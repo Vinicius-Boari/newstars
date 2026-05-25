@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as RelatoriosRouteImport } from './routes/relatorios'
 import { Route as QuinzenasRouteImport } from './routes/quinzenas'
+import { Route as ConfiguracoesRouteImport } from './routes/configuracoes'
 import { Route as ComissoesRouteImport } from './routes/comissoes'
 import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as IndexRouteImport } from './routes/index'
@@ -23,6 +24,11 @@ const RelatoriosRoute = RelatoriosRouteImport.update({
 const QuinzenasRoute = QuinzenasRouteImport.update({
   id: '/quinzenas',
   path: '/quinzenas',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConfiguracoesRoute = ConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ComissoesRoute = ComissoesRouteImport.update({
@@ -45,6 +51,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/clientes': typeof ClientesRoute
   '/comissoes': typeof ComissoesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/quinzenas': typeof QuinzenasRoute
   '/relatorios': typeof RelatoriosRoute
 }
@@ -52,6 +59,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/clientes': typeof ClientesRoute
   '/comissoes': typeof ComissoesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/quinzenas': typeof QuinzenasRoute
   '/relatorios': typeof RelatoriosRoute
 }
@@ -60,19 +68,33 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/clientes': typeof ClientesRoute
   '/comissoes': typeof ComissoesRoute
+  '/configuracoes': typeof ConfiguracoesRoute
   '/quinzenas': typeof QuinzenasRoute
   '/relatorios': typeof RelatoriosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/clientes' | '/comissoes' | '/quinzenas' | '/relatorios'
+  fullPaths:
+    | '/'
+    | '/clientes'
+    | '/comissoes'
+    | '/configuracoes'
+    | '/quinzenas'
+    | '/relatorios'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/clientes' | '/comissoes' | '/quinzenas' | '/relatorios'
+  to:
+    | '/'
+    | '/clientes'
+    | '/comissoes'
+    | '/configuracoes'
+    | '/quinzenas'
+    | '/relatorios'
   id:
     | '__root__'
     | '/'
     | '/clientes'
     | '/comissoes'
+    | '/configuracoes'
     | '/quinzenas'
     | '/relatorios'
   fileRoutesById: FileRoutesById
@@ -81,6 +103,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ClientesRoute: typeof ClientesRoute
   ComissoesRoute: typeof ComissoesRoute
+  ConfiguracoesRoute: typeof ConfiguracoesRoute
   QuinzenasRoute: typeof QuinzenasRoute
   RelatoriosRoute: typeof RelatoriosRoute
 }
@@ -99,6 +122,13 @@ declare module '@tanstack/react-router' {
       path: '/quinzenas'
       fullPath: '/quinzenas'
       preLoaderRoute: typeof QuinzenasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/configuracoes': {
+      id: '/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/configuracoes'
+      preLoaderRoute: typeof ConfiguracoesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/comissoes': {
@@ -129,6 +159,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ClientesRoute: ClientesRoute,
   ComissoesRoute: ComissoesRoute,
+  ConfiguracoesRoute: ConfiguracoesRoute,
   QuinzenasRoute: QuinzenasRoute,
   RelatoriosRoute: RelatoriosRoute,
 }

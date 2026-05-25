@@ -109,8 +109,12 @@ function ConfigPage() {
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             onClick={() => {
-              if (connectorType === "google") setSheetId(draftGoogle.trim());
-              else setExcelUrl(draftExcel.trim());
+              if (connectorType === "google") {
+                setSheetId(draftGoogle.trim());
+              } else {
+                setExcelUrl(draftExcel.trim());
+              }
+              setStatus({ kind: "ok", ok: 0, fail: 0 });
             }}
             className="inline-flex items-center px-4 h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 cursor-pointer"
           >

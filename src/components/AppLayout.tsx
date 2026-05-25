@@ -20,7 +20,6 @@ const NAV = [
   { to: "/quinzenas", label: "Por Quinzena", icon: Calendar },
   { to: "/clientes", label: "Clientes", icon: Users },
   { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
-  { to: "/configuracoes", label: "Configurações", icon: Settings },
 ] as const;
 
 function ConnectionBadge() {

@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as QuinzenasRouteImport } from './routes/quinzenas'
 import { Route as ComissoesRouteImport } from './routes/comissoes'
 import { Route as IndexRouteImport } from './routes/index'
 
+const QuinzenasRoute = QuinzenasRouteImport.update({
+  id: '/quinzenas',
+  path: '/quinzenas',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ComissoesRoute = ComissoesRouteImport.update({
   id: '/comissoes',
   path: '/comissoes',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/comissoes': typeof ComissoesRoute
+  '/quinzenas': typeof QuinzenasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/comissoes': typeof ComissoesRoute
+  '/quinzenas': typeof QuinzenasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/comissoes': typeof ComissoesRoute
+  '/quinzenas': typeof QuinzenasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/comissoes'
+  fullPaths: '/' | '/comissoes' | '/quinzenas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/comissoes'
-  id: '__root__' | '/' | '/comissoes'
+  to: '/' | '/comissoes' | '/quinzenas'
+  id: '__root__' | '/' | '/comissoes' | '/quinzenas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ComissoesRoute: typeof ComissoesRoute
+  QuinzenasRoute: typeof QuinzenasRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/quinzenas': {
+      id: '/quinzenas'
+      path: '/quinzenas'
+      fullPath: '/quinzenas'
+      preLoaderRoute: typeof QuinzenasRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/comissoes': {
       id: '/comissoes'
       path: '/comissoes'
@@ -71,6 +88,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ComissoesRoute: ComissoesRoute,
+  QuinzenasRoute: QuinzenasRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

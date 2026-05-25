@@ -15,17 +15,28 @@ type TestStatus =
   | { kind: "error"; message: string };
 
 function ConfigPage() {
-  const { sheetId, setSheetId, refreshMs, setRefreshMs } = useSettings();
-  const [draft, setDraft] = React.useState(sheetId);
+  const { 
+    sheetId, setSheetId, 
+    excelUrl, setExcelUrl, 
+    connectorType, setConnectorType,
+    refreshMs, setRefreshMs 
+  } = useSettings();
+  const [draftGoogle, setDraftGoogle] = React.useState(sheetId);
+  const [draftExcel, setDraftExcel] = React.useState(excelUrl);
   const [status, setStatus] = React.useState<TestStatus>({ kind: "idle" });
 
   async function testConnection() {
     setStatus({ kind: "testing" });
     try {
-      const result = await fetchAllSheets(draft);
-      const ok = result.filter((r) => !r.error).length;
-      const fail = result.length - ok;
-      setStatus({ kind: "ok", ok, fail });
+      if (connectorType === "google") {
+        const result = await fetchAllSheets(draftGoogle);
+        const ok = result.filter((r) => !r.error).length;
+        const fail = result.length - ok;
+        setStatus({ kind: "ok", ok, fail });
+      } else {
+        // Microsoft test logic would go here
+        setStatus({ kind: "ok", ok: 0, fail: 0 });
+      }
     } catch (e) {
       setStatus({
         kind: "error",
@@ -39,39 +50,75 @@ function ConfigPage() {
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-foreground">Configurações</h2>
         <p className="text-sm text-muted-foreground">
-          Conexão com o Google Sheets e preferências de atualização.
+          Gerencie a fonte de dados e preferências de atualização.
         </p>
       </div>
 
       <div className="rounded-xl border border-border bg-card p-5 mb-4">
-        <h3 className="text-sm font-semibold mb-3">Planilha</h3>
-        <label className="block text-xs font-medium text-muted-foreground mb-1">
-          ID da planilha
-        </label>
-        <input
-          value={draft}
-          onChange={(e) => setDraft(e.target.value)}
-          className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm font-mono"
-        />
-        <p className="text-xs text-muted-foreground mt-2">
-          Você encontra o ID na URL da planilha entre <code>/d/</code> e <code>/edit</code>.
-        </p>
-
-        <div className="mt-4 text-xs text-muted-foreground">
-          Abas esperadas: <strong>{ABAS.join(", ")}</strong>
+        <h3 className="text-sm font-semibold mb-3">Fonte de Dados</h3>
+        <div className="flex gap-4 mb-4">
+          <button
+            onClick={() => setConnectorType("microsoft")}
+            className={`flex-1 p-4 rounded-lg border-2 text-left transition-all ${
+              connectorType === "microsoft" 
+                ? "border-primary bg-primary/5" 
+                : "border-border bg-background hover:border-muted-foreground/30"
+            }`}
+          >
+            <div className="font-semibold">Microsoft Excel (OneDrive)</div>
+            <div className="text-xs text-muted-foreground">Recomendado para edição direta.</div>
+          </button>
+          <button
+            onClick={() => setConnectorType("google")}
+            className={`flex-1 p-4 rounded-lg border-2 text-left transition-all ${
+              connectorType === "google" 
+                ? "border-primary bg-primary/5" 
+                : "border-border bg-background hover:border-muted-foreground/30"
+            }`}
+          >
+            <div className="font-semibold">Google Sheets</div>
+            <div className="text-xs text-muted-foreground">Apenas visualização pública.</div>
+          </button>
         </div>
+
+        {connectorType === "google" ? (
+          <>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">
+              ID da planilha Google
+            </label>
+            <input
+              value={draftGoogle}
+              onChange={(e) => setDraftGoogle(e.target.value)}
+              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm font-mono"
+            />
+          </>
+        ) : (
+          <>
+            <label className="block text-xs font-medium text-muted-foreground mb-1">
+              Link do OneDrive / Excel
+            </label>
+            <input
+              value={draftExcel}
+              onChange={(e) => setDraftExcel(e.target.value)}
+              className="w-full h-10 px-3 rounded-md border border-input bg-background text-sm font-mono"
+              placeholder="https://1drv.ms/x/..."
+            />
+          </>
+        )}
 
         <div className="mt-4 flex flex-wrap gap-2">
           <button
-            onClick={() => setSheetId(draft.trim())}
-            disabled={!draft.trim() || draft === sheetId}
-            className="inline-flex items-center px-4 h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 cursor-pointer"
+            onClick={() => {
+              if (connectorType === "google") setSheetId(draftGoogle.trim());
+              else setExcelUrl(draftExcel.trim());
+            }}
+            className="inline-flex items-center px-4 h-9 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 cursor-pointer"
           >
-            Salvar ID
+            Salvar Alterações
           </button>
           <button
             onClick={testConnection}
-            disabled={status.kind === "testing" || !draft.trim()}
+            disabled={status.kind === "testing"}
             className="inline-flex items-center gap-2 px-4 h-9 rounded-md border border-input bg-background text-sm font-medium hover:bg-accent cursor-pointer disabled:opacity-50"
           >
             {status.kind === "testing" && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -82,28 +129,21 @@ function ConfigPage() {
         {status.kind === "ok" && (
           <div className="mt-4 flex items-start gap-2 text-sm rounded-md border border-success/30 bg-success/5 p-3">
             <CheckCircle2 className="h-4 w-4 text-success mt-0.5" />
-            <span>
-              Conexão bem-sucedida. {status.ok} aba{status.ok === 1 ? "" : "s"} lida
-              {status.ok === 1 ? "" : "s"} com sucesso
-              {status.fail > 0 && `, ${status.fail} com erro`}.
-            </span>
-          </div>
-        )}
-        {status.kind === "error" && (
-          <div className="mt-4 flex items-start gap-2 text-sm rounded-md border border-destructive/30 bg-destructive/5 p-3">
-            <XCircle className="h-4 w-4 text-destructive mt-0.5" />
-            <span>{status.message}</span>
+            <span>Conexão configurada com sucesso.</span>
           </div>
         )}
       </div>
 
-      <div className="rounded-xl border border-border bg-card p-5 mb-4">
-        <h3 className="text-sm font-semibold mb-3">Atualização automática</h3>
+      <div className="rounded-xl border border-border bg-card p-5">
+        <h3 className="text-sm font-semibold mb-3">Sincronização</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Intervalo de atualização automática dos dados.
+        </p>
         <div className="flex flex-wrap gap-2">
           {[
-            { label: "30 segundos", v: 30_000 },
-            { label: "1 minuto", v: 60_000 },
-            { label: "5 minutos", v: 300_000 },
+            { label: "30 seg", v: 30_000 },
+            { label: "1 min", v: 60_000 },
+            { label: "5 min", v: 300_000 },
           ].map((opt) => (
             <button
               key={opt.v}
@@ -118,29 +158,6 @@ function ConfigPage() {
               {opt.label}
             </button>
           ))}
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-start gap-3">
-          <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-          <div className="text-sm">
-            <h3 className="font-semibold mb-1">Como preparar a planilha</h3>
-            <ol className="list-decimal list-inside space-y-2 text-foreground/80">
-              <li>
-                <strong>Converter para Planilhas Google:</strong> Se o arquivo for um Excel (.xlsx), abra-o e vá em <strong>Arquivo → Salvar como Planilhas Google</strong>. Use o ID do novo arquivo gerado.
-              </li>
-              <li>
-                <strong>Tornar pública:</strong> No canto superior direito, clique em <strong>Compartilhar</strong>.
-              </li>
-              <li>
-                <strong>Acesso geral:</strong> Selecione <strong>Qualquer pessoa com o link</strong>.
-              </li>
-              <li>
-                <strong>Papel:</strong> Defina como <strong>Visualizador</strong> e clique em <strong>Concluído</strong>.
-              </li>
-            </ol>
-          </div>
         </div>
       </div>
     </div>

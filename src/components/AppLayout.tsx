@@ -50,6 +50,7 @@ function ConnectionBadge() {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
+  const { data } = useSheetsData();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (
@@ -119,28 +120,21 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 );
               })}
 
-              <Link
-                to="/quinzenas"
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                  pathname === "/quinzenas"
-                    ? "bg-sidebar-accent text-[#00e5ff] font-semibold shadow-lg shadow-black/20"
-                    : "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
-                )}
-              >
-                <Calendar className="h-4 w-4 shrink-0" />
-                <span>ABRIL</span>
-              </Link>
-              <Link
-                to="/quinzenas"
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                  "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
-                )}
-              >
-                <Calendar className="h-4 w-4 shrink-0" />
-                <span>PEDIDOS DE MAIO</span>
-              </Link>
+              {data?.map((q) => (
+                <Link
+                  key={q.quinzena}
+                  to="/quinzenas"
+                  search={{ quinzena: q.quinzena }}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                    "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
+                  )}
+                >
+                  <Calendar className="h-4 w-4 shrink-0" />
+                  <span>{q.quinzena}</span>
+                </Link>
+              ))}
             </div>
           </div>
         </nav>

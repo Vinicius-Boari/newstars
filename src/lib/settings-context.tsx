@@ -15,9 +15,9 @@ interface Settings {
 const SettingsContext = React.createContext<Settings | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [sheetId, setSheetId] = React.useState(DEFAULT_SHEET_ID);
+  const [sheetId, setSheetId] = React.useState("1b3IzfKyMXivpz4klzZy0eoa4eQeQFHBt");
   const [excelUrl, setExcelUrl] = React.useState("https://1drv.ms/x/c/63f6b82fdfc1daf6/IQDqCmJjTzIGR6nYTfVXU1KOAczfQQWvanYU_WH2wXhmzyM?e=K7EDdZ&nav=MTVfezU3ODNFMjc5LUJCRUYtNDgzQi05QkFDLTA2QkVCRUREMTM3Mn0");
-  const [connectorType, setConnectorType] = React.useState<"google" | "microsoft">("microsoft");
+  const [connectorType, setConnectorType] = React.useState<"google" | "microsoft">("google");
   const [refreshMs, setRefreshMs] = React.useState(60_000);
 
   return (

@@ -66,42 +66,71 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       >
         <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border">
-          <div>
-            <div className="text-xs uppercase tracking-widest text-sidebar-foreground/60">
-              Comissões
+          <div className="flex items-center gap-3">
+            <div className="bg-[#00e5ff]/20 p-2 rounded-lg">
+              <LayoutDashboard className="h-5 w-5 text-[#00e5ff]" />
             </div>
-            <div className="text-lg font-semibold">2026</div>
+            <div>
+              <div className="text-lg font-bold text-white">GolField</div>
+              <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/40 font-medium">
+                DASHBOARD
+              </div>
+            </div>
           </div>
           <button
-            className="lg:hidden p-2 -mr-2 cursor-pointer"
+            className="lg:hidden p-2 -mr-2 cursor-pointer text-sidebar-foreground/60 hover:text-white"
             onClick={() => setOpen(false)}
             aria-label="Fechar menu"
           >
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="p-3 space-y-1">
-          {NAV.map((item) => {
-            const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors",
-                  active
-                    ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    : "text-sidebar-foreground/80 hover:bg-sidebar-accent/60 hover:text-sidebar-accent-foreground",
-                )}
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+        <nav className="p-4 space-y-6">
+          <div>
+            <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest mb-4 px-3">
+              PLANILHA
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-sidebar-foreground/80">
+                PLANILHA GOLFIELD
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest mb-4 px-3">
+              ABAS
+            </div>
+            <div className="space-y-1">
+              {NAV.map((item) => {
+                const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                      active
+                        ? "bg-sidebar-accent text-[#00e5ff] font-semibold shadow-lg shadow-black/20"
+                        : "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
+                    )}
+                  >
+                    <Icon className="h-4 w-4 shrink-0" />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
         </nav>
+        <div className="absolute bottom-4 left-0 w-full px-4">
+          <div className="flex items-center gap-2 text-[10px] text-sidebar-foreground/40 font-medium bg-black/20 py-2 px-3 rounded-full border border-white/5">
+            <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+            Sincronizando a cada 30s
+          </div>
+        </div>
       </aside>
 
       {open && (

@@ -114,7 +114,7 @@ function Index() {
       <div className="mb-6">
         <h2 className="text-2xl font-semibold text-foreground">Dashboard</h2>
         <p className="text-sm text-muted-foreground">
-          Visão geral das comissões sincronizadas em tempo real do Google Sheets.
+          Visão geral das comissões sincronizadas em tempo real.
         </p>
       </div>
 

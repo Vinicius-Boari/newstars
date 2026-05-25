@@ -31,7 +31,7 @@ function QuinzenasPage() {
           return (
             <div
               key={q.quinzena}
-              className="rounded-xl border border-border bg-card overflow-hidden"
+              className="rounded-2xl border border-white/5 bg-card overflow-hidden shadow-2xl transition-all duration-300 hover:border-white/10"
             >
               <button
                 onClick={() => setOpen(isOpen ? null : q.quinzena)}
@@ -63,7 +63,7 @@ function QuinzenasPage() {
                 </div>
               </button>
               {isOpen && (
-                <div className="border-t border-border max-h-80 overflow-auto">
+                <div className="border-t border-white/5 max-h-80 overflow-auto bg-black/10">
                   {q.registros.length === 0 ? (
                     <div className="p-4 text-sm text-muted-foreground text-center">
                       Sem registros

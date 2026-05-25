@@ -62,23 +62,23 @@ function ClientesPage() {
 
       <StatusBanner data={data} isError={isError} isLoading={isLoading} />
 
-      <div className="rounded-xl border border-border bg-card overflow-hidden">
-        <div className="p-4 border-b border-border">
+      <div className="rounded-2xl border border-white/5 bg-card overflow-hidden shadow-2xl">
+        <div className="p-5 border-b border-white/5 bg-black/5">
           <div className="relative max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground/40" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Buscar cliente…"
-              className="w-full pl-9 pr-3 h-9 rounded-md border border-input bg-background text-sm"
+              placeholder="Buscar cliente por nome..."
+              className="w-full pl-11 pr-4 h-11 rounded-xl border-none bg-background/50 text-sm focus:ring-2 focus:ring-[#00e5ff]/20 transition-all placeholder:text-muted-foreground/30"
             />
           </div>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-muted/40 text-muted-foreground">
-              <tr className="text-left">
+            <thead className="bg-black/10 text-muted-foreground/50 text-[10px] uppercase tracking-widest font-bold">
+              <tr className="text-left border-b border-white/5">
                 <th className="px-3 py-2 font-medium w-10">#</th>
                 <th className="px-3 py-2 font-medium">Cliente</th>
                 <th className="px-3 py-2 font-medium">Local</th>
@@ -106,7 +106,7 @@ function ClientesPage() {
                 </tr>
               ) : (
                 filtered.map((c, i) => (
-                  <tr key={c.nome} className="border-t border-border hover:bg-muted/30">
+                  <tr key={c.nome} className="border-t border-white/5 hover:bg-white/[0.02] transition-colors">
                     <td className="px-3 py-2 text-muted-foreground tabular-nums">{i + 1}</td>
                     <td className="px-3 py-2 font-medium">{c.nome}</td>
                     <td className="px-3 py-2 text-muted-foreground">

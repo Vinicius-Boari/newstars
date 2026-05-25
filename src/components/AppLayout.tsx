@@ -107,7 +107,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   onClick={() => setOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                    pathname.startsWith("/quinzenas") && (new URLSearchParams(window.location.search).get('quinzena') === q.quinzena)
+                    pathname.startsWith("/quinzenas") && (new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('quinzena') === q.quinzena)
                       ? "bg-sidebar-accent text-[#00e5ff] font-semibold shadow-lg shadow-black/20"
                       : "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
                   )}

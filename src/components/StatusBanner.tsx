@@ -23,8 +23,7 @@ export function StatusBanner({
             Não foi possível ler a planilha
           </div>
           <p className="text-foreground/80">
-            Verifique se a planilha está pública: no Google Sheets clique em{" "}
-            <strong>Compartilhar → Acesso geral → Qualquer pessoa com o link → Visualizador</strong>.
+            Certifique-se de que o arquivo foi convertido (<strong>Arquivo → Salvar como Planilhas Google</strong>) e está público (<strong>Compartilhar → Qualquer pessoa com o link → Visualizador</strong>).
             Depois clique em 🔄 para tentar novamente.
           </p>
         </div>

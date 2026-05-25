@@ -60,11 +60,16 @@ async function fetchSheet(sheetId: string, sheetName: string): Promise<GVizJson>
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   const text = await res.text();
   // The gviz response is wrapped in `google.visualization.Query.setResponse(...);`
+  if (text.includes("errorMessage") && text.includes("too large")) {
+    throw new Error(
+      "O arquivo é um Excel (.xlsx). No Google Sheets, vá em 'Arquivo' > 'Salvar como Planilhas Google'.",
+    );
+  }
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
   if (start === -1 || end === -1) {
     throw new Error(
-      "Planilha não está pública. Compartilhe como 'Qualquer pessoa com o link → Visualizador'.",
+      "Planilha não está pública ou formato inválido. Compartilhe como 'Qualquer pessoa com o link → Visualizador' e certifique-se de que é uma Planilha Google (não .xlsx).",
     );
   }
   try {

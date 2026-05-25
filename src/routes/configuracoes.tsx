@@ -125,19 +125,19 @@ function ConfigPage() {
         <div className="flex items-start gap-3">
           <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <div className="text-sm">
-            <h3 className="font-semibold mb-1">Como tornar a planilha pública</h3>
-            <ol className="list-decimal list-inside space-y-1 text-foreground/80">
-              <li>Abra a planilha no Google Sheets.</li>
+            <h3 className="font-semibold mb-1">Como preparar a planilha</h3>
+            <ol className="list-decimal list-inside space-y-2 text-foreground/80">
               <li>
-                Clique em <strong>Compartilhar</strong> no canto superior direito.
+                <strong>Converter para Planilhas Google:</strong> Se o arquivo for um Excel (.xlsx), abra-o e vá em <strong>Arquivo → Salvar como Planilhas Google</strong>. Use o ID do novo arquivo gerado.
               </li>
               <li>
-                Em <strong>Acesso geral</strong>, selecione{" "}
-                <strong>Qualquer pessoa com o link</strong>.
+                <strong>Tornar pública:</strong> No canto superior direito, clique em <strong>Compartilhar</strong>.
               </li>
               <li>
-                Defina o papel como <strong>Visualizador</strong> e clique em{" "}
-                <strong>Concluído</strong>.
+                <strong>Acesso geral:</strong> Selecione <strong>Qualquer pessoa com o link</strong>.
+              </li>
+              <li>
+                <strong>Papel:</strong> Defina como <strong>Visualizador</strong> e clique em <strong>Concluído</strong>.
               </li>
             </ol>
           </div>

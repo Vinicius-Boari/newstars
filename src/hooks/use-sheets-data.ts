@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchAllSheets, type QuinzenaData } from "@/lib/sheets";
+import { fetchExcelData } from "@/lib/microsoft-excel";
 import { useSettings } from "@/lib/settings-context";
 
 export interface SheetsDataResult {
@@ -14,10 +15,10 @@ export interface SheetsDataResult {
 }
 
 export function useSheetsData(): SheetsDataResult {
-  const { sheetId, refreshMs } = useSettings();
+  const { sheetId, excelUrl, connectorType, refreshMs } = useSettings();
   const q = useQuery({
-    queryKey: ["sheets", sheetId],
-    queryFn: () => fetchAllSheets(sheetId),
+    queryKey: ["sheets", connectorType, connectorType === "google" ? sheetId : excelUrl],
+    queryFn: () => connectorType === "google" ? fetchAllSheets(sheetId) : fetchExcelData(),
     refetchInterval: refreshMs,
     refetchOnWindowFocus: false,
     staleTime: 0,

@@ -68,7 +68,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <LayoutDashboard className="h-5 w-5 text-[#00e5ff]" />
             </div>
             <div>
-              <div className="text-lg font-bold text-white">GolField</div>
+              <div className="text-lg font-bold text-white uppercase tracking-tight">NewStar</div>
               <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/40 font-medium">
                 DASHBOARD
               </div>
@@ -89,37 +89,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="space-y-1">
               <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-sidebar-foreground/80">
-                PLANILHA GOLFIELD
+                PLANILHA NEWSTAR
               </div>
             </div>
           </div>
 
           <div>
             <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest mb-4 px-3">
-              ABAS
+              MESES
             </div>
             <div className="space-y-1">
-              {NAV.map((item) => {
-                const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                      active
-                        ? "bg-sidebar-accent text-[#00e5ff] font-semibold shadow-lg shadow-black/20"
-                        : "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
-                    )}
-                  >
-                    <Icon className="h-4 w-4 shrink-0" />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-
               {data?.map((q) => (
                 <Link
                   key={q.quinzena}
@@ -128,7 +107,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   onClick={() => setOpen(false)}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                    "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
+                    pathname.startsWith("/quinzenas") && (new URLSearchParams(window.location.search).get('quinzena') === q.quinzena)
+                      ? "bg-sidebar-accent text-[#00e5ff] font-semibold shadow-lg shadow-black/20"
+                      : "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
                   )}
                 >
                   <Calendar className="h-4 w-4 shrink-0" />

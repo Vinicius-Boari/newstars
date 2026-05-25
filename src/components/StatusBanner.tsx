@@ -1,5 +1,6 @@
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Database } from "lucide-react";
 import type { QuinzenaData } from "@/lib/sheets";
+import { useSettings } from "@/lib/settings-context";
 
 export function StatusBanner({
   data,
@@ -10,26 +11,35 @@ export function StatusBanner({
   isError: boolean;
   isLoading: boolean;
 }) {
+  const { connectorType } = useSettings();
   if (isLoading) return null;
+  
   const allFailed = data && data.length > 0 && data.every((d) => d.error);
   const someFailed = data && data.some((d) => d.error) && !allFailed;
 
   if (isError || allFailed) {
+    const errorMsg = data?.find(d => d.error)?.error || "Erro de conexão";
+    
     return (
       <div className="rounded-lg border border-destructive/30 bg-destructive/5 p-4 mb-4 flex gap-3">
         <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
         <div className="text-sm">
           <div className="font-medium text-destructive mb-1">
-            Não foi possível ler a planilha
+            Não foi possível conectar ao {connectorType === "google" ? "Google Sheets" : "Microsoft Excel"}
           </div>
-          <p className="text-foreground/80">
-            Certifique-se de que o arquivo foi convertido (<strong>Arquivo → Salvar como Planilhas Google</strong>) e está público (<strong>Compartilhar → Qualquer pessoa com o link → Visualizador</strong>).
-            Depois clique em 🔄 para tentar novamente.
+          <p className="text-foreground/80 mb-2">
+            {connectorType === "google" 
+              ? "Certifique-se de que o arquivo foi convertido para Planilhas Google e está público como Visualizador."
+              : `Ocorreu um problema ao acessar o arquivo no OneDrive: "${errorMsg}". Verifique se o conector Microsoft Excel está autorizado.`}
           </p>
+          <div className="text-xs font-mono text-destructive/70 bg-destructive/5 p-2 rounded">
+            {errorMsg}
+          </div>
         </div>
       </div>
     );
   }
+
   if (someFailed) {
     const failed = data!.filter((d) => d.error).map((d) => d.quinzena).join(", ");
     return (
@@ -39,5 +49,11 @@ export function StatusBanner({
       </div>
     );
   }
-  return null;
+
+  return (
+    <div className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-success/10 border border-success/20 w-fit text-xs font-medium text-success">
+      <Database className="h-3 w-3" />
+      Conectado ao {connectorType === "google" ? "Google Sheets" : "Microsoft Excel"}
+    </div>
+  );
 }

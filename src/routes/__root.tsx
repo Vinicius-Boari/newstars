@@ -9,6 +9,8 @@ import {
 } from "@tanstack/react-router";
 
 import appCss from "../styles.css?url";
+import { SettingsProvider } from "@/lib/settings-context";
+import { AppLayout } from "@/components/AppLayout";
 
 function NotFoundComponent() {
   return (
@@ -72,11 +74,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "Controle de Comissões 2026" },
+      {
+        name: "description",
+        content:
+          "Sistema de controle de comissões com sincronização automática a partir do Google Sheets.",
+      },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "Controle de Comissões 2026" },
+      {
+        property: "og:description",
+        content: "Dashboard de comissões com sync automático do Google Sheets.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -113,7 +122,11 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <SettingsProvider>
+        <AppLayout>
+          <Outlet />
+        </AppLayout>
+      </SettingsProvider>
     </QueryClientProvider>
   );
 }

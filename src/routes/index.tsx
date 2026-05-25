@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { cn } from "@/lib/utils";
 import * as React from "react";
 import {
   BarChart,
@@ -39,24 +40,38 @@ function StatCard({
   value,
   hint,
   icon: Icon,
+  color = "primary",
 }: {
   label: string;
   value: string;
   hint?: string;
   icon: React.ComponentType<{ className?: string }>;
+  color?: "primary" | "success" | "warning" | "danger" | "info";
 }) {
+  const colorClasses = {
+    primary: "bg-[#00e5ff]/10 text-[#00e5ff]",
+    success: "bg-[#00c853]/10 text-[#00c853]",
+    warning: "bg-[#ffab00]/10 text-[#ffab00]",
+    danger: "bg-[#ff1744]/10 text-[#ff1744]",
+    info: "bg-[#2979ff]/10 text-[#2979ff]",
+  };
+
   return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-      <div className="flex items-start justify-between">
+    <div className="rounded-2xl border border-white/5 bg-card p-6 shadow-2xl relative overflow-hidden group hover:border-white/10 transition-all duration-300">
+      <div className="flex items-start justify-between relative z-10">
         <div>
-          <div className="text-xs uppercase tracking-wider text-muted-foreground">{label}</div>
-          <div className="mt-2 text-2xl font-semibold text-foreground tabular-nums">{value}</div>
-          {hint && <div className="mt-1 text-xs text-muted-foreground">{hint}</div>}
+          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-4">{label}</div>
+          <div className="text-3xl font-bold text-white tabular-nums tracking-tight">{value}</div>
+          {hint && <div className="mt-2 text-[11px] font-medium text-muted-foreground/60 flex items-center gap-1.5">
+            <span className="h-1 w-1 rounded-full bg-current opacity-40" />
+            {hint}
+          </div>}
         </div>
-        <div className="h-10 w-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-          <Icon className="h-5 w-5" />
+        <div className={cn("h-12 w-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110", colorClasses[color])}>
+          <Icon className="h-6 w-6" />
         </div>
       </div>
+      <div className="absolute -right-4 -bottom-4 h-24 w-24 bg-current opacity-[0.02] rounded-full blur-2xl transition-all duration-500 group-hover:scale-150" />
     </div>
   );
 }
@@ -111,11 +126,22 @@ function Index() {
 
   return (
     <div>
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold text-foreground">Dashboard</h2>
-        <p className="text-sm text-muted-foreground">
-          Visão geral das comissões sincronizadas em tempo real.
-        </p>
+      <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-2xl font-bold text-white tracking-tight">RESUMO GERAL</h2>
+            <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse mt-1" />
+          </div>
+          <p className="text-sm font-medium text-muted-foreground/60">
+            Acompanhe o desempenho das suas comissões em tempo real.
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="bg-card border border-white/5 rounded-full px-4 py-2 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest flex items-center gap-2">
+            <Calendar className="h-3.5 w-3.5" />
+            {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
+          </div>
+        </div>
       </div>
 
       <StatusBanner data={data} isError={isError} isLoading={isLoading} />
@@ -124,32 +150,36 @@ function Index() {
         <Skeleton />
       ) : (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <StatCard
               label="Próxima quinzena"
               value={fmtMoney(stats.proxima?.total ?? 0)}
-              hint={stats.proxima?.quinzena ?? "—"}
+              hint={stats.proxima?.quinzena ?? "Nenhuma pendente"}
               icon={Calendar}
+              color="info"
             />
             <StatCard
               label="Total em aberto"
               value={fmtMoney(stats.totalGeral)}
               hint="Soma de todas as quinzenas"
               icon={Wallet}
+              color="success"
             />
             <StatCard
               label="Pedidos ativos"
               value={String(stats.pedidosUnicos)}
-              hint={`${stats.qtdRegistros} parcelas`}
+              hint={`${stats.qtdRegistros} parcelas registradas`}
               icon={FileText}
+              color="warning"
             />
             <StatCard
               label="Ticket médio"
               value={fmtMoney(
                 stats.qtdRegistros ? stats.totalGeral / stats.qtdRegistros : 0,
               )}
-              hint="Por parcela"
+              hint="Valor médio por parcela"
               icon={TrendingUp}
+              color="danger"
             />
           </div>
 

@@ -1,14 +1,15 @@
 export const DEFAULT_SHEET_ID = "18y8D7O10G3N_kU-4YqB2N3jL9vE8pS0R";
 
 export const ABAS = [
-  "15 maio",
-  "01 jun",
-  "15 jun",
-  "30 jun",
-  "15 jul",
-  "30 jul",
-  "15 ag",
-  "30 ag",
+  "ABRIL",
+  "MAIO",
+  "JUNHO",
+  "JULHO",
+  "AGOSTO",
+  "SETEMBRO",
+  "OUTUBRO",
+  "NOVEMBRO",
+  "DEZEMBRO",
 ] as const;
 
 export type Quinzena = (typeof ABAS)[number];

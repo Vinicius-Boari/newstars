@@ -16,10 +16,6 @@ import { useSheetsData } from "@/hooks/use-sheets-data";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/comissoes", label: "Comissões", icon: ListChecks },
-  { to: "/quinzenas", label: "Por Quinzena", icon: Calendar },
-  { to: "/clientes", label: "Clientes", icon: Users },
-  { to: "/relatorios", label: "Relatórios", icon: BarChart3 },
 ] as const;
 
 function ConnectionBadge() {
@@ -122,6 +118,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   </Link>
                 );
               })}
+
+              <Link
+                to="/quinzenas"
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                  pathname === "/quinzenas"
+                    ? "bg-sidebar-accent text-[#00e5ff] font-semibold shadow-lg shadow-black/20"
+                    : "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
+                )}
+              >
+                <Calendar className="h-4 w-4 shrink-0" />
+                <span>ABRIL</span>
+              </Link>
+              <Link
+                to="/quinzenas"
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                  "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
+                )}
+              >
+                <Calendar className="h-4 w-4 shrink-0" />
+                <span>PEDIDOS DE MAIO</span>
+              </Link>
             </div>
           </div>
         </nav>

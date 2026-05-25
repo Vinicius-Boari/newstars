@@ -50,6 +50,7 @@ function ConnectionBadge() {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
+  const { data } = useSheetsData();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   return (

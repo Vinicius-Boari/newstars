@@ -8,12 +8,20 @@ import { StatusBanner } from "@/components/StatusBanner";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/quinzenas")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    quinzena: search.quinzena as string | undefined,
+  }),
   component: QuinzenasPage,
 });
 
 function QuinzenasPage() {
   const { data, isLoading, isError } = useSheetsData();
+  const { quinzena: searchQuinzena } = Route.useSearch();
   const [open, setOpen] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (searchQuinzena) setOpen(searchQuinzena);
+  }, [searchQuinzena]);
 
   return (
     <div>

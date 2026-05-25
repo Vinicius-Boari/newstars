@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as QuinzenasRouteImport } from './routes/quinzenas'
 import { Route as ComissoesRouteImport } from './routes/comissoes'
+import { Route as ClientesRouteImport } from './routes/clientes'
 import { Route as IndexRouteImport } from './routes/index'
 
 const QuinzenasRoute = QuinzenasRouteImport.update({
@@ -23,6 +24,11 @@ const ComissoesRoute = ComissoesRouteImport.update({
   path: '/comissoes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ClientesRoute = ClientesRouteImport.update({
+  id: '/clientes',
+  path: '/clientes',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -31,30 +37,34 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/clientes': typeof ClientesRoute
   '/comissoes': typeof ComissoesRoute
   '/quinzenas': typeof QuinzenasRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/clientes': typeof ClientesRoute
   '/comissoes': typeof ComissoesRoute
   '/quinzenas': typeof QuinzenasRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/clientes': typeof ClientesRoute
   '/comissoes': typeof ComissoesRoute
   '/quinzenas': typeof QuinzenasRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/comissoes' | '/quinzenas'
+  fullPaths: '/' | '/clientes' | '/comissoes' | '/quinzenas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/comissoes' | '/quinzenas'
-  id: '__root__' | '/' | '/comissoes' | '/quinzenas'
+  to: '/' | '/clientes' | '/comissoes' | '/quinzenas'
+  id: '__root__' | '/' | '/clientes' | '/comissoes' | '/quinzenas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ClientesRoute: typeof ClientesRoute
   ComissoesRoute: typeof ComissoesRoute
   QuinzenasRoute: typeof QuinzenasRoute
 }
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ComissoesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/clientes': {
+      id: '/clientes'
+      path: '/clientes'
+      fullPath: '/clientes'
+      preLoaderRoute: typeof ClientesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -87,6 +104,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ClientesRoute: ClientesRoute,
   ComissoesRoute: ComissoesRoute,
   QuinzenasRoute: QuinzenasRoute,
 }

@@ -89,6 +89,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Controle de Comissões 2026" },
+      { name: "description", content: "New Stars synchronizes and displays data from Google Sheets and OneDrive, allowing for viewing and editing." },
+      { property: "og:description", content: "New Stars synchronizes and displays data from Google Sheets and OneDrive, allowing for viewing and editing." },
+      { name: "twitter:description", content: "New Stars synchronizes and displays data from Google Sheets and OneDrive, allowing for viewing and editing." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a2da817c-a753-42bc-8e94-182785d1b618/id-preview-d1e60250--fddb9bb2-85a7-4d25-b747-bacdf99def15.lovable.app-1779797486422.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a2da817c-a753-42bc-8e94-182785d1b618/id-preview-d1e60250--fddb9bb2-85a7-4d25-b747-bacdf99def15.lovable.app-1779797486422.png" },
     ],
     links: [
       {

@@ -10,9 +10,20 @@ import {
   RefreshCw,
   Menu,
   X,
+  Plus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSheetsData } from "@/hooks/use-sheets-data";
+import { useSheetsStore } from "@/hooks/use-sheets-store";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -50,8 +61,18 @@ function ConnectionBadge() {
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
+  const [newAbaName, setNewAbaName] = React.useState("");
   const { data } = useSheetsData();
+  const { addAba } = useSheetsStore();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  const handleAddAba = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newAbaName.trim()) {
+      addAba(newAbaName.trim().toUpperCase());
+      setNewAbaName("");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -95,8 +116,43 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
 
           <div>
-            <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest mb-4 px-3">
-              MESES
+            <div className="flex items-center justify-between mb-4 px-3">
+              <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest">
+                MESES
+              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button className="p-1 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/40 hover:text-primary transition-colors cursor-pointer">
+                    <Plus className="h-3 w-3" />
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Adicionar novo mês (aba)</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleAddAba} className="space-y-4 pt-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome da aba na planilha</label>
+                      <Input
+                        placeholder="Ex: JUNHO"
+                        value={newAbaName}
+                        onChange={(e) => setNewAbaName(e.target.value)}
+                        autoFocus
+                      />
+                      <p className="text-[10px] text-muted-foreground">
+                        Certifique-se de que o nome seja exatamente igual ao da aba na planilha.
+                      </p>
+                    </div>
+                    <div className="flex justify-end">
+                      <DialogTrigger asChild>
+                        <Button type="submit" disabled={!newAbaName.trim()}>
+                          Adicionar
+                        </Button>
+                      </DialogTrigger>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
             </div>
             <div className="space-y-1">
               {data?.map((q) => (

@@ -1,11 +1,11 @@
 export const DEFAULT_SHEET_ID = "18y8D7O10G3N_kU-4YqB2N3jL9vE8pS0R";
 
-export const ABAS = [
+export const ABAS_DEFAULT = [
   "ABRIL",
   "PEDIDOS DE MAIO",
 ] as const;
 
-export type Quinzena = (typeof ABAS)[number];
+export type Quinzena = string;
 
 export interface Registro {
   quinzena: string;
@@ -107,9 +107,9 @@ export interface QuinzenaData {
   error?: string;
 }
 
-export async function fetchAllSheets(sheetId: string): Promise<QuinzenaData[]> {
+export async function fetchAllSheets(sheetId: string, abas: string[]): Promise<QuinzenaData[]> {
   const results = await Promise.all(
-    ABAS.map(async (aba): Promise<QuinzenaData> => {
+    abas.map(async (aba): Promise<QuinzenaData> => {
       try {
         const json = await fetchSheet(sheetId, aba);
         const registros = parseRows(json, aba);

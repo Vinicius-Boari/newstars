@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import * as React from "react";
 import { CheckCircle2, XCircle, Loader2, Info } from "lucide-react";
 import { useSettings } from "@/lib/settings-context";
-import { ABAS, fetchAllSheets } from "@/lib/sheets";
+import { fetchAllSheets } from "@/lib/sheets";
+import { useSheetsStore } from "@/hooks/use-sheets-store";
 
 export const Route = createFileRoute("/configuracoes")({
   component: ConfigPage,
@@ -24,12 +25,13 @@ function ConfigPage() {
   const [draftGoogle, setDraftGoogle] = React.useState(sheetId);
   const [draftExcel, setDraftExcel] = React.useState(excelUrl);
   const [status, setStatus] = React.useState<TestStatus>({ kind: "idle" });
+  const { abas } = useSheetsStore();
 
   async function testConnection() {
     setStatus({ kind: "testing" });
     try {
       if (connectorType === "google") {
-        const result = await fetchAllSheets(draftGoogle);
+        const result = await fetchAllSheets(draftGoogle, abas);
         const ok = result.filter((r) => !r.error).length;
         const fail = result.length - ok;
         setStatus({ kind: "ok", ok, fail });

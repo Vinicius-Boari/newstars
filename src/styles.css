@@ -67,19 +67,19 @@
   --radius: 0.625rem;
   /* Dark theme is the default now */
   --background: oklch(0.25 0.1 285);
-  --foreground: oklch(0.25 0.1 285);
+  --foreground: oklch(0.98 0.02 285);
   --card: oklch(0.97 0.03 285);
-  --card-foreground: oklch(0.25 0.1 285);
+  --card-foreground: oklch(0.15 0.08 285);
   --popover: oklch(0.97 0.03 285);
-  --popover-foreground: oklch(0.25 0.1 285);
+  --popover-foreground: oklch(0.15 0.08 285);
   --primary: oklch(0.65 0.18 285);
   --primary-foreground: oklch(1 0 0);
   --secondary: oklch(0.91 0.07 285);
-  --secondary-foreground: oklch(0.25 0.1 285);
+  --secondary-foreground: oklch(0.15 0.08 285);
   --muted: oklch(0.92 0.05 285);
-  --muted-foreground: oklch(0.45 0.12 285);
+  --muted-foreground: oklch(0.35 0.1 285);
   --accent: oklch(0.87 0.1 285);
-  --accent-foreground: oklch(0.25 0.1 285);
+  --accent-foreground: oklch(0.15 0.08 285);
   --destructive: oklch(0.6 0.2 25);
   --destructive-foreground: oklch(1 0 0);
   --success: oklch(0.65 0.15 160);

@@ -66,7 +66,7 @@
 :root {
   --radius: 0.625rem;
   /* Dark theme is the default now */
-  --background: oklch(0.94 0.05 285);
+  --background: oklch(0.25 0.1 285);
   --foreground: oklch(0.25 0.1 285);
   --card: oklch(0.97 0.03 285);
   --card-foreground: oklch(0.25 0.1 285);

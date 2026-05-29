@@ -11,6 +11,7 @@ import {
   Menu,
   X,
   Plus,
+  Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSheetsData } from "@/hooks/use-sheets-data";
@@ -63,7 +64,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
   const [newAbaName, setNewAbaName] = React.useState("");
   const { data } = useSheetsData();
-  const { addAba } = useSheetsStore();
+  const { addAba, removeAba } = useSheetsStore();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const handleAddAba = (e: React.FormEvent) => {
@@ -156,21 +157,33 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
             <div className="space-y-1">
               {data?.map((q) => (
-                <Link
-                  key={q.quinzena}
-                  to="/quinzenas"
-                  search={{ quinzena: q.quinzena }}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                    pathname.startsWith("/quinzenas") && (new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('quinzena') === q.quinzena)
-                      ? "bg-sidebar-accent text-primary font-semibold shadow-sm"
-                      : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
-                  )}
-                >
-                  <Calendar className="h-4 w-4 shrink-0" />
-                  <span>{q.quinzena}</span>
-                </Link>
+                <div key={q.quinzena} className="group flex items-center gap-1">
+                  <Link
+                    to="/quinzenas"
+                    search={{ quinzena: q.quinzena }}
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      "flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+                      pathname.startsWith("/quinzenas") && (new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('quinzena') === q.quinzena)
+                        ? "bg-sidebar-accent text-primary font-semibold shadow-sm"
+                        : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
+                    )}
+                  >
+                    <Calendar className="h-4 w-4 shrink-0" />
+                    <span>{q.quinzena}</span>
+                  </Link>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Deseja realmente excluir a aba "${q.quinzena}"?`)) {
+                        removeAba(q.quinzena);
+                      }
+                    }}
+                    className="opacity-0 group-hover:opacity-100 p-2 text-sidebar-foreground/40 hover:text-destructive transition-all cursor-pointer"
+                    title="Excluir aba"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               ))}
             </div>
           </div>

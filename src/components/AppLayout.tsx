@@ -22,6 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -164,7 +165,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     onClick={() => setOpen(false)}
                     className={cn(
                       "flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                      pathname.startsWith("/quinzenas") && (new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('quinzena') === q.quinzena)
+                      pathname.startsWith("/quinzenas") &&
+                        (new URLSearchParams(
+                          typeof window !== "undefined" ? window.location.search : "",
+                        ).get("quinzena") === q.quinzena)
                         ? "bg-sidebar-accent text-primary font-semibold shadow-sm"
                         : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
                     )}
@@ -172,17 +176,41 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <Calendar className="h-4 w-4 shrink-0" />
                     <span>{q.quinzena}</span>
                   </Link>
-                  <button
-                    onClick={() => {
-                      if (confirm(`Deseja realmente excluir a aba "${q.quinzena}"?`)) {
-                        removeAba(q.quinzena);
-                      }
-                    }}
-                    className="opacity-0 group-hover:opacity-100 p-2 text-sidebar-foreground/40 hover:text-destructive transition-all cursor-pointer"
-                    title="Excluir aba"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button
+                        className="opacity-0 group-hover:opacity-100 p-2 text-sidebar-foreground/40 hover:text-destructive transition-all cursor-pointer"
+                        title="Excluir aba"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Confirmar exclusão</DialogTitle>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <p className="text-sm text-muted-foreground">
+                          Deseja realmente excluir a aba "{q.quinzena}"? Esta ação não pode ser
+                          desfeita.
+                        </p>
+                      </div>
+                      <DialogFooter className="gap-2 sm:gap-0">
+                        <DialogTrigger asChild>
+                          <Button variant="outline">Cancelar</Button>
+                        </DialogTrigger>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="destructive"
+                            onClick={() => removeAba(q.quinzena)}
+                          >
+                            Excluir
+                          </Button>
+                        </DialogTrigger>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               ))}
             </div>

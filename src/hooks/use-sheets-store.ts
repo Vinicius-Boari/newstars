@@ -11,13 +11,13 @@ export const useSheetsStore = create<SheetsStore>()(
   persist(
     (set) => ({
       abas: ["ABRIL", "PEDIDOS DE MAIO"],
-      addAba: (name) =>
-        set((state) => ({
+      addAba: (name: string) =>
+        set((state: { abas: string[] }) => ({
           abas: state.abas.includes(name) ? state.abas : [...state.abas, name],
         })),
-      removeAba: (name) =>
-        set((state) => ({
-          abas: state.abas.filter((a) => a !== name),
+      removeAba: (name: string) =>
+        set((state: { abas: string[] }) => ({
+          abas: state.abas.filter((a: string) => a !== name),
         })),
     }),
     {

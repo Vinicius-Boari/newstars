@@ -49,19 +49,19 @@ function StatCard({
   color?: "primary" | "success" | "warning" | "danger" | "info";
 }) {
   const colorClasses = {
-    primary: "bg-[#00e5ff]/10 text-[#00e5ff]",
-    success: "bg-[#00c853]/10 text-[#00c853]",
-    warning: "bg-[#ffab00]/10 text-[#ffab00]",
-    danger: "bg-[#ff1744]/10 text-[#ff1744]",
-    info: "bg-[#2979ff]/10 text-[#2979ff]",
+    primary: "bg-primary/10 text-primary",
+    success: "bg-success/10 text-success",
+    warning: "bg-orange-500/10 text-orange-600",
+    danger: "bg-destructive/10 text-destructive",
+    info: "bg-blue-500/10 text-blue-600",
   };
 
   return (
-    <div className="rounded-2xl border border-white/5 bg-card p-6 shadow-2xl relative overflow-hidden group hover:border-white/10 transition-all duration-300">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
       <div className="flex items-start justify-between relative z-10">
         <div>
           <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-4">{label}</div>
-          <div className="text-3xl font-bold text-white tabular-nums tracking-tight">{value}</div>
+          <div className="text-3xl font-bold text-foreground tabular-nums tracking-tight">{value}</div>
           {hint && <div className="mt-2 text-[11px] font-medium text-muted-foreground/60 flex items-center gap-1.5">
             <span className="h-1 w-1 rounded-full bg-current opacity-40" />
             {hint}
@@ -129,7 +129,7 @@ function Index() {
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-2xl font-bold text-white tracking-tight">RESUMO GERAL</h2>
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">RESUMO GERAL</h2>
             <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse mt-1" />
           </div>
           <p className="text-sm font-medium text-muted-foreground/60">
@@ -137,7 +137,7 @@ function Index() {
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-card border border-white/5 rounded-full px-4 py-2 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest flex items-center gap-2">
+          <div className="bg-card border border-border rounded-full px-4 py-2 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest flex items-center gap-2">
             <Calendar className="h-3.5 w-3.5" />
             {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
           </div>

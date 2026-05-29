@@ -64,18 +64,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       >
         <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
-            <div className="bg-[#00e5ff]/20 p-2 rounded-lg">
-              <LayoutDashboard className="h-5 w-5 text-[#00e5ff]" />
+            <div className="bg-primary/20 p-2 rounded-lg">
+              <LayoutDashboard className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <div className="text-lg font-bold text-white uppercase tracking-tight">NewStar</div>
+              <div className="text-lg font-bold text-foreground uppercase tracking-tight">NewStar</div>
               <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/40 font-medium">
                 DASHBOARD
               </div>
             </div>
           </div>
           <button
-            className="lg:hidden p-2 -mr-2 cursor-pointer text-sidebar-foreground/60 hover:text-white"
+            className="lg:hidden p-2 -mr-2 cursor-pointer text-sidebar-foreground/60 hover:text-foreground"
             onClick={() => setOpen(false)}
             aria-label="Fechar menu"
           >
@@ -108,8 +108,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
                     pathname.startsWith("/quinzenas") && (new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '').get('quinzena') === q.quinzena)
-                      ? "bg-sidebar-accent text-[#00e5ff] font-semibold shadow-lg shadow-black/20"
-                      : "text-sidebar-foreground/60 hover:text-white hover:bg-sidebar-accent/50",
+                      ? "bg-sidebar-accent text-primary font-semibold shadow-sm"
+                      : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
                   )}
                 >
                   <Calendar className="h-4 w-4 shrink-0" />

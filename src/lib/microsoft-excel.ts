@@ -1,4 +1,4 @@
-import { ABAS, Registro } from "./sheets";
+import { Registro } from "./sheets";
 
 // Configurações da planilha Excel no OneDrive
 export const EXCEL_FILE_ID = "63F6B82FDFC1DAF6!3118"; 
@@ -12,11 +12,11 @@ function toNumber(v: any): number {
   return Number.isFinite(n) ? n : 0;
 }
 
-export async function fetchExcelData(): Promise<{ quinzena: string; registros: Registro[]; total: number; error?: string }[]> {
+export async function fetchExcelData(abas: string[]): Promise<{ quinzena: string; registros: Registro[]; total: number; error?: string }[]> {
   console.log("Iniciando busca de dados do Excel via Microsoft Graph...");
   
   const results = await Promise.all(
-    ABAS.map(async (aba) => {
+    abas.map(async (aba) => {
       try {
         const range = "A1:J100"; 
         // URL format for Microsoft Graph to access a worksheet range

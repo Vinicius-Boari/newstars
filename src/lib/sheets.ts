@@ -1,9 +1,10 @@
-export const DEFAULT_SHEET_ID = "18y8D7O10G3N_kU-4YqB2N3jL9vE8pS0R";
+export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export const ABAS_DEFAULT = [
+  "MAIO",
   "ABRIL",
-  "PEDIDOS DE MAIO",
 ] as const;
+
 
 export type Quinzena = string;
 

@@ -108,6 +108,9 @@ function Dashboard() {
     });
   }, [selectedQuinzena, localFilter, pctFilter, search, COMMISSIONS]);
 
+  const allRegistros = COMMISSIONS;
+
+
   const stats = React.useMemo(() => {
     const totalReceber = filtered.reduce((s, c) => s + c.receber, 0);
     const clientesUnicos = new Set(filtered.map(c => c.nome)).size;

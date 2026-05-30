@@ -25,6 +25,7 @@ export function useSheetsData(): SheetsDataResult {
   const { data: abas = [] } = useQuery({
     queryKey: ["sheets-names"],
     queryFn: () => getSheets(),
+    refetchInterval: refreshMs, // Poll for new sheets too
   });
 
   const addMutation = useMutation({
@@ -56,7 +57,10 @@ export function useSheetsData(): SheetsDataResult {
     queryFn: () => connectorType === "google" ? fetchAllSheets(sheetId, abas) : fetchExcelData(abas),
     refetchInterval: refreshMs,
     refetchOnWindowFocus: false,
-    staleTime: 0,
+    staleTime: 5000,
+    gcTime: refreshMs * 2,
+    placeholderData: (prev) => prev, // Keep old data during sync
+    notifyOnChangeProps: ['data', 'isFetching', 'isError'],
     enabled: abas.length > 0,
   });
 

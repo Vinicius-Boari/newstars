@@ -54,17 +54,18 @@ function LoginComponent() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#0a0a0a] p-4 relative overflow-hidden">
       {/* Background Texture/Gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-900/50 via-black to-black z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-purple-900/20 via-black to-black z-0" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-pink-900/10 via-transparent to-transparent z-0" />
       <div className="absolute inset-0 opacity-[0.03] z-0 pointer-events-none" 
            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} />
 
-      <Card className="w-full max-w-md bg-zinc-950/50 border-zinc-800/50 backdrop-blur-xl shadow-2xl relative z-10 animate-in fade-in zoom-in duration-500 rounded-2xl overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-zinc-500/20 to-transparent" />
+      <Card className="w-full max-w-md bg-zinc-950/50 border-purple-500/20 backdrop-blur-xl shadow-2xl relative z-10 animate-in fade-in zoom-in duration-500 rounded-2xl overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500" />
         
         <CardHeader className="space-y-4 pt-12 pb-8 text-center">
           <div className="flex justify-center">
-            <div className="h-16 w-16 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center shadow-inner">
-              <span className="text-2xl font-serif text-zinc-100 italic">M</span>
+            <div className="px-6 py-2 rounded-full bg-zinc-900/50 border border-purple-500/30 flex items-center justify-center shadow-lg shadow-purple-500/10">
+              <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent italic tracking-tighter">NewStars</span>
             </div>
           </div>
           <CardTitle className="text-3xl font-serif tracking-tight text-zinc-100">
@@ -89,7 +90,7 @@ function LoginComponent() {
                 onChange={(e) => setUsername(e.target.value)}
                 required
                 disabled={isLoading}
-                className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-700 focus:border-zinc-500 focus:ring-zinc-500/20 transition-all duration-300 h-12 rounded-xl"
+                className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-700 focus:border-purple-500 focus:ring-purple-500/20 transition-all duration-300 h-12 rounded-xl"
               />
             </div>
             
@@ -105,7 +106,7 @@ function LoginComponent() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 disabled={isLoading}
-                className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-700 focus:border-zinc-500 focus:ring-zinc-500/20 transition-all duration-300 h-12 rounded-xl"
+                className="bg-zinc-900/50 border-zinc-800 text-zinc-100 placeholder:text-zinc-700 focus:border-purple-500 focus:ring-purple-500/20 transition-all duration-300 h-12 rounded-xl"
               />
             </div>
 
@@ -144,8 +145,8 @@ function LoginComponent() {
       </Card>
 
       {/* Decorative elements */}
-      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-zinc-900/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute -top-24 -right-24 w-96 h-96 bg-zinc-800/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-purple-900/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute -top-24 -right-24 w-96 h-96 bg-pink-900/5 rounded-full blur-[120px] pointer-events-none" />
     </div>
   );
 }

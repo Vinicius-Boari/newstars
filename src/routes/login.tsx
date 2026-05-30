@@ -94,13 +94,13 @@ function LoginPage() {
           </form>
         </div>
 
-        <div className="text-center space-y-1">
-          <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground/40">
-            <Lock className="h-3 w-3" />
+        <div className="text-center space-y-2 pt-4">
+          <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground/60">
+            <Lock className="h-4 w-4 text-primary/60" />
             Acesso protegido por DevBoari
           </div>
-          <div className="text-[10px] text-muted-foreground/30">
-            Sistema criado por <a href="https://devboari.com.br" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">devboari.com.br</a>
+          <div className="text-xs font-medium text-muted-foreground/50">
+            Sistema criado por <a href="https://devboari.com.br" target="_blank" rel="noopener noreferrer" className="text-primary/70 hover:text-primary transition-colors decoration-primary/30 underline underline-offset-4">devboari.com.br</a>
           </div>
         </div>
       </div>

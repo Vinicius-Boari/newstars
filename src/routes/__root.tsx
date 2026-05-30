@@ -4,9 +4,13 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useRouterState,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { Toaster } from "sonner";
+import { supabase } from "@/lib/supabase";
+import { useQuery } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { SettingsProvider } from "@/lib/settings-context";
@@ -71,7 +75,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async () => {
-    // Autenticação removida para acesso direto
+    // Auth logic handled in individual routes
   },
 
   head: () => ({
@@ -129,13 +133,21 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { pathname } = useRouterState({ select: (s) => s.location });
+
+  const isLoginPage = pathname === "/login";
 
   return (
     <QueryClientProvider client={queryClient}>
       <SettingsProvider>
-        <AppLayout>
+        {isLoginPage ? (
           <Outlet />
-        </AppLayout>
+        ) : (
+          <AppLayout>
+            <Outlet />
+          </AppLayout>
+        )}
+        <Toaster position="top-center" richColors />
       </SettingsProvider>
     </QueryClientProvider>
   );

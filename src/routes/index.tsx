@@ -90,15 +90,22 @@ function Skeleton() {
 }
 
 function Index() {
+  const { quinzena: selectedQuinzena } = Route.useSearch();
   const { data, isLoading, isError } = useSheetsData();
 
-  const { stats, perQuinzena, topClientes } = React.useMemo(() => {
+  const { stats, perQuinzena, topClientes, filteredData } = React.useMemo(() => {
     const quinzenas = data ?? [];
-    const allReg = quinzenas.flatMap((q) => q.registros);
+    
+    // Filter by selected quinzena if present
+    const activeQuinzenas = selectedQuinzena 
+      ? quinzenas.filter(q => q.quinzena === selectedQuinzena)
+      : quinzenas;
+
+    const allReg = activeQuinzenas.flatMap((q) => q.registros);
     const totalGeral = allReg.reduce((s, r) => s + r.receber, 0);
     const pedidosUnicos = new Set(allReg.map((r) => r.pedido)).size;
 
-    const proxima = quinzenas.find((q) => q.total > 0);
+    const proxima = activeQuinzenas.find((q) => q.total > 0);
 
     // group by client
     const clienteMap = new Map<string, number>();
@@ -110,7 +117,7 @@ function Index() {
       .slice(0, 10)
       .map(([name, value]) => ({ name, value }));
 
-    const perQuinzena = quinzenas.map((q) => ({
+    const perQuinzena = activeQuinzenas.map((q) => ({
       name: q.quinzena,
       total: Number(q.total.toFixed(2)),
     }));
@@ -124,8 +131,9 @@ function Index() {
       },
       perQuinzena,
       topClientes,
+      filteredData: activeQuinzenas
     };
-  }, [data]);
+  }, [data, selectedQuinzena]);
 
   return (
     <div>

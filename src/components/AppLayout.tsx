@@ -21,9 +21,11 @@ import { Button } from "@/components/ui/button";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
+  const [newAbaName, setNewAbaName] = React.useState("");
   const navigate = useNavigate();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+
+  const { refetch, isFetching, addAba, removeAba } = useSheetsData();
 
   const currentQ = React.useMemo(() => {
     const params = new URLSearchParams(searchStr || "");
@@ -37,9 +39,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
 
   const totalGeral = React.useMemo(
-    () => COMMISSIONS.reduce((s, c) => s + c.receber, 0),
+    () => COMMISSIONS.reduce((acc, c) => acc + c.receber, 0),
     [],
   );
+
+  const handleAddAba = async () => {
+    if (!newAbaName) return;
+    try {
+      await addAba(newAbaName);
+      setNewAbaName("");
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRemoveAba = async (name: string) => {
+    if (confirm(`Remover aba "${name}"?`)) {
+      try {
+        await removeAba(name);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex">

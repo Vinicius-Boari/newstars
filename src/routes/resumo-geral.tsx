@@ -261,11 +261,12 @@ function Dashboard() {
           label="Período selecionado"
           value={selectedQuinzena === "ALL" ? "TODOS" : selectedQuinzena}
           hint={selectedQuinzena === "ALL"
-            ? fmtMoney(allRegistros.reduce((s,c)=>s+c.receber,0)) + " total geral"
+            ? fmtMoney(COMMISSIONS.reduce((s: number, c: Registro) => s + c.receber, 0)) + " total geral"
             : "Vencimento da quinzena"}
           icon={Calendar}
           accent="bg-blue-500/15 text-blue-600"
         />
+
       </div>
 
       {/* Charts */}

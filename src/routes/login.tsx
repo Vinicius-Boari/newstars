@@ -61,7 +61,7 @@ function LoginPage() {
         </div>
 
         <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
-          <form onSubmit={handleLogin} className="space-y-6">
+          <form onSubmit={handleLogin} className="space-y-6" autoComplete="off">
             <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">Usuário</label>
               <Input
@@ -71,6 +71,8 @@ function LoginPage() {
                 onChange={(e) => setUsername(e.target.value)}
                 className="h-11"
                 required
+                autoComplete="one-time-code"
+                name="username-field"
               />
             </div>
             <div className="space-y-2">
@@ -82,6 +84,8 @@ function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-11"
                 required
+                autoComplete="one-time-code"
+                name="password-field"
               />
             </div>
             <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>

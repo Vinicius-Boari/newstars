@@ -37,23 +37,26 @@ function LoginPage() {
     try {
       const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
       
+      console.log("Tentando entrar com:", email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Erro no login:", error.message);
         toast.error("Usuário ou senha incorretos.");
         setLoading(false);
-      } else if (data.session) {
+      } else {
+        console.log("Sucesso! Sessão:", data.session ? "OK" : "Vazia");
         toast.success("Acesso autorizado!");
-        // Small delay to let the session persist before reload
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 100);
+        // Force immediate redirect
+        window.location.replace("/");
       }
-    } catch (error) {
-      toast.error("Ocorreu um erro ao tentar entrar.");
+    } catch (error: any) {
+      console.error("Erro inesperado:", error);
+      toast.error("Erro: " + (error.message || "Falha ao entrar"));
       setLoading(false);
     }
   };

@@ -73,21 +73,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: async ({ location }) => {
-    // Check session on every route except /login
-    if (location.pathname === '/login') return;
-    
-    const { data } = await supabase.auth.getSession();
-    console.log("Root check session:", data.session ? "Active" : "None");
-    if (!data.session) {
-
-      throw redirect({
-        to: '/login',
-        search: {
-          redirect: location.href,
-        },
-      });
-    }
+  beforeLoad: async () => {
+    // Autenticação removida para acesso direto
   },
 
   head: () => ({

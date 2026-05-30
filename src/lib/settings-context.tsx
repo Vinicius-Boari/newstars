@@ -17,6 +17,7 @@ const SettingsContext = React.createContext<Settings | null>(null);
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
   const [excelUrl, setExcelUrl] = React.useState("https://1drv.ms/x/c/63f6b82fdfc1daf6/IQDqCmJjTzIGR6nYTfVXU1KOAczfQQWvanYU_WH2wXhmzyM?e=K7EDdZ&nav=MTVfezU3ODNFMjc5LUJCRUYtNDgzQi05QkFDLTA2QkVCRUREMTM3Mn0");
+
   const [connectorType, setConnectorType] = React.useState<"google" | "microsoft">("google");
   const [refreshMs, setRefreshMs] = React.useState(60_000);
 

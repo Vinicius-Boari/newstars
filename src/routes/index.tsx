@@ -247,32 +247,65 @@ function Index() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-xl border border-border bg-card p-5">
-            <h3 className="text-sm font-semibold mb-4">Timeline das quinzenas</h3>
-            <div className="space-y-2">
-              {(data ?? []).map((q) => (
-                <div
-                  key={q.quinzena}
-                  className="flex items-center justify-between py-2 border-b border-border last:border-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex items-center justify-center h-8 w-8 rounded-md bg-primary/10 text-primary text-xs font-semibold">
-                      {q.quinzena.split(" ")[0]}
-                    </span>
-                    <div>
-                      <div className="text-sm font-medium">{q.quinzena}</div>
-                      <div className="text-xs text-muted-foreground">
-                        {q.registros.length} parcela{q.registros.length === 1 ? "" : "s"}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="text-sm font-semibold tabular-nums text-success">
-                    {fmtMoney(q.total)}
-                  </div>
-                </div>
-              ))}
+          <div className="mt-6 rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+            <div className="p-5 border-b border-border flex items-center justify-between bg-muted/30">
+              <h3 className="text-sm font-semibold">Tabela de Dados (Planilha Atualizada)</h3>
+              <div className="text-[10px] uppercase tracking-widest text-muted-foreground/50 font-bold">
+                Últimas Entradas
+              </div>
             </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead>
+                  <tr className="border-b border-border bg-muted/20">
+                    <th className="px-4 py-3 font-semibold text-muted-foreground">Data</th>
+                    <th className="px-4 py-3 font-semibold text-muted-foreground">Pedido</th>
+                    <th className="px-4 py-3 font-semibold text-muted-foreground">Nome</th>
+                    <th className="px-4 py-3 font-semibold text-muted-foreground">Local</th>
+                    <th className="px-4 py-3 font-semibold text-muted-foreground text-right">Total</th>
+                    <th className="px-4 py-3 font-semibold text-muted-foreground text-center">Venc</th>
+                    <th className="px-4 py-3 font-semibold text-muted-foreground text-right">A Receber</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {stats.qtdRegistros === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground italic">
+                        Nenhum dado encontrado nas abas configuradas.
+                      </td>
+                    </tr>
+                  ) : (
+                    (data ?? []).flatMap(q => q.registros).slice(0, 50).map((r, i) => (
+                      <tr key={i} className="hover:bg-muted/30 transition-colors group">
+                        <td className="px-4 py-3 text-muted-foreground">{r.data}</td>
+                        <td className="px-4 py-3 font-mono text-xs">{r.pedido}</td>
+                        <td className="px-4 py-3 font-medium text-foreground">{r.nome}</td>
+                        <td className="px-4 py-3 text-muted-foreground">{r.local}</td>
+                        <td className="px-4 py-3 text-right tabular-nums">{fmtMoney(r.total)}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-secondary text-secondary-foreground border border-border">
+                            {r.venc}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums font-semibold text-success">
+                          {fmtMoney(r.receber)}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+            {stats.qtdRegistros > 50 && (
+              <div className="p-4 border-t border-border text-center">
+                <p className="text-xs text-muted-foreground">
+                  Exibindo as primeiras 50 de {stats.qtdRegistros} parcelas. 
+                  Acesse a página <a href="/quinzenas" className="text-primary hover:underline">Quinzenas</a> para ver tudo.
+                </p>
+              </div>
+            )}
           </div>
+
         </>
       )}
     </div>

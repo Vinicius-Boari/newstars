@@ -3,7 +3,7 @@ import * as React from "react";
 import { CheckCircle2, XCircle, Loader2, Info } from "lucide-react";
 import { useSettings } from "@/lib/settings-context";
 import { fetchAllSheets } from "@/lib/sheets";
-import { useSheetsStore } from "@/hooks/use-sheets-store";
+import { useSheetsData } from "@/hooks/use-sheets-data";
 
 export const Route = createFileRoute("/configuracoes")({
   component: ConfigPage,
@@ -25,7 +25,9 @@ function ConfigPage() {
   const [draftGoogle, setDraftGoogle] = React.useState(sheetId);
   const [draftExcel, setDraftExcel] = React.useState(excelUrl);
   const [status, setStatus] = React.useState<TestStatus>({ kind: "idle" });
-  const { abas } = useSheetsStore();
+  const { data: sheetsData } = useSheetsData();
+  const abas = React.useMemo(() => sheetsData?.map(d => d.quinzena) ?? [], [sheetsData]);
+
 
   async function testConnection() {
     setStatus({ kind: "testing" });

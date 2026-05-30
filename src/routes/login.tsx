@@ -66,7 +66,7 @@ function LoginPage() {
               <label className="text-sm font-medium text-muted-foreground">Usuário</label>
               <Input
                 type="text"
-                placeholder="melissa"
+                placeholder=""
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="h-11"
@@ -79,7 +79,7 @@ function LoginPage() {
               <label className="text-sm font-medium text-muted-foreground">Senha</label>
               <Input
                 type="password"
-                placeholder="••••"
+                placeholder=""
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className="h-11"

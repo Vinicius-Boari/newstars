@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -20,15 +20,17 @@ function LoginPage() {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Attempting login for user:", username);
+    if (loading) return;
+    
+    console.log("Iniciando login para:", username);
     setLoading(true);
 
     try {
-      // The single user is stored with email melissa@lovable.local
-      const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
+      const email = username.trim().toLowerCase() === "melissa" ? "melissa@lovable.local" : username.trim();
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -36,20 +38,25 @@ function LoginPage() {
       });
 
       if (error) {
-        console.error("Login error:", error);
-        toast.error("Usuário ou senha inválidos: " + error.message);
-      } else if (data.user) {
-        console.log("Login successful, user:", data.user.id);
-        toast.success("Acesso autorizado! Redirecionando...");
+        console.error("Erro no login:", error.message);
+        toast.error("Usuário ou senha incorretos.");
+      } else if (data.session) {
+        console.log("Login bem-sucedido!");
+        toast.success("Acesso autorizado!");
         
-        // Short delay to ensure toast is visible before redirect
+        // Use navigate with absolute path and replace history
+        await navigate({ to: "/", replace: true });
+        
+        // Fallback hard redirect if navigate fails to trigger a re-render
         setTimeout(() => {
-          window.location.href = "/";
-        }, 1000);
+          if (window.location.pathname === "/login") {
+            window.location.href = "/";
+          }
+        }, 500);
       }
     } catch (error) {
-      console.error("Unexpected error during login:", error);
-      toast.error("Ocorreu um erro inesperado ao tentar fazer login");
+      console.error("Erro inesperado:", error);
+      toast.error("Ocorreu um erro ao tentar entrar.");
     } finally {
       setLoading(false);
     }

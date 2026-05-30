@@ -92,7 +92,7 @@ function LoginPage() {
 
         <div className="text-center flex items-center justify-center gap-2 text-xs text-muted-foreground/40">
           <Lock className="h-3 w-3" />
-          Acesso protegido por Lovable Cloud
+          Acesso protegido por DevBoari
         </div>
       </div>
     </div>

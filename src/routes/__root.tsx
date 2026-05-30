@@ -148,7 +148,7 @@ function RootComponent() {
   const pathname = useRouter().state.location.pathname;
 
   // Don't wrap in AppLayout if we are on the login page
-  if (pathname === "/login") {
+  if (pathname === "/login" || pathname === "/test-auth" || pathname === "/dashboard") {
     return (
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>

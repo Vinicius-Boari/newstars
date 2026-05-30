@@ -12,7 +12,10 @@ import {
   X,
   Plus,
   Trash2,
+  LogOut,
 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+
 import { cn } from "@/lib/utils";
 import { useSheetsData } from "@/hooks/use-sheets-data";
 // Removed local zustand store import to use Supabase instead

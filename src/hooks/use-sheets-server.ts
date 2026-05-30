@@ -31,10 +31,10 @@ export const getSheets = createServerFn({ method: 'GET' })
 
 export const addSheet = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ data: name, context }: { data: string, context: any }) => {
-    const { error } = await context.supabase
+  .handler(async ({ data: name, context }) => {
+    const { error } = await (context as any).supabase
       .from('sheets')
-      .insert({ user_id: context.userId, name });
+      .insert({ user_id: (context as any).userId, name });
 
     if (error) throw error;
     return { success: true };
@@ -42,11 +42,11 @@ export const addSheet = createServerFn({ method: 'POST' })
 
 export const removeSheet = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ data: name, context }: { data: string, context: any }) => {
-    const { error } = await context.supabase
+  .handler(async ({ data: name, context }) => {
+    const { error } = await (context as any).supabase
       .from('sheets')
       .delete()
-      .match({ user_id: context.userId, name });
+      .match({ user_id: (context as any).userId, name });
 
     if (error) throw error;
     return { success: true };

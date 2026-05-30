@@ -14,9 +14,10 @@ export const getSheets = createServerFn({ method: 'GET' })
     // Default sheets if none exist for user
     if (!data || data.length === 0) {
       const defaults = ["ABRIL", "PEDIDOS DE MAIO"];
+      // Use upsert to avoid duplicate errors if defaults already exist partially
       const { data: inserted, error: insertError } = await context.supabase
         .from('sheets')
-        .insert(defaults.map(name => ({ user_id: context.userId, name })))
+        .upsert(defaults.map(name => ({ user_id: context.userId, name })), { onConflict: 'user_id, name' })
         .select('name');
       
       if (insertError) {
@@ -30,8 +31,8 @@ export const getSheets = createServerFn({ method: 'GET' })
   });
 
 export const addSheet = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
   .validator((name: string) => name)
+  .middleware([requireSupabaseAuth])
   .handler(async ({ data: name, context }) => {
     const { error } = await context.supabase
       .from('sheets')
@@ -42,8 +43,8 @@ export const addSheet = createServerFn({ method: 'POST' })
   });
 
 export const removeSheet = createServerFn({ method: 'POST' })
-  .middleware([requireSupabaseAuth])
   .validator((name: string) => name)
+  .middleware([requireSupabaseAuth])
   .handler(async ({ data: name, context }) => {
     const { error } = await context.supabase
       .from('sheets')

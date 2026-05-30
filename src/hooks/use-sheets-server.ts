@@ -13,7 +13,7 @@ export const getSheets = createServerFn({ method: 'GET' })
     
     // Default sheets if none exist for user
     if (!data || data.length === 0) {
-      const defaults = ["ABRIL", "PEDIDOS DE MAIO"];
+      const defaults = ["MAIO", "ABRIL"];
       const { data: inserted, error: insertError } = await context.supabase
         .from('sheets')
         .upsert(defaults.map(name => ({ user_id: context.userId, name })), { onConflict: 'user_id, name' })

@@ -25,7 +25,9 @@ function ConfigPage() {
   const [draftGoogle, setDraftGoogle] = React.useState(sheetId);
   const [draftExcel, setDraftExcel] = React.useState(excelUrl);
   const [status, setStatus] = React.useState<TestStatus>({ kind: "idle" });
-  const { abas } = useSheetsStore();
+  const { data: sheetsData } = useSheetsData();
+  const abas = React.useMemo(() => sheetsData?.map(d => d.quinzena) ?? [], [sheetsData]);
+
 
   async function testConnection() {
     setStatus({ kind: "testing" });

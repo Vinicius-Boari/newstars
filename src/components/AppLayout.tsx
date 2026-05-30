@@ -40,19 +40,19 @@ function ConnectionBadge() {
   const hasAnyError = isError || (data?.every((d) => d.error) ?? false);
   const time = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString("pt-BR") : "--:--:--";
   return (
-    <div className="flex items-center gap-3 text-sm">
+    <div className="flex items-center gap-4 text-[10px] font-bold uppercase tracking-wider">
       <div className="flex items-center gap-2">
         <span
           className={cn(
-            "h-2.5 w-2.5 rounded-full",
-            hasAnyError ? "bg-destructive" : "bg-success animate-pulse",
+            "h-2 w-2 rounded-full",
+            hasAnyError ? "bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.5)]" : "bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]",
           )}
         />
-        <span className="text-muted-foreground">
+        <span className="text-muted-foreground/60">
           {hasAnyError ? "Erro de conexão" : "Conectado"}
         </span>
       </div>
-      <span className="text-muted-foreground hidden sm:inline">Atualizado às {time}</span>
+      <span className="text-muted-foreground/40 hidden sm:inline">Atualizado às {time}</span>
       <button
         onClick={() => refetch()}
         className="inline-flex items-center justify-center rounded-md border border-border bg-background h-8 w-8 hover:bg-accent transition-colors cursor-pointer disabled:opacity-50"
@@ -97,13 +97,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         )}
       >
         <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/20 p-2 rounded-lg">
-              <LayoutDashboard className="h-5 w-5 text-primary" />
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-lg shadow-lg shadow-purple-500/20">
+              <LayoutDashboard className="h-5 w-5 text-white" />
             </div>
             <div>
-              <div className="text-lg font-bold text-foreground uppercase tracking-tight">NewStar</div>
-              <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/40 font-medium">
+              <div className="text-lg font-black text-foreground uppercase tracking-tighter leading-none italic bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">NewStar</div>
+              <div className="text-[9px] uppercase tracking-[0.2em] text-sidebar-foreground/30 font-bold">
                 DASHBOARD
               </div>
             </div>
@@ -119,7 +119,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <nav className="p-4 space-y-6">
           <div>
             <div className="flex items-center justify-between mb-4 px-3">
-              <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest">
+              <div className="text-[9px] font-black text-sidebar-foreground/20 uppercase tracking-[0.3em]">
                 MESES
               </div>
               <Dialog>
@@ -218,8 +218,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="absolute bottom-4 left-0 w-full px-4 space-y-3">
-          <div className="flex items-center gap-2 text-[10px] text-sidebar-foreground/40 font-medium bg-black/20 py-2 px-3 rounded-full border border-white/5">
-            <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
+          <div className="flex items-center gap-2 text-[9px] text-sidebar-foreground/30 font-bold bg-black/40 py-2.5 px-4 rounded-full border border-white/5 uppercase tracking-wider">
+            <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.5)]" />
             Sincronizando a cada 30s
           </div>
 

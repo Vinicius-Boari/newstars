@@ -75,7 +75,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async () => {
-    // Autenticação removida para acesso direto
+    // Auth logic handled in individual routes
   },
 
   head: () => ({

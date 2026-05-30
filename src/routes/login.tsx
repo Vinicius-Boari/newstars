@@ -1,4 +1,4 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,11 +34,10 @@ function LoginPage() {
     }
     
     setLoading(true);
+    console.log("Iniciando tentativa de login...");
 
     try {
       const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
-      
-      console.log("Tentando entrar com:", email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -48,15 +48,23 @@ function LoginPage() {
         console.error("Erro no login:", error.message);
         toast.error("Usuário ou senha incorretos.");
         setLoading(false);
-      } else {
-        console.log("Sucesso! Sessão:", data.session ? "OK" : "Vazia");
+      } else if (data.session) {
+        console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
-        // Force immediate redirect
-        window.location.replace("/");
+        
+        // Redirecionamento forçado para garantir a entrada
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
+      } else {
+        // Fallback case
+        console.warn("Login sem sessão retornada");
+        setLoading(false);
+        toast.error("Falha ao criar sessão. Tente novamente.");
       }
     } catch (error: any) {
-      console.error("Erro inesperado:", error);
-      toast.error("Erro: " + (error.message || "Falha ao entrar"));
+      console.error("Erro inesperado no login:", error);
+      toast.error("Ocorreu um erro ao tentar entrar.");
       setLoading(false);
     }
   };

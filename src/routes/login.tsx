@@ -113,7 +113,7 @@ function LoginComponent() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full h-12 bg-zinc-100 hover:bg-white text-zinc-950 font-bold text-sm uppercase tracking-widest rounded-xl transition-all duration-300 transform active:scale-[0.98] shadow-[0_0_20px_rgba(255,255,255,0.05)]"
+              className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold text-sm uppercase tracking-widest rounded-xl transition-all duration-300 transform active:scale-[0.98] shadow-lg shadow-purple-500/20 border-none"
             >
               {isLoading ? (
                 <>
@@ -127,7 +127,7 @@ function LoginComponent() {
 
             <div className="space-y-4 pt-4 text-center">
               <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs">
-                <Lock className="w-3 h-3 text-zinc-500/50" />
+                <Lock className="w-3 h-3 text-purple-500/50" />
                 <span>Segurança garantida por DevBoari</span>
               </div>
               
@@ -135,7 +135,7 @@ function LoginComponent() {
                 href="https://devboari.com.br" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="block text-zinc-600 text-[10px] hover:text-zinc-400 transition-colors"
+                className="block text-zinc-600 text-[10px] hover:text-purple-400 transition-colors"
               >
                 Site desenvolvido por devboari.com.br
               </a>

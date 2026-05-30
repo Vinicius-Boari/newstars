@@ -17,20 +17,27 @@ export const Route = createFileRoute("/login")({
 });
 
 function LoginPage() {
-  const [username, setUsername] = React.useState("");
-  const [password, setPassword] = React.useState("");
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loading) return;
+
+    const formData = new FormData(e.currentTarget);
+    const username = formData.get("username-field")?.toString().trim() || "";
+    const password = formData.get("password-field")?.toString() || "";
+
+    if (!username || !password) {
+      toast.error("Preencha todos os campos.");
+      return;
+    }
     
     console.log("Iniciando login para:", username);
     setLoading(true);
 
     try {
-      const email = username.trim().toLowerCase() === "melissa" ? "melissa@lovable.local" : username.trim();
+      const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -44,10 +51,8 @@ function LoginPage() {
         console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
         
-        // Use navigate with absolute path and replace history
         await navigate({ to: "/", replace: true });
         
-        // Fallback hard redirect if navigate fails to trigger a re-render
         setTimeout(() => {
           if (window.location.pathname === "/login") {
             window.location.href = "/";

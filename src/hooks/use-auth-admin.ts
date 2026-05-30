@@ -4,7 +4,8 @@ import { supabaseAdmin } from "@/integrations/supabase/client.server";
 export const ensureMelissaExists = createServerFn({ method: 'POST' })
   .handler(async () => {
     const email = "melissa@lovable.local";
-    const password = "1811";
+    // Supabase exige no mínimo 6 caracteres; mantemos um sufixo interno.
+    const password = "1811ns";
 
     console.log("Checking if melissa exists...");
     const { data: users, error: fetchError } = await supabaseAdmin.auth.admin.listUsers();

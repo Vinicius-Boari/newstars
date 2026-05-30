@@ -18,17 +18,7 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
-import { useSheetsData } from "@/hooks/use-sheets-data";
-// Removed local zustand store import to use Supabase instead
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
+import { QUINZENAS, COMMISSIONS } from "@/data/commissions";
 import { Button } from "@/components/ui/button";
 
 const NAV = [

@@ -44,6 +44,14 @@ function LoginPage() {
     setLoading(true);
     console.log("Iniciando tentativa de login...");
 
+    // Timeout de segurança para não travar o botão
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        toast.error("O login está demorando mais que o esperado. Tente novamente.");
+      }
+    }, 15000);
+
     try {
       const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
       
@@ -51,6 +59,8 @@ function LoginPage() {
         email,
         password,
       });
+
+      clearTimeout(timeoutId);
 
       if (error) {
         console.error("Erro no login:", error.message);
@@ -60,15 +70,11 @@ function LoginPage() {
         console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
         
-        // Redirecionamento forçado para garantir a entrada
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 500);
+        // Use a clean redirect
+        window.location.assign("/");
       } else {
-        // Fallback case
-        console.warn("Login sem sessão retornada");
         setLoading(false);
-        toast.error("Falha ao criar sessão. Tente novamente.");
+        toast.error("Falha ao criar sessão.");
       }
     } catch (error: any) {
       console.error("Erro inesperado no login:", error);

@@ -1,131 +1,121 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { LayoutDashboard, Lock } from "lucide-react";
-import { ensureMelissaExists } from "@/hooks/use-auth-admin";
-
+import { LayoutDashboard, Lock, Loader2 } from "lucide-react";
+import { syncMelissaAuth } from "@/hooks/use-auth-sync";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
     const { data } = await supabase.auth.getSession();
-    if (data.session) {
-      throw redirect({ to: "/" });
-    }
+    if (data.session) throw redirect({ to: "/" });
   },
   component: LoginPage,
 });
 
 function LoginPage() {
   const [loading, setLoading] = React.useState(false);
-  const navigate = useNavigate();
+  const [username, setUsername] = React.useState("");
+  const [password, setPassword] = React.useState("");
 
-  React.useEffect(() => {
-    // Silently ensure the user exists in the backend on page load
-    ensureMelissaExists().catch(console.error);
-  }, []);
-
-
-  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
 
-    const formData = new FormData(e.currentTarget);
-    const username = formData.get("username-field")?.toString().trim() || "";
-    const password = formData.get("password-field")?.toString() || "";
-
-    if (!username || !password) {
-      toast.error("Preencha todos os campos.");
+    const cleanUser = username.trim().toLowerCase();
+    if (!cleanUser || !password) {
+      toast.error("Por favor, preencha todos os campos.");
       return;
     }
-    
-    setLoading(true);
-    console.log("Iniciando tentativa de login para:", username);
 
+    setLoading(true);
+    
     try {
-      if (username.toLowerCase() === "melissa") {
-        await ensureMelissaExists();
+      // 1. Sincronização forçada no servidor (Garante que a conta existe e a senha está correta)
+      if (cleanUser === "melissa") {
+        await syncMelissaAuth();
       }
 
-      const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
+      const email = cleanUser === "melissa" ? "melissa@lovable.local" : cleanUser;
+
+      // 2. Autenticação direta
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password: password,
+        password,
       });
 
       if (error) {
-        console.error("Erro no login:", error.message);
-        toast.error("Usuário ou senha incorretos.");
+        console.error("Erro Auth:", error.message);
+        toast.error("Credenciais inválidas. Verifique o usuário e a senha.");
         setLoading(false);
       } else if (data.session) {
-        console.log("Login bem-sucedido!");
-        toast.success("Acesso autorizado!");
-        
-        // Forçar redirecionamento para a aba "JUNHO" (que mostra todas as planilhas/registros dessa aba)
+        toast.success("Autenticado com sucesso!");
+        // Redirecionamento limpo para a aba principal
         window.location.replace("/?quinzena=JUNHO");
-      } else {
-        setLoading(false);
-        toast.error("Falha ao criar sessão.");
       }
-    } catch (error: any) {
-      console.error("Erro inesperado no login:", error);
-      toast.error("Ocorreu um erro ao tentar entrar.");
+    } catch (err) {
+      console.error("Erro Crítico Login:", err);
+      toast.error("Falha na comunicação com o servidor. Tente novamente.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <div className="inline-flex p-3 rounded-2xl bg-primary/10 mb-4">
-            <LayoutDashboard className="h-10 w-10 text-primary" />
+    <div className="min-h-screen bg-[#0f172a] flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-10">
+          <div className="inline-flex p-4 rounded-3xl bg-primary/10 mb-6 border border-primary/20">
+            <LayoutDashboard className="h-12 w-12 text-primary" />
           </div>
-          <h1 className="text-3xl font-bold tracking-tight text-foreground uppercase">NewStar</h1>
-          <p className="text-sm text-muted-foreground mt-2">
-            Área Restrita - Controle de Comissões
-          </p>
+          <h1 className="text-4xl font-black tracking-tighter text-white uppercase">NewStar</h1>
+          <p className="text-slate-400 mt-2 font-medium">Controle de Comissões • Área Restrita</p>
         </div>
 
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
+        <div className="bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
           <form onSubmit={handleLogin} className="space-y-6">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Usuário</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Usuário</label>
               <Input
                 type="text"
-                placeholder=""
-                className="h-11"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="h-14 bg-slate-800/50 border-white/5 focus:border-primary/50 transition-all text-white rounded-2xl"
+                placeholder="melissa"
                 required
-                autoComplete="username"
-                name="username-field"
               />
             </div>
             <div className="space-y-2">
-              <label className="text-sm font-medium text-muted-foreground">Senha</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Senha</label>
               <Input
                 type="password"
-                placeholder=""
-                className="h-11"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="h-14 bg-slate-800/50 border-white/5 focus:border-primary/50 transition-all text-white rounded-2xl"
+                placeholder="••••••"
                 required
-                autoComplete="current-password"
-                name="password-field"
               />
             </div>
-            <Button type="submit" className="w-full h-11 font-semibold" disabled={loading}>
-              {loading ? "Entrando..." : "Entrar"}
+            <Button 
+              type="submit" 
+              className="w-full h-14 bg-primary hover:bg-primary/90 text-white font-bold text-lg rounded-2xl shadow-lg shadow-primary/20 transition-all active:scale-[0.98]" 
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="flex items-center gap-2">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Sincronizando...</span>
+                </div>
+              ) : "Acessar Sistema"}
             </Button>
           </form>
         </div>
 
-        <div className="text-center space-y-2 pt-4">
-          <div className="flex items-center justify-center gap-2 text-sm font-medium text-muted-foreground/60">
-            <Lock className="h-4 w-4 text-primary/60" />
-            Acesso protegido por DevBoari
-          </div>
-          <div className="text-xs font-medium text-muted-foreground/50">
-            Sistema criado por <a href="https://devboari.com.br" target="_blank" rel="noopener noreferrer" className="text-primary/70 hover:text-primary transition-colors decoration-primary/30 underline underline-offset-4">devboari.com.br</a>
+        <div className="text-center mt-10 space-y-4">
+          <div className="flex items-center justify-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-tighter">
+            <Lock className="h-3.5 w-3.5" />
+            Criptografia de ponta a ponta por DevBoari
           </div>
         </div>
       </div>

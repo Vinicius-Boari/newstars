@@ -75,7 +75,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ location }) => {
     // Check session on every route except /login
-    if (location.pathname === '/login' || location.pathname === '/test-auth' || location.pathname === '/dashboard') return;
+    if (location.pathname === '/login') return;
     
     const { data } = await supabase.auth.getSession();
     console.log("Root check session:", data.session ? "Active" : "None");
@@ -148,7 +148,7 @@ function RootComponent() {
   const pathname = useRouter().state.location.pathname;
 
   // Don't wrap in AppLayout if we are on the login page
-  if (pathname === "/login" || pathname === "/test-auth" || pathname === "/dashboard") {
+  if (pathname === "/login") {
     return (
       <QueryClientProvider client={queryClient}>
         <SettingsProvider>

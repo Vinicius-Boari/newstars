@@ -28,7 +28,7 @@ export function useSheetsData(): SheetsDataResult {
   });
 
   const addMutation = useMutation({
-    mutationFn: (name: string) => addSheet({ data: name }),
+    mutationFn: (name: string) => addSheet(name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sheets-names"] });
       toast.success("Aba adicionada com sucesso!");
@@ -40,7 +40,7 @@ export function useSheetsData(): SheetsDataResult {
   });
 
   const removeMutation = useMutation({
-    mutationFn: (name: string) => removeSheet({ data: name }),
+    mutationFn: (name: string) => removeSheet(name),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sheets-names"] });
       toast.success("Aba removida com sucesso!");

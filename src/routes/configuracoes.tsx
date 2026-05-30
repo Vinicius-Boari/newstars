@@ -3,7 +3,7 @@ import * as React from "react";
 import { CheckCircle2, XCircle, Loader2, Info } from "lucide-react";
 import { useSettings } from "@/lib/settings-context";
 import { fetchAllSheets } from "@/lib/sheets";
-import { useSheetsStore } from "@/hooks/use-sheets-store";
+import { useSheetsData } from "@/hooks/use-sheets-data";
 
 export const Route = createFileRoute("/configuracoes")({
   component: ConfigPage,

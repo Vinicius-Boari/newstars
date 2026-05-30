@@ -87,12 +87,9 @@ function LoginPage() {
               <Input
                 type="text"
                 placeholder=""
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
                 className="h-11"
                 required
                 autoComplete="username"
-
                 name="username-field"
               />
             </div>
@@ -101,8 +98,6 @@ function LoginPage() {
               <Input
                 type="password"
                 placeholder=""
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
                 className="h-11"
                 required
                 autoComplete="current-password"

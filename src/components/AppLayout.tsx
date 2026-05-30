@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import { useSheetsStore } from "@/hooks/use-sheets-store";
+// Removed local zustand store import to use Supabase instead
 import {
   Dialog,
   DialogContent,
@@ -64,8 +64,8 @@ function ConnectionBadge() {
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
   const [newAbaName, setNewAbaName] = React.useState("");
-  const { data } = useSheetsData();
-  const { addAba, removeAba } = useSheetsStore();
+  const { data, addAba, removeAba } = useSheetsData();
+
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
   const handleAddAba = (e: React.FormEvent) => {

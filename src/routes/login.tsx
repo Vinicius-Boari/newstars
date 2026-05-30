@@ -23,25 +23,33 @@ function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Attempting login for user:", username);
     setLoading(true);
 
     try {
       // The single user is stored with email melissa@lovable.local
-      const email = username === "melissa" ? "melissa@lovable.local" : username;
+      const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
       
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        toast.error("Usuário ou senha inválidos");
-      } else {
-        toast.success("Login realizado com sucesso!");
-        window.location.href = "/";
+        console.error("Login error:", error);
+        toast.error("Usuário ou senha inválidos: " + error.message);
+      } else if (data.user) {
+        console.log("Login successful, user:", data.user.id);
+        toast.success("Acesso autorizado! Redirecionando...");
+        
+        // Short delay to ensure toast is visible before redirect
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 1000);
       }
     } catch (error) {
-      toast.error("Ocorreu um erro ao tentar fazer login");
+      console.error("Unexpected error during login:", error);
+      toast.error("Ocorreu um erro inesperado ao tentar fazer login");
     } finally {
       setLoading(false);
     }

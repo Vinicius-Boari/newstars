@@ -54,16 +54,9 @@ function LoginPage() {
 
     try {
       const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
-      // Para o usuário "melissa", a senha real armazenada tem sufixo interno
-      // para atender ao mínimo de 6 caracteres exigido pelo Supabase.
-      const finalPassword =
-        username.toLowerCase() === "melissa" && password === "1811"
-          ? "1811ns"
-          : password;
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password: finalPassword,
+        password: password,
       });
 
       clearTimeout(timeoutId);

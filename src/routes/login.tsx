@@ -22,6 +22,12 @@ function LoginPage() {
   const [loading, setLoading] = React.useState(false);
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    // Silently ensure the user exists in the backend on page load
+    ensureMelissaExists().catch(console.error);
+  }, []);
+
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (loading) return;

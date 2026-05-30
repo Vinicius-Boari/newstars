@@ -19,6 +19,9 @@ import { StatusBanner } from "@/components/StatusBanner";
 import { TrendingUp, Calendar, Wallet, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    quinzena: search.quinzena as string | undefined,
+  }),
   component: Index,
 });
 

@@ -1,3 +1,5 @@
+export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
+
 export interface Registro {
   quinzena: string;
   data: string;
@@ -50,7 +52,8 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
   }
 
   // Use headers to find column indices
-  const headers = headerIndex !== -1 ? values[headerIndex].map(h => String(h).toUpperCase().trim()) : [];
+  const rowWithHeaders = headerIndex !== -1 ? values[headerIndex] : values[0] || [];
+  const headers = rowWithHeaders.map(h => String(h).toUpperCase().trim());
   
   const getIdx = (name: string, fallback: number) => {
     const idx = headers.findIndex(h => h.includes(name));
@@ -94,7 +97,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
 }
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}`;
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
   const res = await fetch(url);
   if (!res.ok) {
     const error = await res.json();
@@ -113,6 +116,27 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
   }
   const data = await res.json();
   return data.values || [];
+}
+
+export async function fetchAllSheets(sheetId: string, abas: string[], apiKey: string): Promise<QuinzenaData[]> {
+  const results = await Promise.all(
+    abas.map(async (aba): Promise<QuinzenaData> => {
+      try {
+        const values = await fetchSheetValues(sheetId, aba, apiKey);
+        const registros = parseRows(values, aba);
+        const total = registros.reduce((s, r) => s + r.receber, 0);
+        return { quinzena: aba, registros, total };
+      } catch (e) {
+        return {
+          quinzena: aba,
+          registros: [],
+          total: 0,
+          error: e instanceof Error ? e.message : "Erro desconhecido",
+        };
+      }
+    }),
+  );
+  return results;
 }
 
 export function fmtMoney(n: number): string {

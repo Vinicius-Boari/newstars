@@ -51,13 +51,8 @@ function LoginPage() {
         console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
         
-        await navigate({ to: "/", replace: true });
-        
-        setTimeout(() => {
-          if (window.location.pathname === "/login") {
-            window.location.href = "/";
-          }
-        }, 500);
+        // Hard redirect to clear any state and ensure we hit "/"
+        window.location.href = "/";
       }
     } catch (error) {
       console.error("Erro inesperado:", error);

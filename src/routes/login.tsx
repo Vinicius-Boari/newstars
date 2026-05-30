@@ -1,4 +1,4 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,6 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const [loading, setLoading] = React.useState(false);
-  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,7 +32,6 @@ function LoginPage() {
       return;
     }
     
-    console.log("Iniciando login para:", username);
     setLoading(true);
 
     try {
@@ -45,19 +43,17 @@ function LoginPage() {
       });
 
       if (error) {
-        console.error("Erro no login:", error.message);
         toast.error("Usuário ou senha incorretos.");
+        setLoading(false);
       } else if (data.session) {
-        console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
-        
-        // Hard redirect to clear any state and ensure we hit "/"
-        window.location.href = "/";
+        // Small delay to let the session persist before reload
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 100);
       }
     } catch (error) {
-      console.error("Erro inesperado:", error);
       toast.error("Ocorreu um erro ao tentar entrar.");
-    } finally {
       setLoading(false);
     }
   };

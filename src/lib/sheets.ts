@@ -78,9 +78,24 @@ async function fetchSheet(sheetId: string, sheetName: string): Promise<GVizJson>
 
 function parseRows(json: GVizJson, quinzena: string): Registro[] {
   const rows = json.table?.rows ?? [];
-  if (rows.length < 2) return [];
+  if (rows.length === 0) return [];
+
+  // Dynamic header detection: search for a row that looks like a header
+  // (contains "DATA", "PEDIDO", "NOME", etc.)
+  let headerIndex = -1;
+  for (let i = 0; i < Math.min(rows.length, 10); i++) {
+    const rowStr = JSON.stringify(rows[i]?.c || "").toUpperCase();
+    if (rowStr.includes("PEDIDO") && rowStr.includes("NOME")) {
+      headerIndex = i;
+      break;
+    }
+  }
+
+  // Fallback to index 1 if no header found (common in these sheets)
+  const startRow = headerIndex !== -1 ? headerIndex + 1 : 2;
+
   return rows
-    .slice(2)
+    .slice(startRow)
     .map((row): Registro | null => {
       const c = row?.c ?? [];
       const get = (i: number): GVizCell | null => c[i] ?? null;
@@ -111,6 +126,8 @@ export interface QuinzenaData {
 }
 
 export async function fetchAllSheets(sheetId: string, abas: string[]): Promise<QuinzenaData[]> {
+  console.log(`[Sync] Fetching ${abas.length} sheets: ${abas.join(', ')}`);
+
   const results = await Promise.all(
     abas.map(async (aba): Promise<QuinzenaData> => {
       try {

@@ -37,10 +37,31 @@ const NAV = [
 
 function ConnectionBadge() {
   const { isError, isFetching, dataUpdatedAt, data, refetch } = useSheetsData();
+  const [showUpdateToast, setShowUpdateToast] = React.useState(false);
+  const prevDataRef = React.useRef<string>("");
+
+  React.useEffect(() => {
+    if (data) {
+      const currentHash = JSON.stringify(data);
+      if (prevDataRef.current && prevDataRef.current !== currentHash) {
+        setShowUpdateToast(true);
+        const timer = setTimeout(() => setShowUpdateToast(false), 3000);
+        return () => clearTimeout(timer);
+      }
+      prevDataRef.current = currentHash;
+    }
+  }, [data]);
+
   const hasAnyError = isError || (data?.every((d) => d.error) ?? false);
   const time = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString("pt-BR") : "--:--:--";
+  
   return (
     <div className="flex items-center gap-3 text-sm">
+      {showUpdateToast && (
+        <span className="text-[10px] font-bold text-success animate-bounce bg-success/10 px-2 py-1 rounded-full">
+          ✨ Dados atualizados
+        </span>
+      )}
       <div className="flex items-center gap-2">
         <span
           className={cn(
@@ -49,7 +70,7 @@ function ConnectionBadge() {
           )}
         />
         <span className="text-muted-foreground">
-          {hasAnyError ? "Erro de conexão" : "Conectado"}
+          {isFetching ? "Sincronizando..." : hasAnyError ? "Erro de conexão" : "Conectado"}
         </span>
       </div>
       <span className="text-muted-foreground hidden sm:inline">Atualizado às {time}</span>

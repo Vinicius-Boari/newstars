@@ -150,3 +150,13 @@ export function fmtMoney(n: number): string {
 export function fmtPct(n: number): string {
   return `${n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
 }
+
+// Extracts the current installment marked with parentheses, e.g. "30.(60).90" -> "60"
+export function extractCurrentParc(qtd: string): { atual: string | null; partes: string[] } {
+  if (!qtd) return { atual: null, partes: [] };
+  const m = qtd.match(/\(([^)]+)\)/);
+  const atual = m ? m[1] : null;
+  const partes = qtd.split(/[.\s]/).filter(Boolean);
+  return { atual, partes };
+}
+

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Link, useRouterState } from "@tanstack/react-router";
+import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   ListChecks,
@@ -14,7 +14,8 @@ import {
   Trash2,
   LogOut,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { useSheetsData } from "@/hooks/use-sheets-data";
@@ -68,6 +69,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
   const [newAbaName, setNewAbaName] = React.useState("");
   const { data, addAba, removeAba } = useSheetsData();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success("Sessão encerrada.");
+    navigate({ to: "/login" });
+  };
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
@@ -214,6 +222,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
             Sincronizando a cada 30s
           </div>
+
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 cursor-pointer"
+          >
+            <LogOut className="h-4 w-4 shrink-0" />
+            <span>Sair</span>
+          </button>
         </div>
 
       </aside>

@@ -110,17 +110,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </div>
         <nav className="p-4 space-y-6">
           <div>
-            <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest mb-4 px-3">
-              PLANILHA
-            </div>
-            <div className="space-y-1">
-              <div className="flex items-center gap-3 px-3 py-2 text-sm font-medium text-sidebar-foreground/80">
-                PLANILHA NEWSTAR
-              </div>
-            </div>
-          </div>
-
-          <div>
             <div className="flex items-center justify-between mb-4 px-3">
               <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest">
                 MESES
@@ -163,12 +152,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               {data?.map((q) => (
                 <div key={q.quinzena} className="group flex items-center gap-1">
                   <Link
-                    to="/quinzenas"
+                    to="/"
                     search={{ quinzena: q.quinzena }}
                     onClick={() => setOpen(false)}
                     className={cn(
                       "flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                      pathname.startsWith("/quinzenas") &&
+                      pathname === "/" &&
                         (new URLSearchParams(
                           typeof window !== "undefined" ? window.location.search : "",
                         ).get("quinzena") === q.quinzena)
@@ -219,6 +208,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </nav>
+
         <div className="absolute bottom-4 left-0 w-full px-4 space-y-3">
           <div className="flex items-center gap-2 text-[10px] text-sidebar-foreground/40 font-medium bg-black/20 py-2 px-3 rounded-full border border-white/5">
             <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />

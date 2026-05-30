@@ -19,6 +19,9 @@ import { StatusBanner } from "@/components/StatusBanner";
 import { TrendingUp, Calendar, Wallet, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    quinzena: search.quinzena as string | undefined,
+  }),
   component: Index,
 });
 
@@ -87,15 +90,22 @@ function Skeleton() {
 }
 
 function Index() {
+  const { quinzena: selectedQuinzena } = Route.useSearch();
   const { data, isLoading, isError } = useSheetsData();
 
-  const { stats, perQuinzena, topClientes } = React.useMemo(() => {
+  const { stats, perQuinzena, topClientes, filteredData } = React.useMemo(() => {
     const quinzenas = data ?? [];
-    const allReg = quinzenas.flatMap((q) => q.registros);
+    
+    // Filter by selected quinzena if present
+    const activeQuinzenas = selectedQuinzena 
+      ? quinzenas.filter(q => q.quinzena === selectedQuinzena)
+      : quinzenas;
+
+    const allReg = activeQuinzenas.flatMap((q) => q.registros);
     const totalGeral = allReg.reduce((s, r) => s + r.receber, 0);
     const pedidosUnicos = new Set(allReg.map((r) => r.pedido)).size;
 
-    const proxima = quinzenas.find((q) => q.total > 0);
+    const proxima = activeQuinzenas.find((q) => q.total > 0);
 
     // group by client
     const clienteMap = new Map<string, number>();
@@ -107,7 +117,7 @@ function Index() {
       .slice(0, 10)
       .map(([name, value]) => ({ name, value }));
 
-    const perQuinzena = quinzenas.map((q) => ({
+    const perQuinzena = activeQuinzenas.map((q) => ({
       name: q.quinzena,
       total: Number(q.total.toFixed(2)),
     }));
@@ -121,8 +131,9 @@ function Index() {
       },
       perQuinzena,
       topClientes,
+      filteredData: activeQuinzenas
     };
-  }, [data]);
+  }, [data, selectedQuinzena]);
 
   return (
     <div>
@@ -275,7 +286,7 @@ function Index() {
                       </td>
                     </tr>
                   ) : (
-                    (data ?? []).flatMap(q => q.registros).slice(0, 50).map((r, i) => (
+                    (filteredData ?? []).flatMap(q => q.registros).slice(0, 50).map((r, i) => (
                       <tr key={i} className="hover:bg-muted/30 transition-colors group">
                         <td className="px-4 py-3 text-muted-foreground">{r.data}</td>
                         <td className="px-4 py-3 font-mono text-xs">{r.pedido}</td>
@@ -300,7 +311,8 @@ function Index() {
               <div className="p-4 border-t border-border text-center">
                 <p className="text-xs text-muted-foreground">
                   Exibindo as primeiras 50 de {stats.qtdRegistros} parcelas. 
-                  Acesse a página <a href="/quinzenas" className="text-primary hover:underline">Quinzenas</a> para ver tudo.
+                  Acesse as abas no menu lateral para filtrar por mês.
+
                 </p>
               </div>
             )}

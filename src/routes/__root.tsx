@@ -143,6 +143,18 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const pathname = useRouter().state.location.pathname;
+
+  // Don't wrap in AppLayout if we are on the login page
+  if (pathname === "/login") {
+    return (
+      <QueryClientProvider client={queryClient}>
+        <SettingsProvider>
+          <Outlet />
+        </SettingsProvider>
+      </QueryClientProvider>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -154,3 +166,4 @@ function RootComponent() {
     </QueryClientProvider>
   );
 }
+

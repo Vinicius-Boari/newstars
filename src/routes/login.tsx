@@ -42,24 +42,22 @@ function LoginPage() {
     }
     
     setLoading(true);
-    console.log("Iniciando tentativa de login...");
-
-    // Timeout de segurança para não travar o botão
-    const timeoutId = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        toast.error("O login está demorando mais que o esperado. Tente novamente.");
-      }
-    }, 15000);
+    console.log("Iniciando tentativa de login para:", username);
 
     try {
+      // Forçar a garantia de que a Melissa existe antes de tentar o login
+      if (username.toLowerCase() === "melissa") {
+        console.log("Garantindo que melissa existe no backend...");
+        await ensureMelissaExists();
+      }
+
       const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password: password,
       });
 
-      clearTimeout(timeoutId);
+      
 
       if (error) {
         console.error("Erro no login:", error.message);

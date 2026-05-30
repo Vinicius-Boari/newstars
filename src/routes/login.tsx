@@ -1,10 +1,12 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import * as React from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LayoutDashboard, Lock } from "lucide-react";
+import { ensureMelissaExists } from "@/hooks/use-auth-admin";
+
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
@@ -18,6 +20,13 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const [loading, setLoading] = React.useState(false);
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    // Silently ensure the user exists in the backend on page load
+    ensureMelissaExists().catch(console.error);
+  }, []);
+
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,6 +42,15 @@ function LoginPage() {
     }
     
     setLoading(true);
+    console.log("Iniciando tentativa de login...");
+
+    // Timeout de segurança para não travar o botão
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        toast.error("O login está demorando mais que o esperado. Tente novamente.");
+      }
+    }, 15000);
 
     try {
       const email = username.toLowerCase() === "melissa" ? "melissa@lovable.local" : username;
@@ -42,17 +60,24 @@ function LoginPage() {
         password,
       });
 
+      clearTimeout(timeoutId);
+
       if (error) {
+        console.error("Erro no login:", error.message);
         toast.error("Usuário ou senha incorretos.");
         setLoading(false);
       } else if (data.session) {
+        console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
-        // Small delay to let the session persist before reload
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 100);
+        
+        // Use a clean redirect
+        window.location.assign("/");
+      } else {
+        setLoading(false);
+        toast.error("Falha ao criar sessão.");
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Erro inesperado no login:", error);
       toast.error("Ocorreu um erro ao tentar entrar.");
       setLoading(false);
     }

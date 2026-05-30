@@ -78,7 +78,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     if (location.pathname === '/login') return;
     
     const { data } = await supabase.auth.getSession();
+    console.log("Root check session:", data.session ? "Active" : "None");
     if (!data.session) {
+
       throw redirect({
         to: '/login',
         search: {

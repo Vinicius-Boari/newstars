@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { LayoutDashboard, Lock } from "lucide-react";
+import { ensureMelissaExists } from "@/hooks/use-auth-admin";
+
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {

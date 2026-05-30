@@ -63,8 +63,8 @@ function LoginPage() {
         console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
         
-        // Forçar redirecionamento para a aba "MAIO" ou o Dashboard principal
-        window.location.replace("/?quinzena=MAIO");
+        // Forçar redirecionamento para a aba "JUNHO" (que mostra todas as planilhas/registros dessa aba)
+        window.location.replace("/?quinzena=JUNHO");
       } else {
         setLoading(false);
         toast.error("Falha ao criar sessão.");

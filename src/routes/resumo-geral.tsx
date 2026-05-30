@@ -67,7 +67,7 @@ function StatCard({
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-sm p-6 shadow-sm relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm relative overflow-hidden group hover:border-primary/20 transition-all duration-300">
       <div className="flex items-start justify-between relative z-10">
         <div>
           <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/50 mb-4">{label}</div>
@@ -145,19 +145,17 @@ function ResumoGeral() {
       <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <h2 className="text-2xl font-black text-foreground tracking-tighter flex items-center gap-2">
-              RESUMO GERAL
-              <span className="inline-flex h-2 w-2 rounded-full bg-success animate-pulse" />
-            </h2>
+            <h2 className="text-2xl font-bold text-foreground tracking-tight">RESUMO GERAL</h2>
+            <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse mt-1" />
           </div>
-          <p className="text-sm font-medium text-muted-foreground/50">
+          <p className="text-sm font-medium text-muted-foreground/60">
             Acompanhe o desempenho das suas comissões em tempo real.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-card/50 backdrop-blur-sm border border-border rounded-full px-4 py-2 text-[10px] font-bold text-muted-foreground/60 uppercase tracking-widest flex items-center gap-2 shadow-sm">
-            <Calendar className="h-3.5 w-3.5 text-primary" />
-            {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }).toUpperCase()}
+          <div className="bg-card border border-border rounded-full px-4 py-2 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest flex items-center gap-2">
+            <Calendar className="h-3.5 w-3.5" />
+            {new Date().toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}
           </div>
         </div>
       </div>
@@ -202,7 +200,7 @@ function ResumoGeral() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-6">
-            <div className="lg:col-span-2 rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 shadow-sm">
+            <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5">
               <h3 className="text-sm font-semibold mb-4">A receber por quinzena</h3>
               <div className="h-72">
                 <ResponsiveContainer width="100%" height="100%">
@@ -231,7 +229,7 @@ function ResumoGeral() {
               </div>
             </div>
 
-            <div className="rounded-xl border border-border bg-card/50 backdrop-blur-sm p-5 shadow-sm">
+            <div className="rounded-xl border border-border bg-card p-5">
               <h3 className="text-sm font-semibold mb-4">Top 10 clientes</h3>
               <div className="h-72">
                 {topClientes.length === 0 ? (
@@ -265,8 +263,8 @@ function ResumoGeral() {
             </div>
           </div>
 
-          <div className="mt-6 rounded-xl border border-border bg-card/50 backdrop-blur-sm overflow-hidden shadow-sm">
-            <div className="p-5 border-b border-border flex items-center justify-between bg-muted/20">
+          <div className="mt-6 rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+            <div className="p-5 border-b border-border flex items-center justify-between bg-muted/30">
               <h3 className="text-sm font-semibold">Tabela de Dados (Planilha Atualizada)</h3>
               <div className="text-[10px] uppercase tracking-widest text-muted-foreground/50 font-bold">
                 Últimas Entradas

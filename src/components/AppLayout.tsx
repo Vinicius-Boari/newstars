@@ -1,12 +1,23 @@
 import * as React from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Calendar, Menu, X, LogOut,
+  LayoutDashboard, Calendar, Menu, X, LogOut, Settings, Plus, Trash2, RefreshCw
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { QUINZENAS, COMMISSIONS, fmtMoney } from "@/data/commissions";
+import { useSheetsData } from "@/hooks/use-sheets-data";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);

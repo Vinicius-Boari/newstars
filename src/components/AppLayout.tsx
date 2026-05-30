@@ -139,18 +139,73 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
                   {q}
                 </span>
-                <span className={cn(
-                  "text-[10px] tabular-nums font-mono",
-                  total === 0 ? "opacity-25" : "opacity-60",
-                )}>
-                  {total > 0 ? fmtMoney(total).replace("R$", "").trim() : "—"}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className={cn(
+                    "text-[10px] tabular-nums font-mono",
+                    total === 0 ? "opacity-25" : "opacity-60",
+                  )}>
+                    {total > 0 ? fmtMoney(total).replace("R$", "").trim() : "—"}
+                  </span>
+                  {active && (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handleRemoveAba(q);
+                      }}
+                      className="p-1 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  )}
+                </div>
               </Link>
             );
           })}
         </nav>
 
         <div className="p-4 space-y-3 border-t border-sidebar-border shrink-0">
+          <Dialog>
+            <DialogTrigger asChild>
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-foreground hover:bg-sidebar-accent/50 transition-all cursor-pointer">
+                <Plus className="h-4 w-4 shrink-0" />
+                <span>Nova Aba</span>
+              </button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Adicionar Nova Quinzena</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Nome da Aba (ex: 15 SET)</label>
+                  <Input 
+                    placeholder="Nome da aba..." 
+                    value={newAbaName}
+                    onChange={(e) => setNewAbaName(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <DialogTrigger asChild>
+                  <Button variant="outline">Cancelar</Button>
+                </DialogTrigger>
+                <DialogTrigger asChild>
+                  <Button onClick={handleAddAba}>Adicionar</Button>
+                </DialogTrigger>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
+          <button
+            onClick={() => refetch()}
+            disabled={isFetching}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-foreground hover:bg-sidebar-accent/50 transition-all cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw className={cn("h-4 w-4 shrink-0", isFetching && "animate-spin")} />
+            <span>Sincronizar</span>
+          </button>
+
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all cursor-pointer"

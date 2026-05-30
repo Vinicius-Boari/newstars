@@ -219,12 +219,24 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </div>
           </div>
         </nav>
-        <div className="absolute bottom-4 left-0 w-full px-4">
+        <div className="absolute bottom-4 left-0 w-full px-4 space-y-3">
           <div className="flex items-center gap-2 text-[10px] text-sidebar-foreground/40 font-medium bg-black/20 py-2 px-3 rounded-full border border-white/5">
             <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
             Sincronizando a cada 30s
           </div>
+          
+          <button 
+            onClick={async () => {
+              await supabase.auth.signOut();
+              window.location.href = "/login";
+            }}
+            className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-sidebar-foreground/40 hover:text-destructive hover:bg-destructive/5 rounded-lg transition-colors cursor-pointer"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            Sair do sistema
+          </button>
         </div>
+
       </aside>
 
       {open && (

@@ -67,8 +67,10 @@ function LoginPage() {
         console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
         
-        // Use a clean redirect
-        window.location.assign("/");
+        // Pequeno atraso para garantir que o toast seja visto e o estado persista
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 500);
       } else {
         setLoading(false);
         toast.error("Falha ao criar sessão.");

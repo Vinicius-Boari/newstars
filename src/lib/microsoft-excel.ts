@@ -18,7 +18,7 @@ export async function fetchExcelData(abas: string[]): Promise<{ quinzena: string
   const results = await Promise.all(
     abas.map(async (aba) => {
       try {
-        const range = "A1:J100"; 
+        const range = "A1:J500"; 
         // URL format for Microsoft Graph to access a worksheet range
         const url = `https://graph.microsoft.com/v1.0/me/drive/items/${EXCEL_FILE_ID}/workbook/worksheets('${aba}')/range(address='${range}')`;
         

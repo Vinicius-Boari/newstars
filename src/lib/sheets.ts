@@ -1,8 +1,10 @@
 export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export const ABAS_DEFAULT = [
-  "MAIO",
+  "MARÇO",
   "ABRIL",
+  "MAIO",
+  "JUNHO",
 ] as const;
 
 

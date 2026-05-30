@@ -20,7 +20,7 @@ import { TrendingUp, Calendar, Wallet, FileText } from "lucide-react";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>) => ({
-    quinzena: search.quinzena as string | undefined,
+    quinzena: (search.quinzena as string | undefined) || "JUNHO",
   }),
   component: Index,
 });

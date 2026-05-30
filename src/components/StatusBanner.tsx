@@ -51,8 +51,8 @@ export function StatusBanner({
   }
 
   return (
-    <div className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-success/10 border border-success/20 w-fit text-xs font-medium text-success">
-      <Database className="h-3 w-3" />
+    <div className="flex items-center gap-2 mb-8 px-4 py-2 rounded-full bg-card/50 backdrop-blur-sm border border-border w-fit text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60 shadow-sm">
+      <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.4)]" />
       Conectado ao {connectorType === "google" ? "Google Sheets" : "Microsoft Excel"}
     </div>
   );

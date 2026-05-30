@@ -33,11 +33,20 @@ export function useSheetsData(): SheetsDataResult {
   const effectiveSheetId = sheetId || DEFAULT_ID;
 
   const sync = React.useCallback(async (isBackground = false) => {
-    if (!effectiveSheetId || !API_KEY) {
-      console.warn("Google Sheets API Key ou ID da planilha não configurados.");
+    if (!API_KEY) {
+      setError("Google Sheets API Key não configurada no .env (VITE_GOOGLE_SHEETS_API_KEY)");
+      setSyncStatus("error");
       setIsInitialLoading(false);
       return;
     }
+
+    if (!effectiveSheetId) {
+      setError("ID da planilha não configurado (VITE_SPREADSHEET_ID)");
+      setSyncStatus("error");
+      setIsInitialLoading(false);
+      return;
+    }
+
 
     try {
       if (!isBackground) setIsInitialLoading(data === undefined);

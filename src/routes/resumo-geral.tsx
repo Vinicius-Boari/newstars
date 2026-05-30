@@ -4,11 +4,12 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
-import { COMMISSIONS, QUINZENAS, fmtMoney, extractCurrentParc, type Commission } from "@/data/commissions";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
+import { useSheetsData } from "@/hooks/use-sheets-data";
+import { fmtMoney, extractCurrentParc, type Registro } from "@/lib/sheets";
 
 export const Route = createFileRoute("/resumo-geral")({
   beforeLoad: async () => {
@@ -80,15 +81,19 @@ function ParcCell({ qtd }: { qtd: string }) {
 function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
+  const { data: abas = [], isLoading, isError, error } = useSheetsData();
 
   const [search, setSearch] = React.useState("");
   const [localFilter, setLocalFilter] = React.useState<string>("ALL");
   const [pctFilter, setPctFilter] = React.useState<string>("ALL");
 
+  const COMMISSIONS = React.useMemo(() => abas.flatMap(a => a.registros), [abas]);
+  const QUINZENAS = React.useMemo(() => abas.map(a => a.quinzena), [abas]);
+
   const allLocals = React.useMemo(() => {
     const s = new Set(COMMISSIONS.map(c => c.local).filter(l => l && l !== "-"));
     return [...s].sort();
-  }, []);
+  }, [COMMISSIONS]);
 
   const filtered = React.useMemo(() => {
     return COMMISSIONS.filter(c => {
@@ -101,7 +106,7 @@ function Dashboard() {
       }
       return true;
     });
-  }, [selectedQuinzena, localFilter, pctFilter, search]);
+  }, [selectedQuinzena, localFilter, pctFilter, search, COMMISSIONS]);
 
   const stats = React.useMemo(() => {
     const totalReceber = filtered.reduce((s, c) => s + c.receber, 0);
@@ -111,11 +116,11 @@ function Dashboard() {
   }, [filtered]);
 
   const perQuinzena = React.useMemo(() => {
-    return QUINZENAS.map(q => ({
-      name: q,
-      total: COMMISSIONS.filter(c => c.quinzena === q).reduce((s, c) => s + c.receber, 0),
+    return abas.map(a => ({
+      name: a.quinzena,
+      total: a.total,
     }));
-  }, []);
+  }, [abas]);
 
   const perCidade = React.useMemo(() => {
     const map = new Map<string, number>();
@@ -148,18 +153,31 @@ function Dashboard() {
       .slice(0, 10);
   }, [filtered]);
 
-  const calendario = React.useMemo(() => {
-    const map = new Map<string, Commission[]>();
-    for (const c of filtered) {
-      if (!c.venc || c.venc === "-") continue;
-      if (!map.has(c.venc)) map.set(c.venc, []);
-      map.get(c.venc)!.push(c);
-    }
-    return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [filtered]);
-
   const setQuinzena = (q: string) => navigate({ search: { quinzena: q } });
   const clearFilters = () => { setSearch(""); setLocalFilter("ALL"); setPctFilter("ALL"); };
+
+  if (isLoading && abas.length === 0) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-4">
+        <Loader2 className="h-8 w-8 text-primary animate-spin" />
+        <p className="text-sm text-muted-foreground animate-pulse">Carregando dados da planilha...</p>
+      </div>
+    );
+  }
+
+  if (isError && abas.length === 0) {
+    return (
+      <div className="h-[60vh] flex flex-col items-center justify-center gap-4 p-8 text-center">
+        <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center mb-2">
+          <X className="h-6 w-6 text-destructive" />
+        </div>
+        <h3 className="text-lg font-bold text-foreground">Falha ao carregar dados</h3>
+        <p className="text-sm text-muted-foreground max-w-md">
+          {error || "Verifique se a planilha está pública e as credenciais API estão corretas no .env"}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -189,8 +207,9 @@ function Dashboard() {
         >
           Todas
         </button>
-        {QUINZENAS.map(q => {
-          const total = perQuinzena.find(p => p.name === q)?.total ?? 0;
+        {abas.map(aba => {
+          const q = aba.quinzena;
+          const total = aba.total;
           const active = selectedQuinzena === q;
           return (
             <button
@@ -239,7 +258,7 @@ function Dashboard() {
           label="Período selecionado"
           value={selectedQuinzena === "ALL" ? "TODOS" : selectedQuinzena}
           hint={selectedQuinzena === "ALL"
-            ? fmtMoney(COMMISSIONS.reduce((s,c)=>s+c.receber,0)) + " total geral"
+            ? fmtMoney(allRegistros.reduce((s,c)=>s+c.receber,0)) + " total geral"
             : "Vencimento da quinzena"}
           icon={Calendar}
           accent="bg-blue-500/15 text-blue-600"
@@ -250,7 +269,7 @@ function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5 shadow-sm">
           <h3 className="text-sm font-semibold mb-1">A receber por quinzena</h3>
-          <p className="text-[11px] text-muted-foreground/60 mb-3">Timeline de maio a agosto de 2026</p>
+          <p className="text-[11px] text-muted-foreground/60 mb-3">Timeline sincronizada em tempo real</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={perQuinzena} margin={{ left: -10, right: 10, top: 10 }}>
@@ -280,7 +299,7 @@ function Dashboard() {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={perPct} dataKey="value" nameKey="name" innerRadius={45} outerRadius={85} paddingAngle={3}>
-                    {perPct.map((d, i) => <Cell key={i} fill={PCT_COLORS[d.pct] ?? CHART_COLORS[i]} />)}
+                    {perPct.map((d, i) => <Cell key={i} fill={PCT_COLORS[d.pct] ?? CHART_COLORS[i % CHART_COLORS.length]} />)}
                   </Pie>
                   <Tooltip formatter={(v: number) => fmtMoney(v)} contentStyle={{ fontSize: 12 }} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
@@ -291,101 +310,47 @@ function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h3 className="text-sm font-semibold mb-3">Top 10 cidades</h3>
-          <div className="h-64">
-            {perCidade.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Sem dados</div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={perCidade} layout="vertical" margin={{ left: 60, right: 10 }}>
-                  <XAxis type="number" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                    tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : String(v)} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} width={90} />
-                  <Tooltip formatter={(v: number) => fmtMoney(v)} contentStyle={{ fontSize: 12 }} />
-                  <Bar dataKey="value" fill="#ec4899" radius={[0, 4, 4, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h3 className="text-sm font-semibold mb-3">Top 10 clientes</h3>
-          <div className="h-64 overflow-y-auto">
-            {topClientes.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Sem dados</div>
-            ) : (
-              <ol className="space-y-2">
-                {topClientes.map((c, i) => (
-                  <li key={c.name} className="flex items-center gap-3">
-                    <span className="text-[10px] font-bold w-5 text-muted-foreground tabular-nums">#{i+1}</span>
-                    <span className="flex-1 text-xs font-medium text-foreground truncate">{c.name}</span>
-                    <span className="text-xs font-bold tabular-nums text-green-600">{fmtMoney(c.value)}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="rounded-xl border border-border bg-card p-4 shadow-sm">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 text-xs font-bold text-muted-foreground uppercase tracking-widest">
-            <Filter className="h-3.5 w-3.5" /> Filtros
-          </div>
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Buscar por cliente ou pedido…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="pl-9 h-9 text-sm"
-            />
-          </div>
-          <select
-            value={localFilter}
-            onChange={(e) => setLocalFilter(e.target.value)}
-            className="h-9 px-3 rounded-md border border-border bg-background text-sm cursor-pointer"
-          >
-            <option value="ALL">Todas as cidades</option>
-            {allLocals.map(l => <option key={l} value={l}>{l}</option>)}
-          </select>
-          <select
-            value={pctFilter}
-            onChange={(e) => setPctFilter(e.target.value)}
-            className="h-9 px-3 rounded-md border border-border bg-background text-sm cursor-pointer"
-          >
-            <option value="ALL">Todas as %</option>
-            <option value="5">5%</option>
-            <option value="10">10%</option>
-            <option value="15">15%</option>
-          </select>
-          {(search || localFilter !== "ALL" || pctFilter !== "ALL") && (
-            <button
-              onClick={clearFilters}
-              className="h-9 px-3 rounded-md border border-border text-xs font-medium hover:bg-accent flex items-center gap-1.5"
-            >
-              <X className="h-3 w-3" /> Limpar
-            </button>
-          )}
-        </div>
-      </div>
-
       {/* Main table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-border bg-muted/30 flex items-center justify-between">
-          <div>
-            <h3 className="text-sm font-semibold">Pedidos e parcelas</h3>
-            <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-              Parcela atual destacada em <span className="text-purple-600 font-bold">roxo</span>
-            </p>
+        <div className="p-5 border-b border-border bg-muted/30 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex-1 min-w-[200px]">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Buscar por cliente ou pedido…"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-9 h-9 text-sm max-w-md"
+              />
+            </div>
           </div>
-          <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/60">
-            {filtered.length} resultado{filtered.length !== 1 ? "s" : ""}
+          <div className="flex items-center gap-2">
+            <select
+              value={localFilter}
+              onChange={(e) => setLocalFilter(e.target.value)}
+              className="h-9 px-3 rounded-md border border-border bg-background text-xs font-medium cursor-pointer"
+            >
+              <option value="ALL">Todas as cidades</option>
+              {allLocals.map(l => <option key={l} value={l}>{l}</option>)}
+            </select>
+            <select
+              value={pctFilter}
+              onChange={(e) => setPctFilter(e.target.value)}
+              className="h-9 px-3 rounded-md border border-border bg-background text-xs font-medium cursor-pointer"
+            >
+              <option value="ALL">Todas as %</option>
+              <option value="5">5%</option>
+              <option value="10">10%</option>
+              <option value="15">15%</option>
+            </select>
+            {(search || localFilter !== "ALL" || pctFilter !== "ALL") && (
+              <button
+                onClick={clearFilters}
+                className="h-9 px-3 rounded-md border border-border text-xs font-medium hover:bg-accent flex items-center gap-1.5"
+              >
+                <X className="h-3 w-3" /> Limpar
+              </button>
+            )}
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -401,98 +366,40 @@ function Dashboard() {
                 <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-right">Vl Parc</th>
                 <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Qtd Parc</th>
                 <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">Venc</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-right">A Receber</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-green-600 font-bold text-right">Receber</th>
               </tr>
             </thead>
-            <tbody>
-              {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={10} className="px-4 py-12 text-center text-muted-foreground italic text-sm">
-                    Nenhum resultado para os filtros aplicados.
-                  </td>
-                </tr>
-              ) : filtered.map((r, i) => (
-                <tr key={i} className={cn(
-                  "border-b border-border/50 hover:bg-accent/40 transition-colors",
-                  i % 2 === 1 && "bg-muted/10"
-                )}>
-                  <td className="px-3 py-2.5 text-muted-foreground text-xs whitespace-nowrap">{r.data}</td>
-                  <td className="px-3 py-2.5 font-mono text-xs">{r.pedido}</td>
-                  <td className="px-3 py-2.5 font-medium text-foreground text-xs">{r.nome}</td>
-                  <td className="px-3 py-2.5 text-muted-foreground text-xs">{r.local}</td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-xs">{fmtMoney(r.total)}</td>
-                  <td className="px-3 py-2.5 text-center">
+            <tbody className="divide-y divide-border/50">
+              {filtered.map((c, i) => (
+                <tr key={`${c.pedido}-${i}`} className="hover:bg-muted/30 transition-colors group">
+                  <td className="px-3 py-3 text-xs whitespace-nowrap">{c.data}</td>
+                  <td className="px-3 py-3 text-xs font-mono text-muted-foreground">{c.pedido}</td>
+                  <td className="px-3 py-3 text-xs font-bold uppercase truncate max-w-[200px]">{c.nome}</td>
+                  <td className="px-3 py-3 text-xs text-muted-foreground">{c.local}</td>
+                  <td className="px-3 py-3 text-xs text-right tabular-nums">{fmtMoney(c.total)}</td>
+                  <td className="px-3 py-3 text-center">
                     <span className={cn(
-                      "inline-block px-1.5 py-0.5 rounded text-[10px] font-bold",
-                      r.pct === 5 && "bg-blue-500/15 text-blue-600",
-                      r.pct === 10 && "bg-purple-500/15 text-purple-600",
-                      r.pct === 15 && "bg-pink-500/15 text-pink-600",
-                    )}>{r.pct}%</span>
+                      "text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ring-inset",
+                      c.pct === 5 ? "bg-blue-500/10 text-blue-600 ring-blue-500/20" :
+                      c.pct === 10 ? "bg-purple-500/10 text-purple-600 ring-purple-500/20" :
+                      "bg-pink-500/10 text-pink-600 ring-pink-500/20"
+                    )}>
+                      {c.pct}%
+                    </span>
                   </td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-xs text-muted-foreground">
-                    {r.vlParc !== null ? fmtMoney(r.vlParc) : "—"}
-                  </td>
-                  <td className="px-3 py-2.5 whitespace-nowrap">
-                    <ParcCell qtd={r.qtdParc} />
-                  </td>
-                  <td className="px-3 py-2.5 text-center text-xs text-muted-foreground whitespace-nowrap">{r.venc}</td>
-                  <td className="px-3 py-2.5 text-right tabular-nums text-xs font-bold text-green-600">
-                    {fmtMoney(r.receber)}
-                  </td>
+                  <td className="px-3 py-3 text-xs text-right tabular-nums text-muted-foreground">{fmtMoney(c.vlParc)}</td>
+                  <td className="px-3 py-3"><ParcCell qtd={c.qtdParc} /></td>
+                  <td className="px-3 py-3 text-center text-xs text-muted-foreground">{c.venc}</td>
+                  <td className="px-3 py-3 text-right tabular-nums font-bold text-green-600">{fmtMoney(c.receber)}</td>
                 </tr>
               ))}
             </tbody>
-            {filtered.length > 0 && (
-              <tfoot>
-                <tr className="bg-muted/40 border-t-2 border-border">
-                  <td colSpan={9} className="px-3 py-3 text-right text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Total filtrado
-                  </td>
-                  <td className="px-3 py-3 text-right tabular-nums text-sm font-bold text-green-600">
-                    {fmtMoney(stats.totalReceber)}
-                  </td>
-                </tr>
-              </tfoot>
-            )}
           </table>
-        </div>
-      </div>
-
-      {/* Calendar */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-border bg-muted/30">
-          <h3 className="text-sm font-semibold">Calendário de vencimentos</h3>
-          <p className="text-[11px] text-muted-foreground/60 mt-0.5">
-            Pagamentos agrupados por data de vencimento
-          </p>
-        </div>
-        <div className="p-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-          {calendario.length === 0 ? (
-            <div className="col-span-full text-center text-sm text-muted-foreground italic py-8">
-              Sem vencimentos no filtro atual.
+          {filtered.length === 0 && (
+            <div className="py-20 text-center">
+              <p className="text-sm text-muted-foreground">Nenhum resultado encontrado para os filtros selecionados.</p>
             </div>
-          ) : calendario.map(([data, items]) => {
-            const totalDia = items.reduce((s, c) => s + c.receber, 0);
-            return (
-              <div key={data} className="rounded-lg border border-border bg-background p-3 hover:border-purple-500/40 transition-colors">
-                <div className="flex items-center justify-between mb-2 pb-2 border-b border-border">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 text-purple-500" />
-                    <span className="text-xs font-bold uppercase tracking-wider">{data}</span>
-                  </div>
-                  <span className="text-xs font-bold tabular-nums text-green-600">{fmtMoney(totalDia)}</span>
-                </div>
-                <ul className="space-y-1">
-                  {items.map((c, i) => (
-                    <li key={i} className="flex items-center justify-between text-[11px] gap-2">
-                      <span className="truncate text-muted-foreground">{c.nome}</span>
-                      <span className="tabular-nums font-medium shrink-0">{fmtMoney(c.receber)}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            );
-          })}
+          )}
         </div>
       </div>
     </div>

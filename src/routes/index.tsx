@@ -311,7 +311,8 @@ function Index() {
               <div className="p-4 border-t border-border text-center">
                 <p className="text-xs text-muted-foreground">
                   Exibindo as primeiras 50 de {stats.qtdRegistros} parcelas. 
-                  Acesse a página <a href="/quinzenas" className="text-primary hover:underline">Quinzenas</a> para ver tudo.
+                  Acesse as abas no menu lateral para filtrar por mês.
+
                 </p>
               </div>
             )}

@@ -63,8 +63,8 @@ function LoginPage() {
         console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
         
-        // Redirecionamento forçado para a home
-        window.location.replace("/");
+        // Forçar redirecionamento para a aba "MAIO" ou o Dashboard principal
+        window.location.replace("/?quinzena=MAIO");
       } else {
         setLoading(false);
         toast.error("Falha ao criar sessão.");

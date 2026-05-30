@@ -11,6 +11,9 @@ import {
 import appCss from "../styles.css?url";
 import { SettingsProvider } from "@/lib/settings-context";
 import { AppLayout } from "@/components/AppLayout";
+import { supabase } from "@/integrations/supabase/client";
+import { redirect } from "@tanstack/react-router";
+
 
 function NotFoundComponent() {
   return (

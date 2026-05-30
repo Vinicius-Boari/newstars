@@ -1,86 +1,23 @@
 import * as React from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard,
-  ListChecks,
-  Calendar,
-  Users,
-  BarChart3,
-  Settings,
-  RefreshCw,
-  Menu,
-  X,
-  Plus,
-  Trash2,
-  LogOut,
+  LayoutDashboard, Calendar, Menu, X, LogOut,
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-
 import { cn } from "@/lib/utils";
-import { QUINZENAS, COMMISSIONS } from "@/data/commissions";
-import { Button } from "@/components/ui/button";
-
-const NAV = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
-] as const;
-
-function ConnectionBadge() {
-  const { isError, isFetching, dataUpdatedAt, data, refetch } = useSheetsData();
-  const [showUpdateToast, setShowUpdateToast] = React.useState(false);
-  const prevDataRef = React.useRef<string>("");
-
-  React.useEffect(() => {
-    if (data) {
-      const currentHash = JSON.stringify(data);
-      if (prevDataRef.current && prevDataRef.current !== currentHash) {
-        setShowUpdateToast(true);
-        const timer = setTimeout(() => setShowUpdateToast(false), 3000);
-        return () => clearTimeout(timer);
-      }
-      prevDataRef.current = currentHash;
-    }
-  }, [data]);
-
-  const hasAnyError = isError || (data?.every((d) => d.error) ?? false);
-  const time = dataUpdatedAt ? new Date(dataUpdatedAt).toLocaleTimeString("pt-BR") : "--:--:--";
-  
-  return (
-    <div className="flex items-center gap-3 text-sm">
-      {showUpdateToast && (
-        <span className="text-[10px] font-bold text-success animate-bounce bg-success/10 px-2 py-1 rounded-full">
-          ✨ Dados atualizados
-        </span>
-      )}
-      <div className="flex items-center gap-2">
-        <span
-          className={cn(
-            "h-2.5 w-2.5 rounded-full",
-            hasAnyError ? "bg-destructive" : "bg-success animate-pulse",
-          )}
-        />
-        <span className="text-muted-foreground">
-          {isFetching ? "Sincronizando..." : hasAnyError ? "Erro de conexão" : "Conectado"}
-        </span>
-      </div>
-      <span className="text-muted-foreground hidden sm:inline">Atualizado às {time}</span>
-      <button
-        onClick={() => refetch()}
-        className="inline-flex items-center justify-center rounded-md border border-border bg-background h-8 w-8 hover:bg-accent transition-colors cursor-pointer disabled:opacity-50"
-        disabled={isFetching}
-        aria-label="Atualizar"
-      >
-        <RefreshCw className={cn("h-4 w-4", isFetching && "animate-spin")} />
-      </button>
-    </div>
-  );
-}
+import { QUINZENAS, COMMISSIONS, fmtMoney } from "@/data/commissions";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
-  const [newAbaName, setNewAbaName] = React.useState("");
-  const { data, addAba, removeAba } = useSheetsData();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const searchStr = useRouterState({ select: (s) => s.location.searchStr });
+
+  const currentQ = React.useMemo(() => {
+    const params = new URLSearchParams(searchStr || "");
+    return params.get("quinzena") || "ALL";
+  }, [searchStr]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -88,33 +25,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     navigate({ to: "/login" });
   };
 
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-
-  const handleAddAba = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newAbaName.trim()) {
-      addAba(newAbaName.trim().toUpperCase());
-      setNewAbaName("");
-    }
-  };
+  const totalGeral = React.useMemo(
+    () => COMMISSIONS.reduce((s, c) => s + c.receber, 0),
+    [],
+  );
 
   return (
     <div className="min-h-screen bg-background flex">
-      {/* Sidebar */}
       <aside
         className={cn(
-          "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-sidebar text-sidebar-foreground transform transition-transform lg:translate-x-0",
+          "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-sidebar text-sidebar-foreground transform transition-transform lg:translate-x-0 flex flex-col",
           open ? "translate-x-0" : "-translate-x-full",
         )}
       >
-        <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="bg-primary/20 p-2 rounded-lg">
-              <LayoutDashboard className="h-5 w-5 text-primary" />
+        <div className="h-16 flex items-center justify-between px-5 border-b border-sidebar-border shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="bg-gradient-to-br from-purple-500 to-pink-500 p-2 rounded-lg shadow-lg shadow-purple-500/20">
+              <LayoutDashboard className="h-5 w-5 text-white" />
             </div>
             <div>
-              <div className="text-lg font-bold text-foreground uppercase tracking-tight">NewStar</div>
-              <div className="text-[10px] uppercase tracking-widest text-sidebar-foreground/40 font-medium">
+              <div className="text-lg font-black uppercase tracking-tighter leading-none italic bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+                NewStars
+              </div>
+              <div className="text-[9px] uppercase tracking-[0.2em] text-sidebar-foreground/40 font-bold">
                 DASHBOARD
               </div>
             </div>
@@ -127,122 +60,72 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <X className="h-5 w-5" />
           </button>
         </div>
-        <nav className="p-4 space-y-6">
-          <div>
-            <div className="flex items-center justify-between mb-4 px-3">
-              <div className="text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest">
-                MESES
-              </div>
-              <Dialog>
-                <DialogTrigger asChild>
-                  <button className="p-1 rounded-md hover:bg-sidebar-accent text-sidebar-foreground/40 hover:text-primary transition-colors cursor-pointer">
-                    <Plus className="h-3 w-3" />
-                  </button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Adicionar novo mês (aba)</DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handleAddAba} className="space-y-4 pt-4">
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Nome da aba na planilha</label>
-                      <Input
-                        placeholder="Ex: JUNHO"
-                        value={newAbaName}
-                        onChange={(e) => setNewAbaName(e.target.value)}
-                        autoFocus
-                      />
-                      <p className="text-[10px] text-muted-foreground">
-                        Certifique-se de que o nome seja exatamente igual ao da aba na planilha.
-                      </p>
-                    </div>
-                    <div className="flex justify-end">
-                      <DialogTrigger asChild>
-                        <Button type="submit" disabled={!newAbaName.trim()}>
-                          Adicionar
-                        </Button>
-                      </DialogTrigger>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
-            </div>
-            <div className="space-y-1">
-              {data?.map((q) => (
-                <div key={q.quinzena} className="group flex items-center gap-1">
-                  <Link
-                    to="/"
-                    search={{ quinzena: q.quinzena }}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex-1 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
-                      pathname === "/" &&
-                        (new URLSearchParams(
-                          typeof window !== "undefined" ? window.location.search : "",
-                        ).get("quinzena") === q.quinzena)
-                        ? "bg-sidebar-accent text-primary font-semibold shadow-sm"
-                        : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
-                    )}
-                  >
-                    <Calendar className="h-4 w-4 shrink-0" />
-                    <span>{q.quinzena}</span>
-                  </Link>
 
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <button
-                        className="opacity-0 group-hover:opacity-100 p-2 text-sidebar-foreground/40 hover:text-destructive transition-all cursor-pointer"
-                        title="Excluir aba"
-                      >
-                        <Trash2 className="h-3.5 w-3.5" />
-                      </button>
-                    </DialogTrigger>
-                    <DialogContent>
-                      <DialogHeader>
-                        <DialogTitle>Confirmar exclusão</DialogTitle>
-                      </DialogHeader>
-                      <div className="py-4">
-                        <p className="text-sm text-muted-foreground">
-                          Deseja realmente excluir a aba "{q.quinzena}"? Esta ação não pode ser
-                          desfeita.
-                        </p>
-                      </div>
-                      <DialogFooter className="gap-2 sm:gap-0">
-                        <DialogTrigger asChild>
-                          <Button variant="outline">Cancelar</Button>
-                        </DialogTrigger>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="destructive"
-                            onClick={() => removeAba(q.quinzena)}
-                          >
-                            Excluir
-                          </Button>
-                        </DialogTrigger>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              ))}
-            </div>
+        <nav className="p-4 space-y-1 flex-1 overflow-y-auto">
+          <Link
+            to="/resumo-geral"
+            search={{ quinzena: "ALL" }}
+            onClick={() => setOpen(false)}
+            className={cn(
+              "flex items-center justify-between gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200",
+              currentQ === "ALL"
+                ? "bg-sidebar-accent text-primary font-semibold"
+                : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
+            )}
+          >
+            <span className="flex items-center gap-3">
+              <LayoutDashboard className="h-4 w-4" />
+              Todas quinzenas
+            </span>
+            <span className="text-[10px] tabular-nums font-mono opacity-60">
+              {fmtMoney(totalGeral).replace("R$", "")}
+            </span>
+          </Link>
+
+          <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest">
+            Quinzenas
           </div>
+
+          {QUINZENAS.map((q) => {
+            const total = COMMISSIONS.filter(c => c.quinzena === q).reduce((s, c) => s + c.receber, 0);
+            const active = currentQ === q;
+            return (
+              <Link
+                key={q}
+                to="/resumo-geral"
+                search={{ quinzena: q }}
+                onClick={() => setOpen(false)}
+                className={cn(
+                  "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                  active
+                    ? "bg-sidebar-accent text-primary font-semibold"
+                    : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
+                )}
+              >
+                <span className="flex items-center gap-3">
+                  <Calendar className="h-3.5 w-3.5 shrink-0" />
+                  {q}
+                </span>
+                <span className={cn(
+                  "text-[10px] tabular-nums font-mono",
+                  total === 0 ? "opacity-25" : "opacity-60",
+                )}>
+                  {total > 0 ? fmtMoney(total).replace("R$", "").trim() : "—"}
+                </span>
+              </Link>
+            );
+          })}
         </nav>
 
-        <div className="absolute bottom-4 left-0 w-full px-4 space-y-3">
-          <div className="flex items-center gap-2 text-[10px] text-sidebar-foreground/40 font-medium bg-black/20 py-2 px-3 rounded-full border border-white/5">
-            <div className="h-1.5 w-1.5 rounded-full bg-success animate-pulse" />
-            Sincronizando a cada 30s
-          </div>
-
+        <div className="p-4 space-y-3 border-t border-sidebar-border shrink-0">
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/40 hover:text-destructive hover:bg-destructive/10 transition-all duration-200 cursor-pointer"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all cursor-pointer"
           >
             <LogOut className="h-4 w-4 shrink-0" />
             <span>Sair</span>
           </button>
         </div>
-
       </aside>
 
       {open && (
@@ -252,7 +135,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         />
       )}
 
-      {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
         <header className="h-16 border-b border-border bg-card sticky top-0 z-20 flex items-center justify-between px-4 lg:px-6">
           <button
@@ -267,7 +149,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               Controle de Comissões
             </h1>
           </div>
-          <ConnectionBadge />
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <span>Sistema ativo</span>
+          </div>
         </header>
         <main className="flex-1 p-4 lg:p-6">{children}</main>
       </div>

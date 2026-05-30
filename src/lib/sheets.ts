@@ -1,15 +1,5 @@
 export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
-export const ABAS_DEFAULT = [
-  "MARÇO",
-  "ABRIL",
-  "MAIO",
-  "JUNHO",
-] as const;
-
-
-export type Quinzena = string;
-
 export interface Registro {
   quinzena: string;
   data: string;
@@ -24,100 +14,6 @@ export interface Registro {
   receber: number;
 }
 
-function toNumber(v: unknown): number {
-  if (v == null || v === "") return 0;
-  if (typeof v === "number") return v;
-  const s = String(v).replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
-  const n = parseFloat(s);
-  return Number.isFinite(n) ? n : 0;
-}
-
-function toStr(v: unknown, f?: string | null): string {
-  if (f) return f;
-  if (v == null) return "";
-  return String(v);
-}
-
-interface GVizCell {
-  v?: unknown;
-  f?: string | null;
-}
-interface GVizRow {
-  c: (GVizCell | null)[];
-}
-interface GVizJson {
-  table: { rows: GVizRow[] };
-}
-
-async function fetchSheet(sheetId: string, sheetName: string): Promise<GVizJson> {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(
-    sheetName,
-  )}`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const text = await res.text();
-  // The gviz response is wrapped in `google.visualization.Query.setResponse(...);`
-  if (text.includes("errorMessage") && text.includes("too large")) {
-    throw new Error(
-      "O arquivo é um Excel (.xlsx). No Google Sheets, vá em 'Arquivo' > 'Salvar como Planilhas Google'.",
-    );
-  }
-  const start = text.indexOf("{");
-  const end = text.lastIndexOf("}");
-  if (start === -1 || end === -1) {
-    throw new Error(
-      "Planilha não está pública ou formato inválido. Compartilhe como 'Qualquer pessoa com o link → Visualizador' e certifique-se de que é uma Planilha Google (não .xlsx).",
-    );
-  }
-  try {
-    return JSON.parse(text.substring(start, end + 1)) as GVizJson;
-  } catch {
-    throw new Error("Falha ao processar resposta da planilha.");
-  }
-}
-
-function parseRows(json: GVizJson, quinzena: string): Registro[] {
-  const rows = json.table?.rows ?? [];
-  if (rows.length === 0) return [];
-
-  // Dynamic header detection: search for a row that looks like a header
-  // (contains "DATA", "PEDIDO", "NOME", etc.)
-  let headerIndex = -1;
-  for (let i = 0; i < Math.min(rows.length, 10); i++) {
-    const rowStr = JSON.stringify(rows[i]?.c || "").toUpperCase();
-    if (rowStr.includes("PEDIDO") && rowStr.includes("NOME")) {
-      headerIndex = i;
-      break;
-    }
-  }
-
-  // Fallback to index 1 if no header found (common in these sheets)
-  const startRow = headerIndex !== -1 ? headerIndex + 1 : 2;
-
-  return rows
-    .slice(startRow)
-    .map((row): Registro | null => {
-      const c = row?.c ?? [];
-      const get = (i: number): GVizCell | null => c[i] ?? null;
-      const nome = toStr(get(2)?.v, get(2)?.f).trim();
-      if (!nome) return null;
-      return {
-        quinzena,
-        data: toStr(get(0)?.v, get(0)?.f),
-        pedido: toStr(get(1)?.v, get(1)?.f),
-        nome,
-        local: toStr(get(3)?.v, get(3)?.f),
-        total: toNumber(get(4)?.f ?? get(4)?.v),
-        pct: toNumber(get(5)?.f ?? get(5)?.v),
-        vlParc: toNumber(get(6)?.f ?? get(6)?.v),
-        qtdParc: toStr(get(7)?.v, get(7)?.f),
-        venc: toStr(get(8)?.v, get(8)?.f),
-        receber: toNumber(get(9)?.f ?? get(9)?.v),
-      };
-    })
-    .filter((r): r is Registro => r !== null);
-}
-
 export interface QuinzenaData {
   quinzena: string;
   registros: Registro[];
@@ -125,14 +21,109 @@ export interface QuinzenaData {
   error?: string;
 }
 
-export async function fetchAllSheets(sheetId: string, abas: string[]): Promise<QuinzenaData[]> {
-  console.log(`[Sync] Fetching ${abas.length} sheets: ${abas.join(', ')}`);
+function toNumber(v: any): number {
+  if (v == null || v === "") return 0;
+  if (typeof v === "number") return v;
+  const s = String(v).replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+}
 
+function toStr(v: any): string {
+  if (v == null) return "";
+  return String(v).trim();
+}
+
+/**
+ * Parses rows from Google Sheets API v4 (array of arrays)
+ */
+export function parseRows(values: any[][], quinzena: string): Registro[] {
+  if (!values || values.length === 0) return [];
+
+  // Dynamic header detection: search for a row that looks like a header
+  // (contains "PEDIDO" and "NOME")
+  let headerIndex = -1;
+  for (let i = 0; i < Math.min(values.length, 10); i++) {
+    const rowStr = values[i].join("|").toUpperCase();
+    if (rowStr.includes("PEDIDO") && rowStr.includes("NOME")) {
+      headerIndex = i;
+      break;
+    }
+  }
+
+  // Use headers to find column indices
+  const rowWithHeaders = headerIndex !== -1 ? values[headerIndex] : values[0] || [];
+  const headers = rowWithHeaders.map(h => String(h).toUpperCase().trim());
+  
+  const getIdx = (name: string, fallback: number) => {
+    const idx = headers.findIndex(h => h.includes(name));
+    return idx !== -1 ? idx : fallback;
+  };
+
+  const idxData = getIdx("DATA", 0);
+  const idxPedido = getIdx("PEDIDO", 1);
+  const idxNome = getIdx("NOME", 2);
+  const idxLocal = getIdx("LOCAL", 3);
+  const idxTotal = getIdx("TOTAL", 4);
+  const idxPct = getIdx("%", 5);
+  const idxVlParc = getIdx("VL PARC", 6);
+  const idxQtdParc = getIdx("QTD PARC", 7);
+  const idxVenc = getIdx("VENC", 8);
+  const idxReceber = getIdx("RECEBER", 9);
+
+  const startRow = headerIndex !== -1 ? headerIndex + 1 : 1;
+
+  return values
+    .slice(startRow)
+    .map((row): Registro | null => {
+      const nome = toStr(row[idxNome]);
+      if (!nome) return null;
+
+      return {
+        quinzena,
+        data: toStr(row[idxData]),
+        pedido: toStr(row[idxPedido]),
+        nome,
+        local: toStr(row[idxLocal]),
+        total: toNumber(row[idxTotal]),
+        pct: toNumber(row[idxPct]),
+        vlParc: toNumber(row[idxVlParc]),
+        qtdParc: toStr(row[idxQtdParc]),
+        venc: toStr(row[idxVenc]),
+        receber: toNumber(row[idxReceber]),
+      };
+    })
+    .filter((r): r is Registro => r !== null);
+}
+
+export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.sheets.map((s: any) => s.properties.title);
+}
+
+export async function fetchSheetValues(sheetId: string, sheetName: string, apiKey: string): Promise<any[][]> {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.values || [];
+}
+
+export async function fetchAllSheets(sheetId: string, abas: string[], apiKey: string): Promise<QuinzenaData[]> {
   const results = await Promise.all(
     abas.map(async (aba): Promise<QuinzenaData> => {
       try {
-        const json = await fetchSheet(sheetId, aba);
-        const registros = parseRows(json, aba);
+        const values = await fetchSheetValues(sheetId, aba, apiKey);
+        const registros = parseRows(values, aba);
         const total = registros.reduce((s, r) => s + r.receber, 0);
         return { quinzena: aba, registros, total };
       } catch (e) {
@@ -159,3 +150,13 @@ export function fmtMoney(n: number): string {
 export function fmtPct(n: number): string {
   return `${n.toLocaleString("pt-BR", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
 }
+
+// Extracts the current installment marked with parentheses, e.g. "30.(60).90" -> "60"
+export function extractCurrentParc(qtd: string): { atual: string | null; partes: string[] } {
+  if (!qtd) return { atual: null, partes: [] };
+  const m = qtd.match(/\(([^)]+)\)/);
+  const atual = m ? m[1] : null;
+  const partes = qtd.split(/[.\s]/).filter(Boolean);
+  return { atual, partes };
+}
+

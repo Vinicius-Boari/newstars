@@ -1,31 +1,20 @@
 import * as React from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Calendar, Menu, X, LogOut, Settings, Plus, Trash2, RefreshCw
+  LayoutDashboard, Calendar, Menu, X, LogOut, RefreshCw, CheckCircle2, AlertCircle
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { QUINZENAS, COMMISSIONS, fmtMoney } from "@/data/commissions";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { fmtMoney } from "@/lib/sheets";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
-  const [newAbaName, setNewAbaName] = React.useState("");
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
 
-  const { refetch, isFetching, addAba, removeAba } = useSheetsData();
+  const { data: abas = [], refetch, isFetching, lastUpdated, syncStatus } = useSheetsData();
 
   const currentQ = React.useMemo(() => {
     const params = new URLSearchParams(searchStr || "");
@@ -38,33 +27,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     navigate({ to: "/login" });
   };
 
-  const totalGeral = React.useMemo(
-    () => COMMISSIONS.reduce((acc, c) => acc + c.receber, 0),
-    [],
-  );
+  const allRegistros = React.useMemo(() => 
+    abas.flatMap(a => a.registros), 
+  [abas]);
 
-  const handleAddAba = async () => {
-    if (!newAbaName) return;
-    try {
-      await addAba(newAbaName);
-      setNewAbaName("");
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  const handleRemoveAba = async (name: string) => {
-    if (confirm(`Remover aba "${name}"?`)) {
-      try {
-        await removeAba(name);
-      } catch (error) {
-        console.error(error);
-      }
-    }
-  };
+  const totalGeral = React.useMemo(() => 
+    allRegistros.reduce((acc, c) => acc + c.receber, 0),
+  [allRegistros]);
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen bg-background flex relative">
       <aside
         className={cn(
           "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-sidebar text-sidebar-foreground transform transition-transform lg:translate-x-0 flex flex-col",
@@ -119,8 +91,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             Quinzenas
           </div>
 
-          {QUINZENAS.map((q) => {
-            const total = COMMISSIONS.filter(c => c.quinzena === q).reduce((s, c) => s + c.receber, 0);
+          {abas.map((aba) => {
+            const q = aba.quinzena;
+            const total = aba.total;
             const active = currentQ === q;
             return (
               <Link
@@ -129,7 +102,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 search={{ quinzena: q }}
                 onClick={() => setOpen(false)}
                 className={cn(
-                  "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200",
+                  "flex items-center justify-between gap-2 px-3 py-2 rounded-lg text-sm transition-all duration-200 group",
                   active
                     ? "bg-sidebar-accent text-primary font-semibold"
                     : "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50",
@@ -139,64 +112,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <Calendar className="h-3.5 w-3.5 shrink-0" />
                   {q}
                 </span>
-                <div className="flex items-center gap-2">
-                  <span className={cn(
-                    "text-[10px] tabular-nums font-mono",
-                    total === 0 ? "opacity-25" : "opacity-60",
-                  )}>
-                    {total > 0 ? fmtMoney(total).replace("R$", "").trim() : "—"}
-                  </span>
-                  {active && (
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        handleRemoveAba(q);
-                      }}
-                      className="p-1 hover:text-destructive transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </button>
-                  )}
-                </div>
+                <span className={cn(
+                  "text-[10px] tabular-nums font-mono",
+                  total === 0 ? "opacity-25" : "opacity-60",
+                )}>
+                  {total > 0 ? fmtMoney(total).replace("R$", "").trim() : "—"}
+                </span>
               </Link>
             );
           })}
         </nav>
 
         <div className="p-4 space-y-3 border-t border-sidebar-border shrink-0">
-          <Dialog>
-            <DialogTrigger asChild>
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-foreground hover:bg-sidebar-accent/50 transition-all cursor-pointer">
-                <Plus className="h-4 w-4 shrink-0" />
-                <span>Nova Aba</span>
-              </button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Adicionar Nova Quinzena</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Nome da Aba (ex: 15 SET)</label>
-                  <Input 
-                    placeholder="Nome da aba..." 
-                    value={newAbaName}
-                    onChange={(e) => setNewAbaName(e.target.value)}
-                  />
-                </div>
-              </div>
-              <DialogFooter>
-                <DialogTrigger asChild>
-                  <Button variant="outline">Cancelar</Button>
-                </DialogTrigger>
-                <DialogTrigger asChild>
-                  <Button onClick={handleAddAba}>Adicionar</Button>
-                </DialogTrigger>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-
           <button
             onClick={() => refetch()}
             disabled={isFetching}
@@ -243,6 +170,36 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </div>
         </header>
         <main className="flex-1 p-4 lg:p-6">{children}</main>
+      </div>
+
+      {/* Sync Indicator Indicator - Bottom Right */}
+      <div className="fixed bottom-4 right-4 z-50 pointer-events-none">
+        <div className={cn(
+          "px-3 py-1.5 rounded-full shadow-lg border text-[11px] font-medium flex items-center gap-2 transition-all duration-300 transform",
+          syncStatus === "syncing" ? "bg-primary/10 border-primary/20 text-primary translate-y-0" :
+          syncStatus === "success" ? "bg-green-500/10 border-green-500/20 text-green-600 translate-y-0" :
+          syncStatus === "error" ? "bg-destructive/10 border-destructive/20 text-destructive translate-y-0" :
+          "translate-y-12 opacity-0"
+        )}>
+          {syncStatus === "syncing" && (
+            <>
+              <RefreshCw className="h-3 w-3 animate-spin" />
+              <span>Sincronizando...</span>
+            </>
+          )}
+          {syncStatus === "success" && (
+            <>
+              <CheckCircle2 className="h-3 w-3" />
+              <span>Atualizado às {lastUpdated}</span>
+            </>
+          )}
+          {syncStatus === "error" && (
+            <>
+              <AlertCircle className="h-3 w-3" />
+              <span>Falha na sincronização — tentando em 30s</span>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

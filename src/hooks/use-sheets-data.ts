@@ -1,83 +1,117 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchAllSheets, type QuinzenaData } from "@/lib/sheets";
-import { fetchExcelData } from "@/lib/microsoft-excel";
+import * as React from "react";
+import { fetchAllSheets, fetchSheetNames, type QuinzenaData } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
-import { getSheets, addSheet, removeSheet } from "./use-sheets-server";
 import { toast } from "sonner";
+
+export type SyncStatus = "idle" | "syncing" | "success" | "error";
 
 export interface SheetsDataResult {
   data: QuinzenaData[] | undefined;
-  previousData: QuinzenaData[] | undefined;
   isLoading: boolean;
   isFetching: boolean;
   isError: boolean;
-  error: unknown;
-  dataUpdatedAt: number;
-  refetch: () => void;
+  error: string | null;
+  lastUpdated: string | null;
+  syncStatus: SyncStatus;
+  refetch: () => Promise<void>;
   addAba: (name: string) => Promise<void>;
   removeAba: (name: string) => Promise<void>;
 }
 
+const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || "";
+const DEFAULT_ID = import.meta.env.VITE_SPREADSHEET_ID || "";
+
 export function useSheetsData(): SheetsDataResult {
-  const queryClient = useQueryClient();
-  const { sheetId, excelUrl, connectorType, refreshMs } = useSettings();
+  const { sheetId, refreshMs } = useSettings();
+  const [data, setData] = React.useState<QuinzenaData[] | undefined>(undefined);
+  const [lastUpdated, setLastUpdated] = React.useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = React.useState<SyncStatus>("idle");
+  const [error, setError] = React.useState<string | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = React.useState(true);
+  const [isFetching, setIsFetching] = React.useState(false);
 
-  const { data: abas = [] } = useQuery({
-    queryKey: ["sheets-names"],
-    queryFn: () => getSheets(),
-    refetchInterval: refreshMs, // Poll for new sheets too
-  });
+  const effectiveSheetId = sheetId || DEFAULT_ID;
 
-  const addMutation = useMutation({
-    mutationFn: (name: string) => addSheet({ data: name } as any),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sheets-names"] });
-      toast.success("Aba adicionada com sucesso!");
-    },
-    onError: (error) => {
-      toast.error("Erro ao adicionar aba");
-      console.error(error);
+  const sync = React.useCallback(async (isBackground = false) => {
+    if (!API_KEY) {
+      setError("Google Sheets API Key não configurada no .env (VITE_GOOGLE_SHEETS_API_KEY)");
+      setSyncStatus("error");
+      setIsInitialLoading(false);
+      return;
     }
-  });
 
-  const removeMutation = useMutation({
-    mutationFn: (name: string) => removeSheet({ data: name } as any),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["sheets-names"] });
-      toast.success("Aba removida com sucesso!");
-    },
-    onError: (error) => {
-      toast.error("Erro ao remover aba");
-      console.error(error);
+    if (!effectiveSheetId) {
+      setError("ID da planilha não configurado (VITE_SPREADSHEET_ID)");
+      setSyncStatus("error");
+      setIsInitialLoading(false);
+      return;
     }
-  });
 
-  const q = useQuery({
-    queryKey: ["sheets", connectorType, connectorType === "google" ? sheetId : excelUrl, abas],
-    queryFn: () => connectorType === "google" ? fetchAllSheets(sheetId, abas) : fetchExcelData(abas),
-    refetchInterval: refreshMs,
-    refetchOnWindowFocus: false,
-    staleTime: 5000,
-    gcTime: refreshMs * 2,
-    placeholderData: (prev) => prev, // Keep old data during sync
-    notifyOnChangeProps: ['data', 'isFetching', 'isError'],
-    enabled: abas.length > 0,
-  });
+
+    try {
+      if (!isBackground) setIsInitialLoading(data === undefined);
+      setIsFetching(true);
+      setSyncStatus("syncing");
+
+      // 1. Buscar nomes das abas dinamicamente
+      const sheetNames = await fetchSheetNames(effectiveSheetId, API_KEY);
+      
+      // 2. Buscar dados de todas as abas
+      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, API_KEY);
+
+      // 3. Comparar para evitar re-renders desnecessários
+      const hasChanged = JSON.stringify(data) !== JSON.stringify(newData);
+      
+      if (hasChanged) {
+        setData(newData);
+        if (isBackground && data !== undefined) {
+          toast.success("✨ Dados atualizados", { duration: 2000 });
+        }
+      }
+
+      setLastUpdated(new Date().toLocaleTimeString());
+      setSyncStatus("success");
+      setError(null);
+    } catch (err: any) {
+      console.error("[Sync Error]", err);
+      setError(err.message || "Erro na sincronização");
+      setSyncStatus("error");
+      // Manteḿ os dados anteriores em caso de erro
+    } finally {
+      setIsInitialLoading(false);
+      setIsFetching(false);
+    }
+  }, [effectiveSheetId, data]);
+
+  React.useEffect(() => {
+    // Carga inicial imediata
+    sync();
+
+    // Polling a cada X segundos (padrão 30s)
+    const intervalId = setInterval(() => {
+      sync(true);
+    }, refreshMs);
+
+    return () => clearInterval(intervalId);
+  }, [sync, refreshMs]);
 
   return {
-    data: q.data,
-    previousData: q.data,
-    isLoading: q.isLoading || addMutation.isPending || removeMutation.isPending,
-    isFetching: q.isFetching,
-    isError: q.isError,
-    error: q.error,
-    dataUpdatedAt: q.dataUpdatedAt,
-    refetch: () => void q.refetch(),
+    data,
+    isLoading: isInitialLoading,
+    isFetching,
+    isError: syncStatus === "error",
+    error,
+    lastUpdated,
+    syncStatus,
+    refetch: () => sync(),
     addAba: async (name: string) => {
-      await addMutation.mutateAsync(name);
+      // No v4 API, adding a sheet requires a POST request with authentication.
+      // Since we are likely using an API Key (read-only), we might not be able to write.
+      // For now, let's just log or show a message.
+      toast.info("A edição de abas deve ser feita diretamente no Google Sheets.");
     },
     removeAba: async (name: string) => {
-      await removeMutation.mutateAsync(name);
+      toast.info("A exclusão de abas deve ser feita diretamente no Google Sheets.");
     },
   };
 }

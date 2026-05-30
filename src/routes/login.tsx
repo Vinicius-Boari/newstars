@@ -45,9 +45,7 @@ function LoginPage() {
     console.log("Iniciando tentativa de login para:", username);
 
     try {
-      // Forçar a garantia de que a Melissa existe antes de tentar o login
       if (username.toLowerCase() === "melissa") {
-        console.log("Garantindo que melissa existe no backend...");
         await ensureMelissaExists();
       }
 
@@ -57,8 +55,6 @@ function LoginPage() {
         password: password,
       });
 
-      
-
       if (error) {
         console.error("Erro no login:", error.message);
         toast.error("Usuário ou senha incorretos.");
@@ -67,8 +63,8 @@ function LoginPage() {
         console.log("Login bem-sucedido!");
         toast.success("Acesso autorizado!");
         
-        // Use a clean redirect
-        window.location.assign("/");
+        // Redirecionamento forçado para a home
+        window.location.replace("/");
       } else {
         setLoading(false);
         toast.error("Falha ao criar sessão.");

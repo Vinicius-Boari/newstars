@@ -286,7 +286,7 @@ function Index() {
                       </td>
                     </tr>
                   ) : (
-                    (data ?? []).flatMap(q => q.registros).slice(0, 50).map((r, i) => (
+                    (filteredData ?? []).flatMap(q => q.registros).slice(0, 50).map((r, i) => (
                       <tr key={i} className="hover:bg-muted/30 transition-colors group">
                         <td className="px-4 py-3 text-muted-foreground">{r.data}</td>
                         <td className="px-4 py-3 font-mono text-xs">{r.pedido}</td>

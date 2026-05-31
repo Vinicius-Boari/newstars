@@ -200,11 +200,18 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
     body: JSON.stringify({
       values: [[value]],
     }),
+    mode: 'cors'
   });
 
+  const text = await res.text();
+
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error?.message || `HTTP ${res.status}`);
+    try {
+      const error = JSON.parse(text);
+      throw new Error(error.error?.message || `HTTP ${res.status}`);
+    } catch {
+      throw new Error(`Erro na atualização: ${res.status}`);
+    }
   }
 }
 

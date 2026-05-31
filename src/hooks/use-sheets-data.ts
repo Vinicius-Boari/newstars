@@ -37,7 +37,7 @@ export function useSheetsData(): SheetsDataResult {
   const finalApiKey = "GOOGLE_SHEETS_API_KEY_1";
 
   const sync = React.useCallback(async (isBackground = false) => {
-    if (!finalApiKey || finalApiKey === "") {
+    if (!finalApiKey) {
       setError("Google Sheets API Key não configurada. Vá em Configurações.");
       setSyncStatus("error");
       setIsInitialLoading(false);

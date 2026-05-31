@@ -96,10 +96,21 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
     .filter((r): r is Registro => r !== null);
 }
 
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
+
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
   try {
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
-    const res = await fetch(url);
+    const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_");
+    const url = isGateway 
+      ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`
+      : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
+    
+    const headers: Record<string, string> = {};
+    if (isGateway) {
+      headers["X-Connection-Api-Key"] = apiKey;
+    }
+
+    const res = await fetch(url, { headers });
     if (!res.ok) {
       const error = await res.json();
       throw new Error(error.error?.message || `HTTP ${res.status}`);
@@ -115,8 +126,17 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string, apiKey: string): Promise<any[][]> {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
-  const res = await fetch(url);
+  const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_");
+  const url = isGateway
+    ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`
+    : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
+  
+  const headers: Record<string, string> = {};
+  if (isGateway) {
+    headers["X-Connection-Api-Key"] = apiKey;
+  }
+
+  const res = await fetch(url, { headers });
   if (!res.ok) {
     const error = await res.json();
     throw new Error(error.error?.message || `HTTP ${res.status}`);
@@ -125,19 +145,42 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
   return data.values || [];
 }
 
+export async function updateSheetValue(sheetId: string, range: string, value: any, apiKey: string): Promise<void> {
+  const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_");
+  const url = isGateway
+    ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`
+    : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?key=${apiKey}&valueInputOption=USER_ENTERED`;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (isGateway) {
+    headers["X-Connection-Api-Key"] = apiKey;
+  }
+
+  const res = await fetch(url, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({
+      values: [[value]],
+    }),
+  });
+
+  if (!res.ok) {
+    const error = await res.json();
+    throw new Error(error.error?.message || `HTTP ${res.status}`);
+  }
+}
+
 export async function fetchAllSheets(sheetId: string, abas: string[], apiKey: string): Promise<QuinzenaData[]> {
   const results: QuinzenaData[] = [];
-  
-  // Process sheets sequentially with a small delay to avoid quota issues
   for (const aba of abas) {
     try {
       const values = await fetchSheetValues(sheetId, aba, apiKey);
       const registros = parseRows(values, aba);
       const total = registros.reduce((s, r) => s + r.receber, 0);
       results.push({ quinzena: aba, registros, total });
-      
-      // Small 100ms delay between requests to be safe with quota
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 50));
     } catch (e) {
       results.push({
         quinzena: aba,
@@ -147,7 +190,6 @@ export async function fetchAllSheets(sheetId: string, abas: string[], apiKey: st
       });
     }
   }
-  
   return results;
 }
 

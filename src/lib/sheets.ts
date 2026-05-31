@@ -126,7 +126,7 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
       "Accept": "application/json",
     };
     if (isGateway) {
-      headers["Authorization"] = `Bearer LOVABLE_API_KEY`;
+      headers["Authorization"] = `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ''}`;
       headers["X-Connection-Api-Key"] = apiKey;
     }
 
@@ -163,7 +163,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
     "Accept": "application/json",
   };
   if (isGateway) {
-    headers["Authorization"] = `Bearer LOVABLE_API_KEY`;
+    headers["Authorization"] = `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ''}`;
     headers["X-Connection-Api-Key"] = apiKey;
   }
 
@@ -193,7 +193,7 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
     "Content-Type": "application/json",
   };
   if (isGateway) {
-    headers["Authorization"] = `Bearer LOVABLE_API_KEY`;
+    headers["Authorization"] = `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ''}`;
     headers["X-Connection-Api-Key"] = apiKey;
   }
 

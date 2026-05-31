@@ -32,9 +32,14 @@ export function useSheetsData(): SheetsDataResult {
 
   const effectiveSheetId = sheetId || DEFAULT_ID;
   const effectiveApiKey = apiKey || DEFAULT_API_KEY;
+  
+  // Se o apiKey for o placeholder do segredo, use o segredo real do ambiente se disponível
+  const finalApiKey = effectiveApiKey === "GOOGLE_SHEETS_API_KEY_1" 
+    ? (import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || effectiveApiKey)
+    : effectiveApiKey;
 
   const sync = React.useCallback(async (isBackground = false) => {
-    if (!effectiveApiKey) {
+    if (!finalApiKey || finalApiKey === "") {
       setError("Google Sheets API Key não configurada. Vá em Configurações.");
       setSyncStatus("error");
       setIsInitialLoading(false);
@@ -55,10 +60,10 @@ export function useSheetsData(): SheetsDataResult {
       setSyncStatus("syncing");
 
       // 1. Buscar nomes das abas dinamicamente
-      const sheetNames = await fetchSheetNames(effectiveSheetId, effectiveApiKey);
+      const sheetNames = await fetchSheetNames(effectiveSheetId, finalApiKey);
       
       // 2. Buscar dados de todas as abas
-      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, effectiveApiKey);
+      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, finalApiKey);
 
       // 3. Comparar para evitar re-renders desnecessários
       const hasChanged = JSON.stringify(data) !== JSON.stringify(newData);
@@ -82,7 +87,7 @@ export function useSheetsData(): SheetsDataResult {
       setIsInitialLoading(false);
       setIsFetching(false);
     }
-  }, [effectiveSheetId, data]);
+  }, [effectiveSheetId, finalApiKey, data]);
 
   React.useEffect(() => {
     // Carga inicial imediata

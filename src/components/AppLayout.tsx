@@ -28,12 +28,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
 
   const { data: abas = [], refetch, isFetching, lastUpdated, syncStatus } = useSheetsData();
-  const { sheetId, setSheetId, apiKey, setApiKey, refreshMs, setRefreshMs } = useSettings();
+  const { sheetId, setSheetId, apiKey, setApiKey, refreshMs, setRefreshMs, isSettingsOpen, setIsSettingsOpen } = useSettings();
 
   const [tempSheetId, setTempSheetId] = React.useState(sheetId);
   const [tempApiKey, setTempApiKey] = React.useState(apiKey);
   const [tempRefresh, setTempRefresh] = React.useState(refreshMs / 1000);
-  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
   const handleSaveSettings = () => {
     setSheetId(tempSheetId);

@@ -10,6 +10,9 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useSheetsData } from "@/hooks/use-sheets-data";
 import { fmtMoney, extractCurrentParc, type Registro } from "@/lib/sheets";
+import { useSettings } from "@/lib/settings-context";
+import { Button } from "@/components/ui/button";
+import { Settings } from "lucide-react";
 
 export const Route = createFileRoute("/resumo-geral")({
   beforeLoad: async () => {
@@ -82,6 +85,7 @@ function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { data: abas = [], isLoading, isError, error } = useSheetsData();
+  const { setIsSettingsOpen } = useSettings();
 
   const [search, setSearch] = React.useState("");
   const [localFilter, setLocalFilter] = React.useState<string>("ALL");
@@ -176,8 +180,16 @@ function Dashboard() {
         </div>
         <h3 className="text-lg font-bold text-foreground">Falha ao carregar dados</h3>
         <p className="text-sm text-muted-foreground max-w-md">
-          {error || "Verifique se a planilha está pública e as credenciais API estão corretas no .env"}
+          {error || "Verifique se a planilha está pública e as credenciais API estão corretas nas configurações."}
         </p>
+        <Button 
+          variant="outline" 
+          onClick={() => setIsSettingsOpen(true)}
+          className="mt-4 gap-2"
+        >
+          <Settings className="h-4 w-4" />
+          Configurar Credenciais
+        </Button>
       </div>
     );
   }

@@ -16,11 +16,9 @@ import { Settings } from "lucide-react";
 
 export const Route = createFileRoute("/resumo-geral")({
   beforeLoad: async () => {
-    // Only redirect on the client to avoid SSR redirect loops since we use localStorage for auth
-    if (typeof window !== "undefined") {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) throw redirect({ to: "/login" });
-    }
+    // Check session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw redirect({ to: "/login" });
   },
   validateSearch: (search: Record<string, unknown>) => ({
     quinzena: (search.quinzena as string | undefined) || "ALL",

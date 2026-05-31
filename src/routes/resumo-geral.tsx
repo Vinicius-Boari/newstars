@@ -157,7 +157,7 @@ function Dashboard() {
       const colLetter = String.fromCharCode(65 + colIndex);
       const range = `${quinzena}!${colLetter}${rowIndex}`;
       
-      await updateSheetValue(sheetId, range, value, apiKey);
+      await updateSheetValue(sheetId, range, value, finalApiKey);
       toast.success("Planilha atualizada!");
       await refetch();
     } catch (err: any) {

@@ -87,7 +87,7 @@ export function useSheetsData(): SheetsDataResult {
       setIsInitialLoading(false);
       setIsFetching(false);
     }
-  }, [effectiveSheetId, data]);
+  }, [effectiveSheetId, finalApiKey, data]);
 
   React.useEffect(() => {
     // Carga inicial imediata

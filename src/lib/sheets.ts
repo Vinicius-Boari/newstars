@@ -71,7 +71,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
   const idxVenc = getIdx("VENCIMENTO", 8);
   const idxReceber = getIdx("RECEBER", 9);
 
-  const startRow = headerIndex !== -1 ? headerIndex + 1 : 0;
+  const startRow = headerIndex !== -1 ? headerIndex + 1 : 1;
 
   return values
     .slice(startRow)

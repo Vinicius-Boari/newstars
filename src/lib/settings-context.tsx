@@ -16,7 +16,7 @@ const SettingsContext = React.createContext<Settings | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
-  const [apiKey, setApiKey] = React.useState("AIzaSyBYD6W6p15o-I_pY_R3y9Q7w1jY8_4");
+  const [apiKey, setApiKey] = React.useState("AIzaSyBYD6W6p15o-I_pY_R3y9Q7w1jY8_8");
   const [refreshMs, setRefreshMs] = React.useState(30_000);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 

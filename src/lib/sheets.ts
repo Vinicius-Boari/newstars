@@ -117,7 +117,7 @@ const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
   try {
-    const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_");
+    const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_") || apiKey === "GOOGLE_SHEETS_API_KEY_1";
     const url = isGateway 
       ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`
       : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
@@ -126,7 +126,7 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
       "Accept": "application/json",
     };
     if (isGateway) {
-      headers["X-Connection-Api-Key"] = apiKey;
+      headers["X-Connection-Api-Key"] = apiKey === "GOOGLE_SHEETS_API_KEY_1" ? apiKey : apiKey;
     }
 
     const res = await fetch(url, { headers });

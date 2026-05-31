@@ -16,7 +16,7 @@ export default defineConfig({
     server: {
       proxy: {
         "/google_sheets": {
-          target: "https://connector-gateway.lovable.dev/google_sheets",
+          target: "https://connector-gateway.lovable.dev",
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/google_sheets/, ""),
         },

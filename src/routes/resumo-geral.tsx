@@ -467,11 +467,42 @@ function Dashboard() {
             <tbody className="divide-y divide-border/50">
               {filtered.map((c, i) => (
                 <tr key={`${c.pedido}-${i}`} className="hover:bg-muted/30 transition-colors group">
-                  <td className="px-3 py-3 text-xs whitespace-nowrap">{c.data}</td>
-                  <td className="px-3 py-3 text-xs font-mono text-muted-foreground">{c.pedido}</td>
-                  <td className="px-3 py-3 text-xs font-bold uppercase truncate max-w-[200px]">{c.nome}</td>
-                  <td className="px-3 py-3 text-xs text-muted-foreground">{c.local}</td>
-                  <td className="px-3 py-3 text-xs text-right tabular-nums">{fmtMoney(c.total)}</td>
+                  <td className="px-3 py-3 text-xs whitespace-nowrap">
+                    <EditableCell 
+                      value={c.data} 
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.DATA, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.DATA}`}
+                    />
+                  </td>
+                  <td className="px-3 py-3 text-xs font-mono text-muted-foreground">
+                    <EditableCell 
+                      value={c.pedido} 
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.PEDIDO, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.PEDIDO}`}
+                    />
+                  </td>
+                  <td className="px-3 py-3 text-xs font-bold uppercase truncate max-w-[200px]">
+                    <EditableCell 
+                      value={c.nome} 
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.NOME, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.NOME}`}
+                    />
+                  </td>
+                  <td className="px-3 py-3 text-xs text-muted-foreground">
+                    <EditableCell 
+                      value={c.local} 
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.LOCAL, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.LOCAL}`}
+                    />
+                  </td>
+                  <td className="px-3 py-3 text-xs text-right tabular-nums">
+                    <EditableCell 
+                      value={c.total} 
+                      type="number"
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.TOTAL, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.TOTAL}`}
+                    />
+                  </td>
                   <td className="px-3 py-3 text-center">
                     <span className={cn(
                       "text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ring-inset",
@@ -482,10 +513,30 @@ function Dashboard() {
                       {c.pct}%
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-xs text-right tabular-nums text-muted-foreground">{fmtMoney(c.vlParc)}</td>
+                  <td className="px-3 py-3 text-xs text-right tabular-nums text-muted-foreground">
+                    <EditableCell 
+                      value={c.vlParc} 
+                      type="number"
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.VL_PARC, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.VL_PARC}`}
+                    />
+                  </td>
                   <td className="px-3 py-3"><ParcCell qtd={c.qtdParc} /></td>
-                  <td className="px-3 py-3 text-center text-xs text-muted-foreground">{c.venc}</td>
-                  <td className="px-3 py-3 text-right tabular-nums font-bold text-green-600">{fmtMoney(c.receber)}</td>
+                  <td className="px-3 py-3 text-center text-xs text-muted-foreground">
+                    <EditableCell 
+                      value={c.venc} 
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.VENC, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.VENC}`}
+                    />
+                  </td>
+                  <td className="px-3 py-3 text-right tabular-nums font-bold text-green-600">
+                    <EditableCell 
+                      value={c.receber} 
+                      type="number"
+                      onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.RECEBER, val)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.RECEBER}`}
+                    />
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -85,6 +85,60 @@ function ParcCell({ qtd }: { qtd: string }) {
   );
 }
 
+function EditableCell({ value, onSave, isLoading, type = "text" }: { 
+  value: string | number; 
+  onSave: (val: string | number) => Promise<void>;
+  isLoading: boolean;
+  type?: "text" | "number";
+}) {
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [tempValue, setTempValue] = React.useState(value);
+
+  const handleSave = async () => {
+    if (tempValue === value) {
+      setIsEditing(false);
+      return;
+    }
+    try {
+      await onSave(tempValue);
+      setIsEditing(false);
+    } catch (err) {
+      setTempValue(value);
+    }
+  };
+
+  if (isEditing) {
+    return (
+      <div className="flex items-center gap-1 min-w-[80px]">
+        <Input
+          type={type}
+          value={tempValue}
+          onChange={(e) => setTempValue(type === "number" ? Number(e.target.value) : e.target.value)}
+          className="h-7 text-xs px-1 py-0"
+          autoFocus
+          onKeyDown={(e) => {
+            if (e.key === "Enter") handleSave();
+            if (e.key === "Escape") setIsEditing(false);
+          }}
+        />
+        <button onClick={handleSave} disabled={isLoading} className="text-green-600 hover:text-green-700">
+          {isLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Check className="h-3 w-3" />}
+        </button>
+        <button onClick={() => setIsEditing(false)} className="text-muted-foreground">
+          <CloseIcon className="h-3 w-3" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 group/cell cursor-pointer" onClick={() => setIsEditing(true)}>
+      <span>{type === "number" && typeof value === "number" ? fmtMoney(value) : value}</span>
+      <Edit2 className="h-3 w-3 opacity-0 group-hover/cell:opacity-40 transition-opacity" />
+    </div>
+  );
+}
+
 function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();

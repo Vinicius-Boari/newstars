@@ -142,8 +142,29 @@ function EditableCell({ value, onSave, isLoading, type = "text" }: {
 function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { data: abas = [], isLoading, isError, error } = useSheetsData();
-  const { setIsSettingsOpen } = useSettings();
+  const { data: abas = [], isLoading, isError, error, refetch } = useSheetsData();
+  const { apiKey, sheetId, setIsSettingsOpen } = useSettings();
+  const [updatingId, setUpdatingId] = React.useState<string | null>(null);
+
+  const handleUpdate = async (quinzena: string, rowIndex: number, colIndex: number, value: any) => {
+    const cellId = `${quinzena}-${rowIndex}-${colIndex}`;
+    setUpdatingId(cellId);
+    try {
+      // Column letter calculation (0 -> A, 1 -> B, ...)
+      const colLetter = String.fromCharCode(65 + colIndex);
+      const range = `${quinzena}!${colLetter}${rowIndex}`;
+      
+      await updateSheetValue(sheetId, range, value, apiKey);
+      toast.success("Planilha atualizada!");
+      await refetch();
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Erro ao atualizar: " + err.message);
+      throw err;
+    } finally {
+      setUpdatingId(null);
+    }
+  };
 
   const [search, setSearch] = React.useState("");
   const [localFilter, setLocalFilter] = React.useState<string>("ALL");

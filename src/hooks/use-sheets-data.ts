@@ -39,7 +39,7 @@ export function useSheetsData(): SheetsDataResult {
     : effectiveApiKey;
 
   const sync = React.useCallback(async (isBackground = false) => {
-    if (!effectiveApiKey) {
+    if (!finalApiKey || finalApiKey === "") {
       setError("Google Sheets API Key não configurada. Vá em Configurações.");
       setSyncStatus("error");
       setIsInitialLoading(false);
@@ -60,10 +60,10 @@ export function useSheetsData(): SheetsDataResult {
       setSyncStatus("syncing");
 
       // 1. Buscar nomes das abas dinamicamente
-      const sheetNames = await fetchSheetNames(effectiveSheetId, effectiveApiKey);
+      const sheetNames = await fetchSheetNames(effectiveSheetId, finalApiKey);
       
       // 2. Buscar dados de todas as abas
-      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, effectiveApiKey);
+      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, finalApiKey);
 
       // 3. Comparar para evitar re-renders desnecessários
       const hasChanged = JSON.stringify(data) !== JSON.stringify(newData);

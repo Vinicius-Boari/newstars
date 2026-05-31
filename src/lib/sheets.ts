@@ -113,7 +113,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
     .filter((r): r is Registro => r !== null);
 }
 
-const GATEWAY_URL = "/google_sheets";
+const GATEWAY_URL = "/google_sheets/google_sheets";
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
   try {

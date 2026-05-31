@@ -64,11 +64,11 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
   const idxPedido = getIdx("PEDIDO", 1);
   const idxNome = getIdx("NOME", 2);
   const idxLocal = getIdx("LOCAL", 3);
-  const idxTotal = getIdx("TOTAL", 4);
-  const idxPct = getIdx("%", 5);
-  const idxVlParc = getIdx("VL PARC", 6);
+  const idxTotal = getIdx("VALOR PEDIDO", 4);
+  const idxPct = getIdx("COMISSAO %", 5);
+  const idxVlParc = getIdx("VALOR PARC", 6);
   const idxQtdParc = getIdx("QTD PARC", 7);
-  const idxVenc = getIdx("VENC", 8);
+  const idxVenc = getIdx("VENCIMENTO", 8);
   const idxReceber = getIdx("RECEBER", 9);
 
   const startRow = headerIndex !== -1 ? headerIndex + 1 : 1;

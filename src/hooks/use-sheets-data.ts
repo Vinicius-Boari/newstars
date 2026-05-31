@@ -18,8 +18,8 @@ export interface SheetsDataResult {
   removeAba: (name: string) => Promise<void>;
 }
 
-const DEFAULT_API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || "";
-const DEFAULT_ID = import.meta.env.VITE_SPREADSHEET_ID || "";
+const DEFAULT_API_KEY = "AIzaSyDtgRtBszG11tHvd5f0c39e5Ndn2zjAS4o";
+const DEFAULT_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export function useSheetsData(): SheetsDataResult {
   const { sheetId, apiKey, refreshMs } = useSettings();

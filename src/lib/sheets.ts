@@ -1,7 +1,27 @@
 import { supabase } from "@/integrations/supabase/client";
 
-// Log for debugging
-console.log("LOVABLE_API_KEY presence:", !!import.meta.env.VITE_LOVABLE_API_KEY);
+// Simple fetch wrapper to handle errors
+async function safeFetch(url: string, options: RequestInit) {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    
+    if (!res.ok) {
+      console.error(`Fetch error ${res.status}:`, text);
+      try {
+        const error = JSON.parse(text);
+        throw new Error(error.error?.message || `Erro ${res.status}`);
+      } catch {
+        throw new Error(`Erro na conexão: ${res.status}`);
+      }
+    }
+    
+    return JSON.parse(text);
+  } catch (err: any) {
+    console.error("safeFetch critical error:", err);
+    throw err;
+  }
+}
 
 export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 

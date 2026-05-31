@@ -26,8 +26,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedKey = localStorage.getItem("apiKey");
     const savedRefresh = localStorage.getItem("refreshMs");
 
+    // Only override defaults if something was actually saved by the user
     if (savedId) setSheetId(savedId);
-    if (savedKey) setApiKey(savedKey);
+    if (savedKey && savedKey !== "AIzaSyBYD6W6p15o-I_pY_R3y9Q7w1jY8_8") setApiKey(savedKey);
     if (savedRefresh) setRefreshMs(Number(savedRefresh));
   }, []);
 

@@ -32,6 +32,11 @@ export function useSheetsData(): SheetsDataResult {
 
   const effectiveSheetId = sheetId || DEFAULT_ID;
   const effectiveApiKey = apiKey || DEFAULT_API_KEY;
+  
+  // Se o apiKey for o placeholder do segredo, use o segredo real do ambiente se disponível
+  const finalApiKey = effectiveApiKey === "GOOGLE_SHEETS_API_KEY_1" 
+    ? (import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || effectiveApiKey)
+    : effectiveApiKey;
 
   const sync = React.useCallback(async (isBackground = false) => {
     if (!effectiveApiKey) {

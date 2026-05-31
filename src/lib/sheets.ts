@@ -1,5 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Log for debugging
+console.log("LOVABLE_API_KEY presence:", !!import.meta.env.VITE_LOVABLE_API_KEY);
+
 export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export interface Registro {

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useRouter } from "@tanstack/react-router";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
+  beforeLoad: async () => {
+    if (typeof window !== "undefined") {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) throw redirect({ to: "/resumo-geral" });
+    }
+  },
   component: LoginComponent,
 });
 
@@ -17,10 +23,14 @@ function LoginComponent() {
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const navigate = useNavigate();
+  const { invalidate } = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isLoading) return;
+    
     setIsLoading(true);
+    console.log("Iniciando tentativa de login para:", username);
 
     try {
       // Mapping logic: melissa -> viniciusbataglia500@gmail.com
@@ -28,25 +38,33 @@ function LoginComponent() {
         ? "viniciusbataglia500@gmail.com" 
         : username;
 
+      console.log("Tentando entrar com email:", email);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        toast.error("Usuário ou senha incorretos.");
+        console.error("Erro no login:", error);
+        toast.error(error.message || "Usuário ou senha incorretos.");
         setIsLoading(false);
         return;
       }
 
       if (data.user) {
+        console.log("Login bem-sucedido!");
         toast.success("Bem-vinda, Melissa! ✨");
-        setTimeout(() => {
-          navigate({ to: "/resumo-geral" });
-        }, 1500);
+        
+        // Invalidate router state to ensure beforeLoad re-runs
+        await invalidate();
+        
+        // Navigate immediately without timeout to avoid "stuck" feeling
+        navigate({ to: "/resumo-geral" });
       }
     } catch (error) {
-      toast.error("Ocorreu um erro ao tentar entrar.");
+      console.error("Erro inesperado no login:", error);
+      toast.error("Ocorreu um erro inesperado ao tentar entrar.");
       setIsLoading(false);
     }
   };

@@ -1,13 +1,26 @@
 import * as React from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Calendar, Menu, X, LogOut, RefreshCw, CheckCircle2, AlertCircle
+  LayoutDashboard, Calendar, Menu, X, LogOut, RefreshCw, CheckCircle2, AlertCircle, Settings as SettingsIcon
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useSheetsData } from "@/hooks/use-sheets-data";
 import { fmtMoney } from "@/lib/sheets";
+import { useSettings } from "@/lib/settings-context";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
@@ -15,6 +28,27 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
 
   const { data: abas = [], refetch, isFetching, lastUpdated, syncStatus } = useSheetsData();
+  const { sheetId, setSheetId, apiKey, setApiKey, refreshMs, setRefreshMs } = useSettings();
+
+  const [tempSheetId, setTempSheetId] = React.useState(sheetId);
+  const [tempApiKey, setTempApiKey] = React.useState(apiKey);
+  const [tempRefresh, setTempRefresh] = React.useState(refreshMs / 1000);
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+
+  const handleSaveSettings = () => {
+    setSheetId(tempSheetId);
+    setApiKey(tempApiKey);
+    setRefreshMs(tempRefresh * 1000);
+    setIsSettingsOpen(false);
+    toast.success("Configurações salvas!");
+    refetch();
+  };
+
+  React.useEffect(() => {
+    setTempSheetId(sheetId);
+    setTempApiKey(apiKey);
+    setTempRefresh(refreshMs / 1000);
+  }, [sheetId, apiKey, refreshMs, isSettingsOpen]);
 
   const currentQ = React.useMemo(() => {
     const params = new URLSearchParams(searchStr || "");
@@ -124,6 +158,59 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-4 space-y-3 border-t border-sidebar-border shrink-0">
+          <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <DialogTrigger asChild>
+              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-foreground hover:bg-sidebar-accent/50 transition-all cursor-pointer">
+                <SettingsIcon className="h-4 w-4 shrink-0" />
+                <span>Configurações</span>
+              </button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle>Configurações da Planilha</DialogTitle>
+                <DialogDescription>
+                  Configure as credenciais do Google Sheets para sincronização em tempo real.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="sheetId">ID da Planilha</Label>
+                  <Input
+                    id="sheetId"
+                    value={tempSheetId}
+                    onChange={(e) => setTempSheetId(e.target.value)}
+                    placeholder="ex: 186zpKURns1dm1ixv44RqYDbMfvVd3b4b"
+                  />
+                  <p className="text-[10px] text-muted-foreground">O ID fica na URL da planilha após /d/</p>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="apiKey">Google Sheets API Key</Label>
+                  <Input
+                    id="apiKey"
+                    type="password"
+                    value={tempApiKey}
+                    onChange={(e) => setTempApiKey(e.target.value)}
+                    placeholder="Cole sua API Key aqui"
+                  />
+                  <p className="text-[10px] text-muted-foreground">Necessária para buscar todas as abas automaticamente.</p>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="refresh">Intervalo de Sincronização (segundos)</Label>
+                  <Input
+                    id="refresh"
+                    type="number"
+                    value={tempRefresh}
+                    onChange={(e) => setTempRefresh(Number(e.target.value))}
+                    min={10}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button onClick={handleSaveSettings} className="w-full">Salvar e Sincronizar</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+
           <button
             onClick={() => refetch()}
             disabled={isFetching}

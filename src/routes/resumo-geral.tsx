@@ -4,15 +4,16 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2 } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import { fmtMoney, extractCurrentParc, type Registro } from "@/lib/sheets";
+import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { Settings } from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/resumo-geral")({
   beforeLoad: async () => {

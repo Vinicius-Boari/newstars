@@ -97,14 +97,21 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
 }
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error?.message || `HTTP ${res.status}`);
+  try {
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      const error = await res.json();
+      throw new Error(error.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    return data.sheets.map((s: any) => s.properties.title);
+  } catch (error: any) {
+    if (error.message?.includes("not be an Office file")) {
+      throw new Error("A planilha fornecida não é um arquivo do Google Sheets (formato .xlsx não suportado via API). Por favor, abra o arquivo no Google Sheets e vá em 'Arquivo' > 'Salvar como Planilha Google'.");
+    }
+    throw error;
   }
-  const data = await res.json();
-  return data.sheets.map((s: any) => s.properties.title);
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string, apiKey: string): Promise<any[][]> {

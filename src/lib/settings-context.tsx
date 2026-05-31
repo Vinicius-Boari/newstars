@@ -3,35 +3,54 @@ import { DEFAULT_SHEET_ID } from "./sheets";
 
 interface Settings {
   sheetId: string;
-  excelUrl: string;
-  connectorType: "google" | "microsoft";
+  apiKey: string;
   refreshMs: number;
   setSheetId: (id: string) => void;
-  setExcelUrl: (url: string) => void;
-  setConnectorType: (type: "google" | "microsoft") => void;
+  setApiKey: (key: string) => void;
   setRefreshMs: (ms: number) => void;
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (open: boolean) => void;
 }
 
 const SettingsContext = React.createContext<Settings | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
-  const [excelUrl, setExcelUrl] = React.useState("https://1drv.ms/x/c/63f6b82fdfc1daf6/IQDqCmJjTzIGR6nYTfVXU1KOAczfQQWvanYU_WH2wXhmzyM?e=K7EDdZ&nav=MTVfezU3ODNFMjc5LUJCRUYtNDgzQi05QkFDLTA2QkVCRUREMTM3Mn0");
-
-  const [connectorType, setConnectorType] = React.useState<"google" | "microsoft">("google");
+  const [apiKey, setApiKey] = React.useState("");
   const [refreshMs, setRefreshMs] = React.useState(30_000);
+  const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+
+  // Load from localStorage only on client
+  React.useEffect(() => {
+    const savedId = localStorage.getItem("sheetId");
+    const savedKey = localStorage.getItem("apiKey");
+    const savedRefresh = localStorage.getItem("refreshMs");
+
+    if (savedId) setSheetId(savedId);
+    if (savedKey) setApiKey(savedKey);
+    if (savedRefresh) setRefreshMs(Number(savedRefresh));
+  }, []);
+
+  // Save to localStorage on change
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sheetId", sheetId);
+      localStorage.setItem("apiKey", apiKey);
+      localStorage.setItem("refreshMs", String(refreshMs));
+    }
+  }, [sheetId, apiKey, refreshMs]);
 
   return (
     <SettingsContext.Provider
       value={{
         sheetId,
-        excelUrl,
-        connectorType,
+        apiKey,
         refreshMs,
         setSheetId,
-        setExcelUrl,
-        setConnectorType,
+        setApiKey,
         setRefreshMs,
+        isSettingsOpen,
+        setIsSettingsOpen,
       }}
     >
       {children}

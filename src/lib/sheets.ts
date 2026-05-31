@@ -122,19 +122,29 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
       ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`
       : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
     
-    const headers: Record<string, string> = {};
+    const headers: Record<string, string> = {
+      "Accept": "application/json",
+    };
     if (isGateway) {
       headers["X-Connection-Api-Key"] = apiKey;
     }
 
-    const res = await fetch(url, { headers });
+    const res = await fetch(url, { headers, mode: 'cors' });
+    const text = await res.text();
+    
     if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.error?.message || `HTTP ${res.status}`);
+      try {
+        const error = JSON.parse(text);
+        throw new Error(error.error?.message || `HTTP ${res.status}`);
+      } catch {
+        throw new Error(`Erro na conexão: ${res.status} ${res.statusText}`);
+      }
     }
-    const data = await res.json();
+
+    const data = JSON.parse(text);
     return data.sheets.map((s: any) => s.properties.title);
   } catch (error: any) {
+    console.error("fetchSheetNames error:", error);
     if (error.message?.includes("not be an Office file")) {
       throw new Error("A planilha fornecida não é um arquivo do Google Sheets (formato .xlsx não suportado via API). Por favor, abra o arquivo no Google Sheets e vá em 'Arquivo' > 'Salvar como Planilha Google'.");
     }

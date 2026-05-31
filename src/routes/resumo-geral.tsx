@@ -16,7 +16,9 @@ import { Settings } from "lucide-react";
 
 export const Route = createFileRoute("/resumo-geral")({
   beforeLoad: async () => {
-    // Check session
+    // Skip session check during SSR
+    if (typeof window === "undefined") return;
+
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) throw redirect({ to: "/login" });
   },

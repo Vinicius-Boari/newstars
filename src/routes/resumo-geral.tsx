@@ -144,6 +144,9 @@ function Dashboard() {
   const navigate = Route.useNavigate();
   const { data: abas = [], isLoading, isError, error, refetch } = useSheetsData();
   const { apiKey, sheetId, setIsSettingsOpen } = useSettings();
+  const finalApiKey = apiKey === "GOOGLE_SHEETS_API_KEY_1" 
+    ? (import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || apiKey)
+    : apiKey;
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
 
   const handleUpdate = async (quinzena: string, rowIndex: number, colIndex: number, value: any) => {

@@ -18,7 +18,7 @@ export interface SheetsDataResult {
   removeAba: (name: string) => Promise<void>;
 }
 
-const DEFAULT_API_KEY = "AIzaSyDtgRtBszG11tHvd5f0c39e5Ndn2zjAS4o";
+const DEFAULT_API_KEY = "GOOGLE_SHEETS_API_KEY_1";
 const DEFAULT_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export function useSheetsData(): SheetsDataResult {

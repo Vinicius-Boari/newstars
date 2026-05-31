@@ -43,7 +43,7 @@ export async function fetchExcelData(abas: string[]): Promise<{ quinzena: string
           return { quinzena: aba, registros: [], total: 0 };
         }
 
-        const registros = rows.slice(2).map((row): Registro | null => {
+        const registros = rows.slice(2).map((row, i): Registro | null => {
           const nome = String(row[2] || "").trim();
           if (!nome) return null;
           
@@ -59,6 +59,7 @@ export async function fetchExcelData(abas: string[]): Promise<{ quinzena: string
             qtdParc: String(row[7] || ""),
             venc: String(row[8] || ""),
             receber: toNumber(row[9]),
+            rowIndex: i + 3, // Assuming data starts at row 3 (A1-based)
           };
         }).filter((r): r is Registro => r !== null);
 

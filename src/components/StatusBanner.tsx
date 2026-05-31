@@ -1,6 +1,5 @@
 import { AlertTriangle, Database } from "lucide-react";
 import type { QuinzenaData } from "@/lib/sheets";
-import { useSettings } from "@/lib/settings-context";
 
 export function StatusBanner({
   data,
@@ -11,7 +10,6 @@ export function StatusBanner({
   isError: boolean;
   isLoading: boolean;
 }) {
-  const { connectorType } = useSettings();
   if (isLoading) return null;
   
   const allFailed = data && data.length > 0 && data.every((d) => d.error);
@@ -25,12 +23,10 @@ export function StatusBanner({
         <AlertTriangle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
         <div className="text-sm">
           <div className="font-medium text-destructive mb-1">
-            Não foi possível conectar ao {connectorType === "google" ? "Google Sheets" : "Microsoft Excel"}
+            Não foi possível conectar ao Google Sheets
           </div>
           <p className="text-foreground/80 mb-2">
-            {connectorType === "google" 
-              ? "Certifique-se de que o arquivo foi convertido para Planilhas Google e está público como Visualizador."
-              : `Ocorreu um problema ao acessar o arquivo no OneDrive: "${errorMsg}". Verifique se o conector Microsoft Excel está autorizado.`}
+            Certifique-se de que a API Key e o ID da planilha estão configurados corretamente nas configurações.
           </p>
           <div className="text-xs font-mono text-destructive/70 bg-destructive/5 p-2 rounded">
             {errorMsg}
@@ -51,9 +47,9 @@ export function StatusBanner({
   }
 
   return (
-    <div className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-success/10 border border-success/20 w-fit text-xs font-medium text-success">
+    <div className="flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 w-fit text-xs font-medium text-green-600">
       <Database className="h-3 w-3" />
-      Conectado ao {connectorType === "google" ? "Google Sheets" : "Microsoft Excel"}
+      Conectado ao Google Sheets
     </div>
   );
 }

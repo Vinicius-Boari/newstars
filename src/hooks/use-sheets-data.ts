@@ -18,11 +18,11 @@ export interface SheetsDataResult {
   removeAba: (name: string) => Promise<void>;
 }
 
-const API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || "";
+const DEFAULT_API_KEY = import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || "";
 const DEFAULT_ID = import.meta.env.VITE_SPREADSHEET_ID || "";
 
 export function useSheetsData(): SheetsDataResult {
-  const { sheetId, refreshMs } = useSettings();
+  const { sheetId, apiKey, refreshMs } = useSettings();
   const [data, setData] = React.useState<QuinzenaData[] | undefined>(undefined);
   const [lastUpdated, setLastUpdated] = React.useState<string | null>(null);
   const [syncStatus, setSyncStatus] = React.useState<SyncStatus>("idle");
@@ -31,17 +31,18 @@ export function useSheetsData(): SheetsDataResult {
   const [isFetching, setIsFetching] = React.useState(false);
 
   const effectiveSheetId = sheetId || DEFAULT_ID;
+  const effectiveApiKey = apiKey || DEFAULT_API_KEY;
 
   const sync = React.useCallback(async (isBackground = false) => {
-    if (!API_KEY) {
-      setError("Google Sheets API Key não configurada no .env (VITE_GOOGLE_SHEETS_API_KEY)");
+    if (!effectiveApiKey) {
+      setError("Google Sheets API Key não configurada. Vá em Configurações.");
       setSyncStatus("error");
       setIsInitialLoading(false);
       return;
     }
 
     if (!effectiveSheetId) {
-      setError("ID da planilha não configurado (VITE_SPREADSHEET_ID)");
+      setError("ID da planilha não configurado.");
       setSyncStatus("error");
       setIsInitialLoading(false);
       return;
@@ -54,10 +55,10 @@ export function useSheetsData(): SheetsDataResult {
       setSyncStatus("syncing");
 
       // 1. Buscar nomes das abas dinamicamente
-      const sheetNames = await fetchSheetNames(effectiveSheetId, API_KEY);
+      const sheetNames = await fetchSheetNames(effectiveSheetId, effectiveApiKey);
       
       // 2. Buscar dados de todas as abas
-      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, API_KEY);
+      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, effectiveApiKey);
 
       // 3. Comparar para evitar re-renders desnecessários
       const hasChanged = JSON.stringify(data) !== JSON.stringify(newData);

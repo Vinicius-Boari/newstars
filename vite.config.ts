@@ -12,4 +12,14 @@ export default defineConfig({
   tanstackStart: {
     server: { entry: "server" },
   },
+  vite: {
+    server: {
+      proxy: {
+        "/google_sheets": {
+          target: "https://connector-gateway.lovable.dev",
+          changeOrigin: true,
+        },
+      },
+    },
+  },
 });

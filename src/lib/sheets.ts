@@ -113,13 +113,13 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
     .filter((r): r is Registro => r !== null);
 }
 
-const GATEWAY_URL = "/api/google_sheets/v4/spreadsheets";
+const GATEWAY_URL = "/api/google_sheets/google_sheets";
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
   try {
     const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_") || apiKey === "GOOGLE_SHEETS_API_KEY_1";
     const url = isGateway 
-      ? `${GATEWAY_URL}/${sheetId}?fields=sheets.properties.title`
+      ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`
       : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
     
     const headers: Record<string, string> = {
@@ -156,7 +156,7 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
 export async function fetchSheetValues(sheetId: string, sheetName: string, apiKey: string): Promise<any[][]> {
   const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_") || apiKey === "GOOGLE_SHEETS_API_KEY_1";
   const url = isGateway
-    ? `${GATEWAY_URL}/${sheetId}/values/${encodeURIComponent(sheetName)}`
+    ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`
     : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
   
   const headers: Record<string, string> = {
@@ -186,7 +186,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
 export async function updateSheetValue(sheetId: string, range: string, value: any, apiKey: string): Promise<void> {
   const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_") || apiKey === "GOOGLE_SHEETS_API_KEY_1";
   const url = isGateway
-    ? `${GATEWAY_URL}/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`
+    ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`
     : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?key=${apiKey}&valueInputOption=USER_ENTERED`;
 
   const headers: Record<string, string> = {

@@ -76,7 +76,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
 
   return values
     .slice(startRow)
-    .map((row): Registro | null => {
+    .map((row, i): Registro | null => {
       const nome = toStr(row[idxNome]);
       if (!nome) return null;
 
@@ -92,6 +92,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
         qtdParc: toStr(row[idxQtdParc]),
         venc: toStr(row[idxVenc]),
         receber: toNumber(row[idxReceber]),
+        rowIndex: startRow + i + 1, // 1-based index in the sheet
       };
     })
     .filter((r): r is Registro => r !== null);

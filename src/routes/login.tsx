@@ -10,10 +10,8 @@ import { Loader2, Lock } from "lucide-react";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
-    if (typeof window !== "undefined") {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) throw redirect({ to: "/resumo-geral" });
-    }
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) throw redirect({ to: "/resumo-geral" });
   },
   component: LoginComponent,
 });

@@ -22,7 +22,7 @@ const DEFAULT_API_KEY = "GOOGLE_SHEETS_API_KEY_1";
 const DEFAULT_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export function useSheetsData(): SheetsDataResult {
-  const { sheetId, apiKey, refreshMs } = useSettings();
+  const { sheetId, refreshMs } = useSettings();
   const [data, setData] = React.useState<QuinzenaData[] | undefined>(undefined);
   const [lastUpdated, setLastUpdated] = React.useState<string | null>(null);
   const [syncStatus, setSyncStatus] = React.useState<SyncStatus>("idle");

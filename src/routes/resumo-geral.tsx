@@ -143,7 +143,7 @@ function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { data: abas = [], isLoading, isError, error, refetch } = useSheetsData();
-  const { apiKey, sheetId, setIsSettingsOpen } = useSettings();
+  const { sheetId, setIsSettingsOpen } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
 
   const handleUpdate = async (quinzena: string, rowIndex: number, colIndex: number, value: any) => {

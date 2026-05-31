@@ -28,15 +28,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
 
   const { data: abas = [], refetch, isFetching, lastUpdated, syncStatus } = useSheetsData();
-  const { sheetId, setSheetId, apiKey, setApiKey, refreshMs, setRefreshMs, isSettingsOpen, setIsSettingsOpen } = useSettings();
+  const { sheetId, setSheetId, refreshMs, setRefreshMs, isSettingsOpen, setIsSettingsOpen } = useSettings();
 
   const [tempSheetId, setTempSheetId] = React.useState(sheetId);
-  const [tempApiKey, setTempApiKey] = React.useState(apiKey);
   const [tempRefresh, setTempRefresh] = React.useState(refreshMs / 1000);
 
   const handleSaveSettings = () => {
     setSheetId(tempSheetId);
-    setApiKey(tempApiKey);
     setRefreshMs(tempRefresh * 1000);
     setIsSettingsOpen(false);
     toast.success("Configurações salvas!");
@@ -45,9 +43,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     setTempSheetId(sheetId);
-    setTempApiKey(apiKey);
     setTempRefresh(refreshMs / 1000);
-  }, [sheetId, apiKey, refreshMs, isSettingsOpen]);
+  }, [sheetId, refreshMs, isSettingsOpen]);
 
   const currentQ = React.useMemo(() => {
     const params = new URLSearchParams(searchStr || "");

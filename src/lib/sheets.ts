@@ -12,6 +12,7 @@ export interface Registro {
   qtdParc: string;
   venc: string;
   receber: number;
+  rowIndex: number; // Row index in the sheet (1-based)
 }
 
 export interface QuinzenaData {

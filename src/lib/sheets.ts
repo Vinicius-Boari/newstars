@@ -113,7 +113,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
     .filter((r): r is Registro => r !== null);
 }
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
+const GATEWAY_URL = "/api/google_sheets";
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
   try {
@@ -126,7 +126,8 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
       "Accept": "application/json",
     };
     if (isGateway) {
-      headers["X-Connection-Api-Key"] = apiKey === "GOOGLE_SHEETS_API_KEY_1" ? apiKey : apiKey;
+      headers["Authorization"] = `Bearer LOVABLE_API_KEY`;
+      headers["X-Connection-Api-Key"] = apiKey;
     }
 
     const res = await fetch(url, { headers });
@@ -162,6 +163,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
     "Accept": "application/json",
   };
   if (isGateway) {
+    headers["Authorization"] = `Bearer LOVABLE_API_KEY`;
     headers["X-Connection-Api-Key"] = apiKey;
   }
 
@@ -191,6 +193,7 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
     "Content-Type": "application/json",
   };
   if (isGateway) {
+    headers["Authorization"] = `Bearer LOVABLE_API_KEY`;
     headers["X-Connection-Api-Key"] = apiKey;
   }
 

@@ -1,6 +1,8 @@
 import { supabase } from "@/integrations/supabase/client";
 
 // Simple fetch wrapper to handle errors
+const L_KEY = "LOVABLE_API_KEY";
+
 async function safeFetch(url: string, options: RequestInit) {
   try {
     const res = await fetch(url, options);
@@ -69,7 +71,7 @@ export async function fetchSheetNames(sheetId: string): Promise<string[]> {
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
   const data = await safeFetch(url, {
     headers: {
-      "Authorization": "Bearer LOVABLE_API_KEY",
+      "Authorization": `Bearer ${L_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
       "Accept": "application/json",
     }
@@ -82,7 +84,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string): Prom
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`;
   const data = await safeFetch(url, {
     headers: {
-      "Authorization": "Bearer LOVABLE_API_KEY",
+      "Authorization": `Bearer ${L_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
       "Accept": "application/json",
     }
@@ -96,7 +98,7 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
   await safeFetch(url, {
     method: "PUT",
     headers: {
-      "Authorization": "Bearer LOVABLE_API_KEY",
+      "Authorization": `Bearer ${L_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
       "Content-Type": "application/json",
     },

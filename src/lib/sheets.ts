@@ -165,7 +165,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
     headers["X-Connection-Api-Key"] = apiKey;
   }
 
-  const res = await fetch(url, { headers, mode: 'cors' });
+  const res = await fetch(url, { headers });
   const text = await res.text();
 
   if (!res.ok) {

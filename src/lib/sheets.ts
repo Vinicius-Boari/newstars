@@ -126,23 +126,28 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
 }
 
 export async function fetchAllSheets(sheetId: string, abas: string[], apiKey: string): Promise<QuinzenaData[]> {
-  const results = await Promise.all(
-    abas.map(async (aba): Promise<QuinzenaData> => {
-      try {
-        const values = await fetchSheetValues(sheetId, aba, apiKey);
-        const registros = parseRows(values, aba);
-        const total = registros.reduce((s, r) => s + r.receber, 0);
-        return { quinzena: aba, registros, total };
-      } catch (e) {
-        return {
-          quinzena: aba,
-          registros: [],
-          total: 0,
-          error: e instanceof Error ? e.message : "Erro desconhecido",
-        };
-      }
-    }),
-  );
+  const results: QuinzenaData[] = [];
+  
+  // Process sheets sequentially with a small delay to avoid quota issues
+  for (const aba of abas) {
+    try {
+      const values = await fetchSheetValues(sheetId, aba, apiKey);
+      const registros = parseRows(values, aba);
+      const total = registros.reduce((s, r) => s + r.receber, 0);
+      results.push({ quinzena: aba, registros, total });
+      
+      // Small 100ms delay between requests to be safe with quota
+      await new Promise(resolve => setTimeout(resolve, 100));
+    } catch (e) {
+      results.push({
+        quinzena: aba,
+        registros: [],
+        total: 0,
+        error: e instanceof Error ? e.message : "Erro desconhecido",
+      });
+    }
+  }
+  
   return results;
 }
 

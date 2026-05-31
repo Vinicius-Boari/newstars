@@ -200,7 +200,6 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
     body: JSON.stringify({
       values: [[value]],
     }),
-    mode: 'cors'
   });
 
   const text = await res.text();

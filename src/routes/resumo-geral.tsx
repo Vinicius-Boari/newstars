@@ -143,10 +143,7 @@ function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { data: abas = [], isLoading, isError, error, refetch } = useSheetsData();
-  const { apiKey, sheetId, setIsSettingsOpen } = useSettings();
-  const finalApiKey = apiKey === "GOOGLE_SHEETS_API_KEY_1" 
-    ? (import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || apiKey)
-    : apiKey;
+  const { sheetId, setIsSettingsOpen } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
 
   const handleUpdate = async (quinzena: string, rowIndex: number, colIndex: number, value: any) => {
@@ -157,7 +154,7 @@ function Dashboard() {
       const colLetter = String.fromCharCode(65 + colIndex);
       const range = `${quinzena}!${colLetter}${rowIndex}`;
       
-      await updateSheetValue(sheetId, range, value, finalApiKey);
+      await updateSheetValue(sheetId, range, value);
       toast.success("Planilha atualizada!");
       await refetch();
     } catch (err: any) {

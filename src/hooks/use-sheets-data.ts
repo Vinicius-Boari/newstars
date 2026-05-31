@@ -22,7 +22,7 @@ const DEFAULT_API_KEY = "GOOGLE_SHEETS_API_KEY_1";
 const DEFAULT_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export function useSheetsData(): SheetsDataResult {
-  const { sheetId, apiKey, refreshMs } = useSettings();
+  const { sheetId, refreshMs } = useSettings();
   const [data, setData] = React.useState<QuinzenaData[] | undefined>(undefined);
   const [lastUpdated, setLastUpdated] = React.useState<string | null>(null);
   const [syncStatus, setSyncStatus] = React.useState<SyncStatus>("idle");
@@ -31,19 +31,8 @@ export function useSheetsData(): SheetsDataResult {
   const [isFetching, setIsFetching] = React.useState(false);
 
   const effectiveSheetId = sheetId || DEFAULT_ID;
-  const effectiveApiKey = apiKey || DEFAULT_API_KEY;
-  
-  // Se o apiKey for o placeholder do segredo, use o segredo real do ambiente se disponível
-  const finalApiKey = "GOOGLE_SHEETS_API_KEY_1";
 
   const sync = React.useCallback(async (isBackground = false) => {
-    if (!finalApiKey) {
-      setError("Google Sheets API Key não configurada. Vá em Configurações.");
-      setSyncStatus("error");
-      setIsInitialLoading(false);
-      return;
-    }
-
     if (!effectiveSheetId) {
       setError("ID da planilha não configurado.");
       setSyncStatus("error");
@@ -51,17 +40,16 @@ export function useSheetsData(): SheetsDataResult {
       return;
     }
 
-
     try {
       if (!isBackground) setIsInitialLoading(data === undefined);
       setIsFetching(true);
       setSyncStatus("syncing");
 
       // 1. Buscar nomes das abas dinamicamente
-      const sheetNames = await fetchSheetNames(effectiveSheetId, finalApiKey);
+      const sheetNames = await fetchSheetNames(effectiveSheetId);
       
       // 2. Buscar dados de todas as abas
-      const newData = await fetchAllSheets(effectiveSheetId, sheetNames, finalApiKey);
+      const newData = await fetchAllSheets(effectiveSheetId, sheetNames);
 
       // 3. Comparar para evitar re-renders desnecessários
       const hasChanged = JSON.stringify(data) !== JSON.stringify(newData);
@@ -80,12 +68,11 @@ export function useSheetsData(): SheetsDataResult {
       console.error("[Sync Error]", err);
       setError(err.message || "Erro na sincronização");
       setSyncStatus("error");
-      // Manteḿ os dados anteriores em caso de erro
     } finally {
       setIsInitialLoading(false);
       setIsFetching(false);
     }
-  }, [effectiveSheetId, finalApiKey, data]);
+  }, [effectiveSheetId, data]);
 
   React.useEffect(() => {
     // Carga inicial imediata

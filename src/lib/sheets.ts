@@ -1,5 +1,30 @@
 import { supabase } from "@/integrations/supabase/client";
 
+// Simple fetch wrapper to handle errors
+const L_KEY = "LOVABLE_API_KEY";
+
+async function safeFetch(url: string, options: RequestInit) {
+  try {
+    const res = await fetch(url, options);
+    const text = await res.text();
+    
+    if (!res.ok) {
+      console.error(`Fetch error ${res.status}:`, text);
+      try {
+        const error = JSON.parse(text);
+        throw new Error(error.error?.message || `Erro ${res.status}`);
+      } catch {
+        throw new Error(`Erro na conexão: ${res.status}`);
+      }
+    }
+    
+    return JSON.parse(text);
+  } catch (err: any) {
+    console.error("safeFetch critical error:", err);
+    throw err;
+  }
+}
+
 export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export interface Registro {
@@ -44,48 +69,36 @@ export async function fetchSheetNames(sheetId: string): Promise<string[]> {
   if (!session) throw new Error("Não autenticado");
 
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
-  const res = await fetch(url, {
+  const data = await safeFetch(url, {
     headers: {
-      "Authorization": `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY}`,
+      "Authorization": `Bearer ${L_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
       "Accept": "application/json",
     }
   });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error?.message || `Erro ao buscar abas: ${res.status}`);
-  }
-
-  const data = await res.json();
   return data.sheets.map((s: any) => s.properties.title);
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string): Promise<any[][]> {
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`;
-  const res = await fetch(url, {
+  const data = await safeFetch(url, {
     headers: {
-      "Authorization": `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY}`,
+      "Authorization": `Bearer ${L_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
       "Accept": "application/json",
     }
   });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error?.message || `Erro ao buscar dados: ${res.status}`);
-  }
-
-  const data = await res.json();
   return data.values || [];
 }
 
 export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  const res = await fetch(url, {
+  await safeFetch(url, {
     method: "PUT",
     headers: {
-      "Authorization": `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY}`,
+      "Authorization": `Bearer ${L_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
       "Content-Type": "application/json",
     },
@@ -93,11 +106,6 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
       values: [[value]],
     }),
   });
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error?.message || `Erro ao atualizar: ${res.status}`);
-  }
 }
 
 function toNumber(v: any): number {

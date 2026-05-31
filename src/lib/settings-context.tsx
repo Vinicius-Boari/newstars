@@ -17,7 +17,7 @@ const SettingsContext = React.createContext<Settings | null>(null);
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
   const [apiKey, setApiKey] = React.useState("AIzaSyDtgRtBszG11tHvd5f0c39e5Ndn2zjAS4o");
-  const [refreshMs, setRefreshMs] = React.useState(30_000);
+  const [refreshMs, setRefreshMs] = React.useState(120_000); // Aumentado para 2 minutos para evitar erro de cota
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
   // Load from localStorage only on client

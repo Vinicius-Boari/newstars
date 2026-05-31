@@ -158,17 +158,26 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
     ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`
     : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
   
-  const headers: Record<string, string> = {};
+  const headers: Record<string, string> = {
+    "Accept": "application/json",
+  };
   if (isGateway) {
     headers["X-Connection-Api-Key"] = apiKey;
   }
 
-  const res = await fetch(url, { headers });
+  const res = await fetch(url, { headers, mode: 'cors' });
+  const text = await res.text();
+
   if (!res.ok) {
-    const error = await res.json();
-    throw new Error(error.error?.message || `HTTP ${res.status}`);
+    try {
+      const error = JSON.parse(text);
+      throw new Error(error.error?.message || `HTTP ${res.status}`);
+    } catch {
+      throw new Error(`Erro na conexão: ${res.status}`);
+    }
   }
-  const data = await res.json();
+
+  const data = JSON.parse(text);
   return data.values || [];
 }
 

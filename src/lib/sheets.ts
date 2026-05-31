@@ -113,7 +113,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
     .filter((r): r is Registro => r !== null);
 }
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
+const GATEWAY_URL = "/google_sheets/google_sheets";
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
   try {
@@ -129,7 +129,7 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
       headers["X-Connection-Api-Key"] = apiKey;
     }
 
-    const res = await fetch(url, { headers, mode: 'cors' });
+    const res = await fetch(url, { headers });
     const text = await res.text();
     
     if (!res.ok) {
@@ -165,7 +165,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
     headers["X-Connection-Api-Key"] = apiKey;
   }
 
-  const res = await fetch(url, { headers, mode: 'cors' });
+  const res = await fetch(url, { headers });
   const text = await res.text();
 
   if (!res.ok) {
@@ -200,7 +200,6 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
     body: JSON.stringify({
       values: [[value]],
     }),
-    mode: 'cors'
   });
 
   const text = await res.text();

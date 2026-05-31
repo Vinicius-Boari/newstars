@@ -166,32 +166,30 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
               <DialogHeader>
-                <DialogTitle>Configurações da Planilha</DialogTitle>
+                <DialogTitle>Gerenciar Links e Conectores</DialogTitle>
                 <DialogDescription>
-                  Configure as credenciais do Google Sheets para sincronização em tempo real.
+                  Configure a planilha sincronizada via Lovable Connector.
                 </DialogDescription>
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="sheetId">ID da Planilha</Label>
+                  <Label htmlFor="sheetId">ID da Planilha (via Link)</Label>
                   <Input
                     id="sheetId"
                     value={tempSheetId}
                     onChange={(e) => setTempSheetId(e.target.value)}
-                    placeholder="ex: 186zpKURns1dm1ixv44RqYDbMfvVd3b4b"
+                    placeholder="Ex: 186zpKURns1dm1ixv44RqYDbMfvVd3b4b"
                   />
-                  <p className="text-[10px] text-muted-foreground">O ID fica na URL da planilha após /d/</p>
+                  <p className="text-[10px] text-muted-foreground">Cole o ID que aparece na URL da sua planilha Google.</p>
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="apiKey">Google Sheets API Key</Label>
-                  <Input
-                    id="apiKey"
-                    type="password"
-                    value={tempApiKey}
-                    onChange={(e) => setTempApiKey(e.target.value)}
-                    placeholder="Cole sua API Key aqui"
-                  />
-                  <p className="text-[10px] text-muted-foreground">Necessária para buscar todas as abas automaticamente.</p>
+                <div className="pt-2">
+                  <div className="bg-muted/50 p-3 rounded-lg border border-border">
+                    <h4 className="text-xs font-bold mb-1">Status do Connector</h4>
+                    <div className="flex items-center gap-2 text-[10px]">
+                      <div className="h-2 w-2 rounded-full bg-green-500" />
+                      <span className="text-muted-foreground">Google Sheets Connector Ativo</span>
+                    </div>
+                  </div>
                 </div>
                 <div className="grid gap-2">
                   <Label htmlFor="refresh">Intervalo de Sincronização (segundos)</Label>
@@ -205,7 +203,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </div>
               </div>
               <DialogFooter>
-                <Button onClick={handleSaveSettings} className="w-full">Salvar e Sincronizar</Button>
+                <Button onClick={handleSaveSettings} className="w-full">Salvar Configurações</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>

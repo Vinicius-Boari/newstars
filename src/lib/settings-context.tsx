@@ -28,7 +28,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
 
     // Only override defaults if something was actually saved by the user
     if (savedId) setSheetId(savedId);
-    if (savedKey && savedKey !== "AIzaSyBYD6W6p15o-I_pY_R3y9Q7w1jY8_8") setApiKey(savedKey);
+    if (savedKey && savedKey.length > 5) setApiKey(savedKey);
     if (savedRefresh) setRefreshMs(Number(savedRefresh));
   }, []);
 

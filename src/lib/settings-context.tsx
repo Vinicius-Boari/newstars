@@ -15,15 +15,29 @@ interface Settings {
 const SettingsContext = React.createContext<Settings | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [sheetId, setSheetId] = React.useState(localStorage.getItem("sheetId") || "186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
-  const [apiKey, setApiKey] = React.useState(localStorage.getItem("apiKey") || "");
-  const [refreshMs, setRefreshMs] = React.useState(Number(localStorage.getItem("refreshMs")) || 30_000);
+  const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
+  const [apiKey, setApiKey] = React.useState("");
+  const [refreshMs, setRefreshMs] = React.useState(30_000);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
+  // Load from localStorage only on client
   React.useEffect(() => {
-    localStorage.setItem("sheetId", sheetId);
-    localStorage.setItem("apiKey", apiKey);
-    localStorage.setItem("refreshMs", String(refreshMs));
+    const savedId = localStorage.getItem("sheetId");
+    const savedKey = localStorage.getItem("apiKey");
+    const savedRefresh = localStorage.getItem("refreshMs");
+
+    if (savedId) setSheetId(savedId);
+    if (savedKey) setApiKey(savedKey);
+    if (savedRefresh) setRefreshMs(Number(savedRefresh));
+  }, []);
+
+  // Save to localStorage on change
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("sheetId", sheetId);
+      localStorage.setItem("apiKey", apiKey);
+      localStorage.setItem("refreshMs", String(refreshMs));
+    }
   }, [sheetId, apiKey, refreshMs]);
 
   return (

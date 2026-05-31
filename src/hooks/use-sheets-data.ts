@@ -34,12 +34,10 @@ export function useSheetsData(): SheetsDataResult {
   const effectiveApiKey = apiKey || DEFAULT_API_KEY;
   
   // Se o apiKey for o placeholder do segredo, use o segredo real do ambiente se disponível
-  const finalApiKey = effectiveApiKey === "GOOGLE_SHEETS_API_KEY_1" 
-    ? (import.meta.env.VITE_GOOGLE_SHEETS_API_KEY || effectiveApiKey)
-    : effectiveApiKey;
+  const finalApiKey = "GOOGLE_SHEETS_API_KEY_1";
 
   const sync = React.useCallback(async (isBackground = false) => {
-    if (!finalApiKey || finalApiKey === "") {
+    if (!finalApiKey) {
       setError("Google Sheets API Key não configurada. Vá em Configurações.");
       setSyncStatus("error");
       setIsInitialLoading(false);

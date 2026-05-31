@@ -113,11 +113,11 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
     .filter((r): r is Registro => r !== null);
 }
 
-const GATEWAY_URL = "/google_sheets/google_sheets";
+const GATEWAY_URL = "/api/google_sheets/google_sheets";
 
 export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<string[]> {
   try {
-    const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_");
+    const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_") || apiKey === "GOOGLE_SHEETS_API_KEY_1";
     const url = isGateway 
       ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`
       : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}?key=${apiKey}&fields=sheets.properties.title`;
@@ -126,6 +126,7 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
       "Accept": "application/json",
     };
     if (isGateway) {
+      headers["Authorization"] = `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ''}`;
       headers["X-Connection-Api-Key"] = apiKey;
     }
 
@@ -153,7 +154,7 @@ export async function fetchSheetNames(sheetId: string, apiKey: string): Promise<
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string, apiKey: string): Promise<any[][]> {
-  const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_");
+  const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_") || apiKey === "GOOGLE_SHEETS_API_KEY_1";
   const url = isGateway
     ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`
     : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}?key=${apiKey}`;
@@ -162,6 +163,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
     "Accept": "application/json",
   };
   if (isGateway) {
+    headers["Authorization"] = `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ''}`;
     headers["X-Connection-Api-Key"] = apiKey;
   }
 
@@ -182,7 +184,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string, apiKe
 }
 
 export async function updateSheetValue(sheetId: string, range: string, value: any, apiKey: string): Promise<void> {
-  const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_");
+  const isGateway = apiKey.startsWith("std_") || apiKey.includes("_API_KEY_") || apiKey === "GOOGLE_SHEETS_API_KEY_1";
   const url = isGateway
     ? `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`
     : `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?key=${apiKey}&valueInputOption=USER_ENTERED`;
@@ -191,6 +193,7 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
     "Content-Type": "application/json",
   };
   if (isGateway) {
+    headers["Authorization"] = `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY || ''}`;
     headers["X-Connection-Api-Key"] = apiKey;
   }
 

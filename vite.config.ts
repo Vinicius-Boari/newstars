@@ -15,9 +15,10 @@ export default defineConfig({
   vite: {
     server: {
       proxy: {
-        "/google_sheets": {
+        "/api/google_sheets": {
           target: "https://connector-gateway.lovable.dev",
           changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/api\/google_sheets/, ""),
         },
       },
     },

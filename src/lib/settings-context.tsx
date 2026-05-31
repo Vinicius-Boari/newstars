@@ -17,7 +17,7 @@ const SettingsContext = React.createContext<Settings | null>(null);
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
   const [apiKey, setApiKey] = React.useState("GOOGLE_SHEETS_API_KEY_1");
-  const [refreshMs, setRefreshMs] = React.useState(120_000); // Aumentado para 2 minutos para evitar erro de cota
+  const [refreshMs, setRefreshMs] = React.useState(30_000);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
   // Load from localStorage only on client

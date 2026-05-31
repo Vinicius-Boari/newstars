@@ -3,10 +3,8 @@ import { DEFAULT_SHEET_ID } from "./sheets";
 
 interface Settings {
   sheetId: string;
-  apiKey: string;
   refreshMs: number;
   setSheetId: (id: string) => void;
-  setApiKey: (key: string) => void;
   setRefreshMs: (ms: number) => void;
   isSettingsOpen: boolean;
   setIsSettingsOpen: (open: boolean) => void;
@@ -16,7 +14,7 @@ const SettingsContext = React.createContext<Settings | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
-  const [apiKey, setApiKey] = React.useState("GOOGLE_SHEETS_API_KEY_1");
+  const [apiKey, setApiKey] = React.useState("GOOGLE_SHEETS_API_KEY_1"); // Mantido interno para o Connector
   const [refreshMs, setRefreshMs] = React.useState(30_000);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
@@ -45,10 +43,8 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     <SettingsContext.Provider
       value={{
         sheetId,
-        apiKey,
         refreshMs,
         setSheetId,
-        setApiKey,
         setRefreshMs,
         isSettingsOpen,
         setIsSettingsOpen,

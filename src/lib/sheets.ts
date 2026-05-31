@@ -15,6 +15,21 @@ export interface Registro {
   rowIndex: number; // Row index in the sheet (1-based)
 }
 
+export const COL_INDICES = {
+  DATA: 0,
+  PEDIDO: 1,
+  NOME: 2,
+  LOCAL: 3,
+  TOTAL: 4,
+  PCT: 5,
+  VL_PARC: 6,
+  QTD_PARC: 7,
+  VENC: 8,
+  RECEBER: 9
+};
+
+const COL_LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+
 export interface QuinzenaData {
   quinzena: string;
   registros: Registro[];

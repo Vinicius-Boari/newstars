@@ -67,7 +67,7 @@ export async function fetchSheetNames(sheetId: string): Promise<string[]> {
   if (!session) throw new Error("Não autenticado");
 
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
-  const res = await fetch(url, {
+  const data = await safeFetch(url, {
     headers: {
       "Authorization": `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
@@ -75,18 +75,12 @@ export async function fetchSheetNames(sheetId: string): Promise<string[]> {
     }
   });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error?.message || `Erro ao buscar abas: ${res.status}`);
-  }
-
-  const data = await res.json();
   return data.sheets.map((s: any) => s.properties.title);
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string): Promise<any[][]> {
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`;
-  const res = await fetch(url, {
+  const data = await safeFetch(url, {
     headers: {
       "Authorization": `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY}`,
       "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
@@ -94,18 +88,12 @@ export async function fetchSheetValues(sheetId: string, sheetName: string): Prom
     }
   });
 
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error?.message || `Erro ao buscar dados: ${res.status}`);
-  }
-
-  const data = await res.json();
   return data.values || [];
 }
 
 export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
   const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  const res = await fetch(url, {
+  await safeFetch(url, {
     method: "PUT",
     headers: {
       "Authorization": `Bearer ${import.meta.env.VITE_LOVABLE_API_KEY}`,
@@ -116,11 +104,6 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
       values: [[value]],
     }),
   });
-
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error?.message || `Erro ao atualizar: ${res.status}`);
-  }
 }
 
 function toNumber(v: any): number {

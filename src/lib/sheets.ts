@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
+export const DEFAULT_SHEET_ID = "1b3IzfKyMXivpz4klzZy0eoa4eQeQFHBt";
 
 export interface Registro {
   quinzena: string;
@@ -44,10 +44,16 @@ const invokeProxy = async (action: string, payload: any) => {
 
   if (error) {
     console.error(`Edge Function Error (${action}):`, error);
-    throw new Error(`Erro na sincronização: ${error.message}`);
+    if (error.message?.includes("Office file") || (data?.error && String(data.error).includes("Office file"))) {
+      throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");
+    }
+    throw new Error(error.message || "Falha na comunicação com o servidor.");
   }
 
   if (data?.error) {
+    if (String(data.error).includes("Office file")) {
+       throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");
+    }
     throw new Error(data.error);
   }
 
@@ -55,17 +61,29 @@ const invokeProxy = async (action: string, payload: any) => {
 };
 
 export async function fetchSheetNames(sheetId: string): Promise<string[]> {
-  const data = await invokeProxy("fetchNames", { sheetId });
+  const id = sheetId.includes("docs.google.com") 
+    ? sheetId.split("/d/")[1]?.split("/")[0] 
+    : sheetId;
+    
+  const data = await invokeProxy("fetchNames", { sheetId: id });
   return data.sheets.map((s: any) => s.properties.title);
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string): Promise<any[][]> {
-  const data = await invokeProxy("fetchValues", { sheetId, sheetName });
+  const id = sheetId.includes("docs.google.com") 
+    ? sheetId.split("/d/")[1]?.split("/")[0] 
+    : sheetId;
+
+  const data = await invokeProxy("fetchValues", { sheetId: id, sheetName });
   return data.values || [];
 }
 
 export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
-  await invokeProxy("updateValue", { sheetId, range, value });
+  const id = sheetId.includes("docs.google.com") 
+    ? sheetId.split("/d/")[1]?.split("/")[0] 
+    : sheetId;
+
+  await invokeProxy("updateValue", { sheetId: id, range, value });
 }
 
 function toNumber(v: any): number {

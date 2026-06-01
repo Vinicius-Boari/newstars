@@ -1,31 +1,64 @@
-import { supabase } from "@/integrations/supabase/client";
+import { createServerFn } from "@tanstack/react-start";
+import { supabase } from "@/lib/supabase";
 
-// Simple fetch wrapper to handle errors
-const L_KEY = "LOVABLE_API_KEY";
+const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
 
-async function safeFetch(url: string, options: RequestInit) {
-  try {
-    const res = await fetch(url, options);
-    const text = await res.text();
-    
-    if (!res.ok) {
-      console.error(`Fetch error ${res.status}:`, text);
-      try {
-        const error = JSON.parse(text);
-        throw new Error(error.error?.message || `Erro ${res.status}`);
-      } catch {
-        throw new Error(`Erro na conexão: ${res.status}`);
-      }
-    }
-    
-    return JSON.parse(text);
-  } catch (err: any) {
-    console.error("safeFetch critical error:", err);
-    throw err;
+// Server side fetcher to keep secrets secure
+const serverFetch = async (url: string, options: RequestInit = {}) => {
+  const lovableApiKey = process.env.LOVABLE_API_KEY;
+  const connectionKey = process.env.GOOGLE_SHEETS_API_KEY_1;
+
+  if (!lovableApiKey || !connectionKey) {
+    throw new Error("Credenciais de sincronização não encontradas no servidor.");
   }
-}
 
-export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      "Authorization": `Bearer ${lovableApiKey}`,
+      "X-Connection-Api-Key": connectionKey,
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+  });
+
+  const text = await res.text();
+  if (!res.ok) {
+    console.error(`Gateway Error (${res.status}):`, text);
+    throw new Error(`Erro na planilha: ${res.status}`);
+  }
+
+  return JSON.parse(text);
+};
+
+export const fetchSheetNames = createServerFn()
+  .validator((sheetId: string) => sheetId)
+  .handler(async ({ data: sheetId }) => {
+    const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
+    const data = await serverFetch(url);
+    return data.sheets.map((s: any) => s.properties.title);
+  });
+
+export const fetchSheetValues = createServerFn()
+  .validator((data: { sheetId: string; sheetName: string }) => data)
+  .handler(async ({ data: { sheetId, sheetName } }) => {
+    const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`;
+    const data = await serverFetch(url);
+    return data.values || [];
+  });
+
+export const updateSheetValue = createServerFn()
+  .validator((data: { sheetId: string; range: string; value: any }) => data)
+  .handler(async ({ data: { sheetId, range, value } }) => {
+    const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
+    await serverFetch(url, {
+      method: "PUT",
+      body: JSON.stringify({
+        values: [[value]],
+      }),
+    });
+  });
 
 export interface Registro {
   quinzena: string;
@@ -61,52 +94,6 @@ export const COL_INDICES = {
   VENC: 8,
   RECEBER: 9
 };
-
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
-
-export async function fetchSheetNames(sheetId: string): Promise<string[]> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error("Não autenticado");
-
-  const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
-  const data = await safeFetch(url, {
-    headers: {
-      "Authorization": `Bearer ${L_KEY}`,
-      "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
-      "Accept": "application/json",
-    }
-  });
-
-  return data.sheets.map((s: any) => s.properties.title);
-}
-
-export async function fetchSheetValues(sheetId: string, sheetName: string): Promise<any[][]> {
-  const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`;
-  const data = await safeFetch(url, {
-    headers: {
-      "Authorization": `Bearer ${L_KEY}`,
-      "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
-      "Accept": "application/json",
-    }
-  });
-
-  return data.values || [];
-}
-
-export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
-  const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  await safeFetch(url, {
-    method: "PUT",
-    headers: {
-      "Authorization": `Bearer ${L_KEY}`,
-      "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      values: [[value]],
-    }),
-  });
-}
 
 function toNumber(v: any): number {
   if (v == null || v === "") return 0;
@@ -181,12 +168,12 @@ export async function fetchAllSheets(sheetId: string, abas: string[]): Promise<Q
   const results: QuinzenaData[] = [];
   for (const aba of abas) {
     try {
-      const values = await fetchSheetValues(sheetId, aba);
+      const values = await fetchSheetValues({ data: { sheetId, sheetName: aba } });
       const registros = parseRows(values, aba);
       const total = registros.reduce((s, r) => s + r.receber, 0);
       results.push({ quinzena: aba, registros, total });
-      await new Promise(resolve => setTimeout(resolve, 50));
     } catch (e) {
+      console.error(`Error fetching aba ${aba}:`, e);
       results.push({
         quinzena: aba,
         registros: [],

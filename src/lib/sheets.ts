@@ -1,31 +1,6 @@
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/lib/supabase";
 
-// Simple fetch wrapper to handle errors
-const L_KEY = "LOVABLE_API_KEY";
-
-async function safeFetch(url: string, options: RequestInit) {
-  try {
-    const res = await fetch(url, options);
-    const text = await res.text();
-    
-    if (!res.ok) {
-      console.error(`Fetch error ${res.status}:`, text);
-      try {
-        const error = JSON.parse(text);
-        throw new Error(error.error?.message || `Erro ${res.status}`);
-      } catch {
-        throw new Error(`Erro na conexão: ${res.status}`);
-      }
-    }
-    
-    return JSON.parse(text);
-  } catch (err: any) {
-    console.error("safeFetch critical error:", err);
-    throw err;
-  }
-}
-
-export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
+export const DEFAULT_SHEET_ID = "1b3IzfKyMXivpz4klzZy0eoa4eQeQFHBt";
 
 export interface Registro {
   quinzena: string;
@@ -62,50 +37,62 @@ export const COL_INDICES = {
   RECEBER: 9
 };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
-
-export async function fetchSheetNames(sheetId: string): Promise<string[]> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session) throw new Error("Não autenticado");
-
-  const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
-  const data = await safeFetch(url, {
-    headers: {
-      "Authorization": `Bearer ${L_KEY}`,
-      "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
-      "Accept": "application/json",
-    }
+const invokeProxy = async (action: string, payload: any) => {
+  const { data, error } = await supabase.functions.invoke("google-sheets-proxy", {
+    body: { action, ...payload },
   });
 
+  // Handle Supabase Function errors (like 4xx/5xx)
+  if (error) {
+    console.error(`Edge Function Error (${action}):`, error);
+    
+    // Attempt to parse the actual error message from the response if available
+    // Supabase error objects for functions sometimes wrap the response body
+    let message = error.message || "Falha na comunicação com o servidor.";
+    
+    // If it's the known "Office file" error, give instructions
+    if (message.includes("Office file")) {
+      throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");
+    }
+    
+    throw new Error(message);
+  }
+
+  // Handle application-level errors returned in the JSON body
+  if (data?.error) {
+    if (String(data.error).includes("Office file")) {
+       throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");
+    }
+    throw new Error(data.error);
+  }
+
+  return data;
+};
+
+export async function fetchSheetNames(sheetId: string): Promise<string[]> {
+  const id = sheetId.includes("docs.google.com") 
+    ? sheetId.split("/d/")[1]?.split("/")[0] 
+    : sheetId;
+    
+  const data = await invokeProxy("fetchNames", { sheetId: id });
   return data.sheets.map((s: any) => s.properties.title);
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string): Promise<any[][]> {
-  const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`;
-  const data = await safeFetch(url, {
-    headers: {
-      "Authorization": `Bearer ${L_KEY}`,
-      "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
-      "Accept": "application/json",
-    }
-  });
+  const id = sheetId.includes("docs.google.com") 
+    ? sheetId.split("/d/")[1]?.split("/")[0] 
+    : sheetId;
 
+  const data = await invokeProxy("fetchValues", { sheetId: id, sheetName });
   return data.values || [];
 }
 
 export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
-  const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  await safeFetch(url, {
-    method: "PUT",
-    headers: {
-      "Authorization": `Bearer ${L_KEY}`,
-      "X-Connection-Api-Key": "GOOGLE_SHEETS_API_KEY_1",
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      values: [[value]],
-    }),
-  });
+  const id = sheetId.includes("docs.google.com") 
+    ? sheetId.split("/d/")[1]?.split("/")[0] 
+    : sheetId;
+
+  await invokeProxy("updateValue", { sheetId: id, range, value });
 }
 
 function toNumber(v: any): number {
@@ -187,6 +174,7 @@ export async function fetchAllSheets(sheetId: string, abas: string[]): Promise<Q
       results.push({ quinzena: aba, registros, total });
       await new Promise(resolve => setTimeout(resolve, 50));
     } catch (e) {
+      console.error(`Error fetching aba ${aba}:`, e);
       results.push({
         quinzena: aba,
         registros: [],

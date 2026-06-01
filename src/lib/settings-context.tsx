@@ -13,7 +13,7 @@ interface Settings {
 const SettingsContext = React.createContext<Settings | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const [sheetId, setSheetId] = React.useState("186zpKURns1dm1ixv44RqYDbMfvVd3b4b");
+  const [sheetId, setSheetId] = React.useState(DEFAULT_SHEET_ID);
   const [apiKey, setApiKey] = React.useState("GOOGLE_SHEETS_API_KEY_1"); // Mantido interno para o Connector
   const [refreshMs, setRefreshMs] = React.useState(30_000);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);

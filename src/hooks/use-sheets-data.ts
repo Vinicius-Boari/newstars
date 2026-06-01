@@ -1,5 +1,5 @@
 import * as React from "react";
-import { fetchAllSheets, fetchSheetNames, type QuinzenaData } from "@/lib/sheets";
+import { fetchSpreadsheet, type QuinzenaData } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { toast } from "sonner";
 
@@ -18,8 +18,38 @@ export interface SheetsDataResult {
   removeAba: (name: string) => Promise<void>;
 }
 
-const DEFAULT_API_KEY = "GOOGLE_SHEETS_API_KEY_1";
 const DEFAULT_ID = "1O6ImCfLvgxJF7LiSEFLc9qphD7z0ZpUPii947HCSPGg";
+const MIN_REFRESH_MS = 90_000;
+const CACHE_TTL_MS = 60_000;
+
+type CacheEntry = {
+  data: QuinzenaData[];
+  timestamp: number;
+};
+
+const sheetCache = new Map<string, CacheEntry>();
+const inFlightSyncs = new Map<string, Promise<QuinzenaData[]>>();
+
+async function loadSpreadsheetWithCache(sheetId: string, force = false) {
+  const now = Date.now();
+  const cached = sheetCache.get(sheetId);
+  if (!force && cached && now - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
+  const running = inFlightSyncs.get(sheetId);
+  if (running) return running;
+
+  const request = fetchSpreadsheet(sheetId)
+    .then((result) => {
+      sheetCache.set(sheetId, { data: result, timestamp: Date.now() });
+      return result;
+    })
+    .finally(() => inFlightSyncs.delete(sheetId));
+
+  inFlightSyncs.set(sheetId, request);
+  return request;
+}
 
 export function useSheetsData(): SheetsDataResult {
   const { sheetId, refreshMs } = useSettings();
@@ -32,7 +62,7 @@ export function useSheetsData(): SheetsDataResult {
 
   const effectiveSheetId = sheetId || DEFAULT_ID;
 
-  const sync = React.useCallback(async (isBackground = false) => {
+  const sync = React.useCallback(async (isBackground = false, force = false) => {
     if (!effectiveSheetId) {
       setError("ID da planilha não configurado.");
       setSyncStatus("error");
@@ -45,11 +75,7 @@ export function useSheetsData(): SheetsDataResult {
       setIsFetching(true);
       setSyncStatus("syncing");
 
-      // 1. Buscar nomes das abas dinamicamente
-      const sheetNames = await fetchSheetNames(effectiveSheetId);
-      
-      // 2. Buscar dados de todas as abas
-      const newData = await fetchAllSheets(effectiveSheetId, sheetNames);
+      const newData = await loadSpreadsheetWithCache(effectiveSheetId, force);
 
       // 3. Comparar para evitar re-renders desnecessários
       const hasChanged = JSON.stringify(data) !== JSON.stringify(newData);
@@ -75,13 +101,12 @@ export function useSheetsData(): SheetsDataResult {
   }, [effectiveSheetId, data]);
 
   React.useEffect(() => {
-    // Carga inicial imediata
     sync();
 
-    // Polling a cada X segundos (padrão 30s)
+    const safeRefreshMs = Math.max(refreshMs, MIN_REFRESH_MS);
     const intervalId = setInterval(() => {
       sync(true);
-    }, refreshMs);
+    }, safeRefreshMs);
 
     return () => clearInterval(intervalId);
   }, [sync, refreshMs]);
@@ -94,7 +119,7 @@ export function useSheetsData(): SheetsDataResult {
     error,
     lastUpdated,
     syncStatus,
-    refetch: () => sync(),
+    refetch: () => sync(false, true),
     addAba: async (name: string) => {
       // No v4 API, adding a sheet requires a POST request with authentication.
       // Since we are likely using an API Key (read-only), we might not be able to write.

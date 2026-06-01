@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets/v4";
 const MAX_SHEETS_PER_SYNC = 60;
@@ -68,6 +69,7 @@ async function gatewayFetch<T>(url: string, init?: RequestInit): Promise<T> {
 }
 
 export const fetchSpreadsheetData = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => spreadsheetSchema.parse(input))
   .handler(async ({ data }) => {
     let sheetNames = data.sheetNames?.filter(Boolean) ?? [];
@@ -99,6 +101,7 @@ export const fetchSpreadsheetData = createServerFn({ method: "POST" })
   });
 
 export const updateSpreadsheetCell = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator((input) => updateSchema.parse(input))
   .handler(async ({ data }) => {
     await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values:batchUpdate`, {

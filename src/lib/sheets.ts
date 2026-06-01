@@ -42,14 +42,23 @@ const invokeProxy = async (action: string, payload: any) => {
     body: { action, ...payload },
   });
 
+  // Handle Supabase Function errors (like 4xx/5xx)
   if (error) {
     console.error(`Edge Function Error (${action}):`, error);
-    if (error.message?.includes("Office file") || (data?.error && String(data.error).includes("Office file"))) {
+    
+    // Attempt to parse the actual error message from the response if available
+    // Supabase error objects for functions sometimes wrap the response body
+    let message = error.message || "Falha na comunicação com o servidor.";
+    
+    // If it's the known "Office file" error, give instructions
+    if (message.includes("Office file")) {
       throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");
     }
-    throw new Error(error.message || "Falha na comunicação com o servidor.");
+    
+    throw new Error(message);
   }
 
+  // Handle application-level errors returned in the JSON body
   if (data?.error) {
     if (String(data.error).includes("Office file")) {
        throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");

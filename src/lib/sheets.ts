@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { fetchSpreadsheetData, updateSpreadsheetCell } from "./sheets.functions";
 
 export const DEFAULT_SHEET_ID = "1O6ImCfLvgxJF7LiSEFLc9qphD7z0ZpUPii947HCSPGg";
 
@@ -37,62 +37,18 @@ export const COL_INDICES = {
   RECEBER: 9
 };
 
-const invokeProxy = async (action: string, payload: any) => {
-  const { data, error } = await supabase.functions.invoke("google-sheets-proxy", {
-    body: { action, ...payload },
-  });
-
-  // Handle Supabase Function errors (like 4xx/5xx)
-  if (error) {
-    console.error(`Edge Function Error (${action}):`, error);
-    
-    // Attempt to parse the actual error message from the response if available
-    // Supabase error objects for functions sometimes wrap the response body
-    let message = error.message || "Falha na comunicação com o servidor.";
-    
-    // If it's the known "Office file" error, give instructions
-    if (message.includes("Office file")) {
-      throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");
-    }
-    
-    throw new Error(message);
-  }
-
-  // Handle application-level errors returned in the JSON body
-  if (data?.error) {
-    if (String(data.error).includes("Office file")) {
-       throw new Error("O arquivo selecionado é um Excel (.xlsx). Para usar a sincronização automática, abra o arquivo no Google Drive e clique em 'Arquivo' -> 'Salvar como Planilha Google'.");
-    }
-    throw new Error(data.error);
-  }
-
-  return data;
-};
-
 export async function fetchSheetNames(sheetId: string): Promise<string[]> {
-  const id = sheetId.includes("docs.google.com") 
-    ? sheetId.split("/d/")[1]?.split("/")[0] 
-    : sheetId;
-    
-  const data = await invokeProxy("fetchNames", { sheetId: id });
-  return data.sheets.map((s: any) => s.properties.title);
+  const data = await fetchSpreadsheetData({ data: { sheetId } });
+  return data.sheetNames;
 }
 
 export async function fetchSheetValues(sheetId: string, sheetName: string): Promise<any[][]> {
-  const id = sheetId.includes("docs.google.com") 
-    ? sheetId.split("/d/")[1]?.split("/")[0] 
-    : sheetId;
-
-  const data = await invokeProxy("fetchValues", { sheetId: id, sheetName });
-  return data.values || [];
+  const data = await fetchSpreadsheetData({ data: { sheetId, sheetNames: [sheetName] } });
+  return data.valuesBySheet[sheetName] || [];
 }
 
 export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
-  const id = sheetId.includes("docs.google.com") 
-    ? sheetId.split("/d/")[1]?.split("/")[0] 
-    : sheetId;
-
-  await invokeProxy("updateValue", { sheetId: id, range, value });
+  await updateSpreadsheetCell({ data: { sheetId, range, value } });
 }
 
 function toNumber(v: any): number {
@@ -168,25 +124,21 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
 }
 
 export async function fetchAllSheets(sheetId: string, abas: string[]): Promise<QuinzenaData[]> {
-  const results: QuinzenaData[] = [];
-  for (const aba of abas) {
-    try {
-      const values = await fetchSheetValues(sheetId, aba);
-      const registros = parseRows(values, aba);
-      const total = registros.reduce((s, r) => s + r.receber, 0);
-      results.push({ quinzena: aba, registros, total });
-      await new Promise(resolve => setTimeout(resolve, 50));
-    } catch (e) {
-      console.error(`Error fetching aba ${aba}:`, e);
-      results.push({
-        quinzena: aba,
-        registros: [],
-        total: 0,
-        error: e instanceof Error ? e.message : "Erro desconhecido",
-      });
-    }
-  }
-  return results;
+  const data = await fetchSpreadsheetData({ data: { sheetId, sheetNames: abas } });
+  return data.sheetNames.map((aba) => {
+    const registros = parseRows(data.valuesBySheet[aba] || [], aba);
+    const total = registros.reduce((s, r) => s + r.receber, 0);
+    return { quinzena: aba, registros, total };
+  });
+}
+
+export async function fetchSpreadsheet(sheetId: string): Promise<QuinzenaData[]> {
+  const data = await fetchSpreadsheetData({ data: { sheetId } });
+  return data.sheetNames.map((aba) => {
+    const registros = parseRows(data.valuesBySheet[aba] || [], aba);
+    const total = registros.reduce((s, r) => s + r.receber, 0);
+    return { quinzena: aba, registros, total };
+  });
 }
 
 export function fmtMoney(n: number): string {

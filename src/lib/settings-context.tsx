@@ -14,14 +14,21 @@ const SettingsContext = React.createContext<Settings | null>(null);
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
   const [sheetId, setSheetId] = React.useState(DEFAULT_SHEET_ID);
-  const [apiKey, setApiKey] = React.useState("GOOGLE_SHEETS_API_KEY_1"); // Mantido interno para o Connector
-  const [refreshMs, setRefreshMs] = React.useState(30_000);
+  const [refreshMs, setRefreshMsState] = React.useState(90_000);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
+
+  const updateSheetId = React.useCallback((value: string) => {
+    const match = value.match(/\/spreadsheets\/d\/([^/]+)/);
+    setSheetId((match?.[1] ?? value).trim());
+  }, []);
+
+  const setRefreshMs = React.useCallback((ms: number) => {
+    setRefreshMsState(Math.max(90_000, Number.isFinite(ms) ? ms : 90_000));
+  }, []);
 
   // Load from localStorage only on client
   React.useEffect(() => {
     const savedId = localStorage.getItem("sheetId");
-    const savedKey = localStorage.getItem("apiKey");
     const savedRefresh = localStorage.getItem("refreshMs");
 
     // Limpa IDs antigos (planilha Excel ou ID inválido) para forçar uso do novo DEFAULT
@@ -32,8 +39,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Only override defaults if something was actually saved by the user
-    if (savedId) setSheetId(savedId);
-    if (savedKey && savedKey.length > 5) setApiKey(savedKey);
+    if (savedId) updateSheetId(savedId);
     if (savedRefresh) setRefreshMs(Number(savedRefresh));
   }, []);
 
@@ -41,17 +47,16 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {
     if (typeof window !== "undefined") {
       localStorage.setItem("sheetId", sheetId);
-      localStorage.setItem("apiKey", apiKey);
       localStorage.setItem("refreshMs", String(refreshMs));
     }
-  }, [sheetId, apiKey, refreshMs]);
+  }, [sheetId, refreshMs]);
 
   return (
     <SettingsContext.Provider
       value={{
         sheetId,
         refreshMs,
-        setSheetId,
+        setSheetId: updateSheetId,
         setRefreshMs,
         isSettingsOpen,
         setIsSettingsOpen,

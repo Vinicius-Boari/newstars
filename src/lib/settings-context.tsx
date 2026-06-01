@@ -24,6 +24,12 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedKey = localStorage.getItem("apiKey");
     const savedRefresh = localStorage.getItem("refreshMs");
 
+    // Limpa ID antigo (planilha que não existe mais) para forçar uso do DEFAULT
+    if (savedId === "186zpKURns1dm1ixv44RqYDbMfvVd3b4b") {
+      localStorage.removeItem("sheetId");
+      return;
+    }
+
     // Only override defaults if something was actually saved by the user
     if (savedId) setSheetId(savedId);
     if (savedKey && savedKey.length > 5) setApiKey(savedKey);

@@ -122,21 +122,24 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
   const rowWithHeaders = headerIndex !== -1 ? values[headerIndex] : values[0] || [];
   const headers = rowWithHeaders.map(h => String(h).toUpperCase().trim());
   
-  const getIdx = (name: string, fallback: number) => {
-    const idx = headers.findIndex(h => h.includes(name));
-    return idx !== -1 ? idx : fallback;
+  const getIdx = (names: string[], fallback: number) => {
+    for (const name of names) {
+      const idx = headers.findIndex(h => h.includes(name));
+      if (idx !== -1) return idx;
+    }
+    return fallback;
   };
 
-  const idxData = getIdx("DATA", 0);
-  const idxPedido = getIdx("PEDIDO", 1);
-  const idxNome = getIdx("NOME", 2);
-  const idxLocal = getIdx("LOCAL", 3);
-  const idxTotal = getIdx("VALOR PEDIDO", 4);
-  const idxPct = getIdx("COMISSAO %", 5);
-  const idxVlParc = getIdx("VALOR PARC", 6);
-  const idxQtdParc = getIdx("QTD PARC", 7);
-  const idxVenc = getIdx("VENCIMENTO", 8);
-  const idxReceber = getIdx("RECEBER", 9);
+  const idxData = getIdx(["DATA"], 0);
+  const idxPedido = getIdx(["PEDIDO"], 1);
+  const idxNome = getIdx(["NOME", "CLIENTE"], 2);
+  const idxLocal = getIdx(["LOCAL", "CIDADE"], 3);
+  const idxTotal = getIdx(["VALOR PEDIDO", "TOTAL", "VALOR"], 4);
+  const idxPct = getIdx(["COMISSAO %", "PCT", "%"], 5);
+  const idxVlParc = getIdx(["VALOR PARC", "VL PARC", "PARCELA"], 6);
+  const idxQtdParc = getIdx(["QTD PARC", "PARCELAS", "QTD"], 7);
+  const idxVenc = getIdx(["VENCIMENTO", "VENC"], 8);
+  const idxReceber = getIdx(["RECEBER", "A RECEBER"], 9);
 
   const startRow = headerIndex !== -1 ? headerIndex + 1 : 1;
 

@@ -19,7 +19,7 @@ export interface SheetsDataResult {
 }
 
 const DEFAULT_API_KEY = "GOOGLE_SHEETS_API_KEY_1";
-const DEFAULT_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
+const DEFAULT_ID = "1O6ImCfLvgxJF7LiSEFLc9qphD7z0ZpUPii947HCSPGg";
 
 export function useSheetsData(): SheetsDataResult {
   const { sheetId, refreshMs } = useSettings();

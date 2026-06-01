@@ -24,8 +24,9 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const savedKey = localStorage.getItem("apiKey");
     const savedRefresh = localStorage.getItem("refreshMs");
 
-    // Limpa ID antigo (planilha que não existe mais) para forçar uso do DEFAULT
-    if (savedId === "186zpKURns1dm1ixv44RqYDbMfvVd3b4b") {
+    // Limpa IDs antigos (planilha Excel ou ID inválido) para forçar uso do novo DEFAULT
+    const oldIds = ["186zpKURns1dm1ixv44RqYDbMfvVd3b4b", "1b3IzfKyMXivpz4klzZy0eoa4eQeQFHBt"];
+    if (savedId && oldIds.includes(savedId)) {
       localStorage.removeItem("sheetId");
       return;
     }

@@ -1,6 +1,6 @@
 import { supabase } from "@/lib/supabase";
 
-export const DEFAULT_SHEET_ID = "1b3IzfKyMXivpz4klzZy0eoa4eQeQFHBt";
+export const DEFAULT_SHEET_ID = "1O6ImCfLvgxJF7LiSEFLc9qphD7z0ZpUPii947HCSPGg";
 
 export interface Registro {
   quinzena: string;

@@ -1,64 +1,6 @@
-import { createServerFn } from "@tanstack/react-start";
 import { supabase } from "@/lib/supabase";
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets";
-
-// Server side fetcher to keep secrets secure
-const serverFetch = async (url: string, options: RequestInit = {}) => {
-  const lovableApiKey = process.env.LOVABLE_API_KEY;
-  const connectionKey = process.env.GOOGLE_SHEETS_API_KEY_1;
-
-  if (!lovableApiKey || !connectionKey) {
-    throw new Error("Credenciais de sincronização não encontradas no servidor.");
-  }
-
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      ...options.headers,
-      "Authorization": `Bearer ${lovableApiKey}`,
-      "X-Connection-Api-Key": connectionKey,
-      "Accept": "application/json",
-      "Content-Type": "application/json",
-    },
-  });
-
-  const text = await res.text();
-  if (!res.ok) {
-    console.error(`Gateway Error (${res.status}):`, text);
-    throw new Error(`Erro na planilha: ${res.status}`);
-  }
-
-  return JSON.parse(text);
-};
-
-export const fetchSheetNames = createServerFn()
-  .validator((sheetId: string) => sheetId)
-  .handler(async ({ data: sheetId }) => {
-    const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}?fields=sheets.properties.title`;
-    const data = await serverFetch(url);
-    return data.sheets.map((s: any) => s.properties.title);
-  });
-
-export const fetchSheetValues = createServerFn()
-  .validator((data: { sheetId: string; sheetName: string }) => data)
-  .handler(async ({ data: { sheetId, sheetName } }) => {
-    const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}`;
-    const data = await serverFetch(url);
-    return data.values || [];
-  });
-
-export const updateSheetValue = createServerFn()
-  .validator((data: { sheetId: string; range: string; value: any }) => data)
-  .handler(async ({ data: { sheetId, range, value } }) => {
-    const url = `${GATEWAY_URL}/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-    await serverFetch(url, {
-      method: "PUT",
-      body: JSON.stringify({
-        values: [[value]],
-      }),
-    });
-  });
+export const DEFAULT_SHEET_ID = "186zpKURns1dm1ixv44RqYDbMfvVd3b4b";
 
 export interface Registro {
   quinzena: string;
@@ -94,6 +36,37 @@ export const COL_INDICES = {
   VENC: 8,
   RECEBER: 9
 };
+
+const invokeProxy = async (action: string, payload: any) => {
+  const { data, error } = await supabase.functions.invoke("google-sheets-proxy", {
+    body: { action, ...payload },
+  });
+
+  if (error) {
+    console.error(`Edge Function Error (${action}):`, error);
+    throw new Error(`Erro na sincronização: ${error.message}`);
+  }
+
+  if (data?.error) {
+    throw new Error(data.error);
+  }
+
+  return data;
+};
+
+export async function fetchSheetNames(sheetId: string): Promise<string[]> {
+  const data = await invokeProxy("fetchNames", { sheetId });
+  return data.sheets.map((s: any) => s.properties.title);
+}
+
+export async function fetchSheetValues(sheetId: string, sheetName: string): Promise<any[][]> {
+  const data = await invokeProxy("fetchValues", { sheetId, sheetName });
+  return data.values || [];
+}
+
+export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
+  await invokeProxy("updateValue", { sheetId, range, value });
+}
 
 function toNumber(v: any): number {
   if (v == null || v === "") return 0;
@@ -168,10 +141,11 @@ export async function fetchAllSheets(sheetId: string, abas: string[]): Promise<Q
   const results: QuinzenaData[] = [];
   for (const aba of abas) {
     try {
-      const values = await fetchSheetValues({ data: { sheetId, sheetName: aba } });
+      const values = await fetchSheetValues(sheetId, aba);
       const registros = parseRows(values, aba);
       const total = registros.reduce((s, r) => s + r.receber, 0);
       results.push({ quinzena: aba, registros, total });
+      await new Promise(resolve => setTimeout(resolve, 50));
     } catch (e) {
       console.error(`Error fetching aba ${aba}:`, e);
       results.push({

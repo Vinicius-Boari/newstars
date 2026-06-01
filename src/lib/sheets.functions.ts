@@ -52,7 +52,14 @@ async function gatewayFetch<T>(url: string, init?: RequestInit): Promise<T> {
     },
   });
   const text = await response.text();
-  const payload = text ? JSON.parse(text) : null;
+  let payload: any = null;
+  if (text) {
+    try {
+      payload = JSON.parse(text);
+    } catch {
+      payload = { error: { message: text.slice(0, 200) } };
+    }
+  }
 
   if (!response.ok) {
     const upstreamMessage = payload?.error?.message ?? payload?.error ?? payload?.message ?? text;
@@ -61,6 +68,9 @@ async function gatewayFetch<T>(url: string, init?: RequestInit): Promise<T> {
     }
     if (response.status === 429 || String(upstreamMessage).includes("Quota exceeded")) {
       throw new Error("Limite temporário do Google Sheets atingido. Aguarde cerca de 1 minuto e tente sincronizar novamente.");
+    }
+    if (response.status >= 500 || String(upstreamMessage).includes("upstream")) {
+      throw new Error("Serviço do Google Sheets temporariamente indisponível. Tente novamente em alguns segundos.");
     }
     throw new Error(`Falha no Connector Google Sheets (${response.status}): ${upstreamMessage}`);
   }

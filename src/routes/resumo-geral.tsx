@@ -321,7 +321,7 @@ function Dashboard() {
   // Reset to first page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [selectedQuinzena, localFilter, pctFilter, search]);
+  }, [selectedQuinzena, localFilter, pctFilter, search, dateFilter, qtdParcFilter, vencFilter]);
 
   const allRegistros = COMMISSIONS;
 
@@ -372,7 +372,14 @@ function Dashboard() {
   }, [filtered]);
 
   const setQuinzena = (q: string) => navigate({ search: { quinzena: q } });
-  const clearFilters = () => { setSearch(""); setLocalFilter("ALL"); setPctFilter("ALL"); };
+  const clearFilters = () => { 
+    setSearch(""); 
+    setLocalFilter("ALL"); 
+    setPctFilter("ALL");
+    setDateFilter("ALL");
+    setQtdParcFilter("ALL");
+    setVencFilter("ALL");
+  };
 
   if (isLoading && abas.length === 0) {
     return (
@@ -570,7 +577,34 @@ function Dashboard() {
                 ...allPercentages.map(p => ({ label: `${p}%`, value: String(p) }))
               ]}
             />
-            {(search || localFilter !== "ALL" || pctFilter !== "ALL") && (
+            <ComboboxFilter
+              value={dateFilter}
+              onSelect={setDateFilter}
+              placeholder="Todas as datas"
+              options={[
+                { label: "Todas as datas", value: "ALL" },
+                ...allDates.map(d => ({ label: d, value: d }))
+              ]}
+            />
+            <ComboboxFilter
+              value={qtdParcFilter}
+              onSelect={setQtdParcFilter}
+              placeholder="Todas as parcelas"
+              options={[
+                { label: "Todas as parcelas", value: "ALL" },
+                ...allQtdParcs.map(q => ({ label: q, value: q }))
+              ]}
+            />
+            <ComboboxFilter
+              value={vencFilter}
+              onSelect={setVencFilter}
+              placeholder="Todos os vencimentos"
+              options={[
+                { label: "Todos os vencimentos", value: "ALL" },
+                ...allVencs.map(v => ({ label: v, value: v }))
+              ]}
+            />
+            {(search || localFilter !== "ALL" || pctFilter !== "ALL" || dateFilter !== "ALL" || qtdParcFilter !== "ALL" || vencFilter !== "ALL") && (
               <button
                 onClick={clearFilters}
                 className="h-9 px-3 rounded-md border border-border text-xs font-medium hover:bg-accent flex items-center gap-1.5"

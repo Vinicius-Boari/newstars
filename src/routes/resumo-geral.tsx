@@ -183,6 +183,14 @@ function Dashboard() {
     return [...s].sort();
   }, [COMMISSIONS, selectedQuinzena]);
 
+  const allPercentages = React.useMemo(() => {
+    const relevantRegistros = selectedQuinzena === "ALL" 
+      ? COMMISSIONS 
+      : COMMISSIONS.filter(c => c.quinzena === selectedQuinzena);
+    const s = new Set(relevantRegistros.map(c => c.pct).filter(p => p !== undefined && p !== null));
+    return [...s].sort((a, b) => a - b);
+  }, [COMMISSIONS, selectedQuinzena]);
+
   const filtered = React.useMemo(() => {
     return COMMISSIONS.filter(c => {
       if (selectedQuinzena !== "ALL" && c.quinzena !== selectedQuinzena) return false;
@@ -450,9 +458,9 @@ function Dashboard() {
               className="h-9 px-3 rounded-md border border-border bg-background text-xs font-medium cursor-pointer"
             >
               <option value="ALL">Todas as %</option>
-              <option value="5">5%</option>
-              <option value="10">10%</option>
-              <option value="15">15%</option>
+              {allPercentages.map(p => (
+                <option key={p} value={String(p)}>{p}%</option>
+              ))}
             </select>
             {(search || localFilter !== "ALL" || pctFilter !== "ALL") && (
               <button

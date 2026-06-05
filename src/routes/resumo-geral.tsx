@@ -228,20 +228,32 @@ function EditableCell({ value, onSave, isLoading, type = "text" }: {
   );
 }
 
-function AddPedidoModal({ quinzena, onAdd, sheetId }: { quinzena: string; onAdd: () => Promise<void>; sheetId: string }) {
+function PedidoModal({ 
+  quinzena, 
+  onSuccess, 
+  sheetId, 
+  registro, 
+  trigger 
+}: { 
+  quinzena: string; 
+  onSuccess: () => Promise<void>; 
+  sheetId: string;
+  registro?: Registro;
+  trigger: React.ReactNode;
+}) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    data: new Date().toLocaleDateString("pt-BR"),
-    pedido: "",
-    nome: "",
-    local: "",
-    total: "",
-    pct: "10",
-    vlParc: "",
-    qtdParc: "",
-    venc: "",
-    receber: ""
+    data: registro?.data || new Date().toLocaleDateString("pt-BR"),
+    pedido: registro?.pedido || "",
+    nome: registro?.nome || "",
+    local: registro?.local || "",
+    total: registro?.total?.toString() || "",
+    pct: registro?.pct?.toString() || "10",
+    vlParc: registro?.vlParc?.toString() || "",
+    qtdParc: registro?.qtdParc || "",
+    venc: registro?.venc || "",
+    receber: registro?.receber?.toString() || ""
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -253,38 +265,38 @@ function AddPedidoModal({ quinzena, onAdd, sheetId }: { quinzena: string; onAdd:
     
     setLoading(true);
     try {
-      // Find the next empty row by fetching current data length
-      // For simplicity, we'll append to the end. In a real scenario, we'd need more logic.
-      // But let's assume we want to add it to the first empty row or just after last.
-      
-      const values = [
-        formData.data,
-        formData.pedido,
-        formData.nome,
-        formData.local,
-        formData.total,
-        formData.pct,
-        formData.vlParc,
-        formData.qtdParc,
-        formData.venc,
-        formData.receber
+      const isEditing = !!registro;
+      const rowIndex = registro?.rowIndex;
+
+      const updates = [
+        { col: COL_INDICES.DATA, val: formData.data },
+        { col: COL_INDICES.PEDIDO, val: formData.pedido },
+        { col: COL_INDICES.NOME, val: formData.nome },
+        { col: COL_INDICES.LOCAL, val: formData.local },
+        { col: COL_INDICES.TOTAL, val: Number(formData.total) || 0 },
+        { col: COL_INDICES.PCT, val: Number(formData.pct) || 0 },
+        { col: COL_INDICES.VL_PARC, val: Number(formData.vlParc) || 0 },
+        { col: COL_INDICES.QTD_PARC, val: formData.qtdParc },
+        { col: COL_INDICES.VENC, val: formData.venc },
+        { col: COL_INDICES.RECEBER, val: Number(formData.receber) || 0 },
       ];
 
-      // Since we don't have a direct "append" helper, we'll use a specific logic or just notify.
-      // For this project, updateSpreadsheetCell updates a range. 
-      // To keep it simple and safe for the user, we inform them it was sent.
-      // I'll add a proper updateSheetValue call for the specific columns.
-      
-      toast.info("Processando inclusão na planilha...");
-      
-      // We would need to know the last row index. We'll simulate finding it.
-      // For now, I'll implement the UI and the call if possible.
+      if (isEditing && rowIndex) {
+        toast.info("Salvando alterações...");
+        for (const update of updates) {
+          const colLetter = String.fromCharCode(65 + update.col);
+          const range = `${quinzena}!${colLetter}${rowIndex}`;
+          await updateSpreadsheetCell({ data: { sheetId, range, value: update.val } });
+        }
+        toast.success("Pedido atualizado com sucesso!");
+      } else {
+        toast.info("Inclusão manual requer indicar a linha. Adicione via planilha ou edite existentes.");
+      }
       
       setOpen(false);
-      toast.success("Pedido adicionado com sucesso!");
-      await onAdd();
+      await onSuccess();
     } catch (err: any) {
-      toast.error("Erro ao adicionar: " + err.message);
+      toast.error("Erro: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -293,13 +305,11 @@ function AddPedidoModal({ quinzena, onAdd, sheetId }: { quinzena: string; onAdd:
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" className="gap-2 bg-foreground text-background hover:bg-foreground/90 h-9">
-          <Plus className="h-4 w-4" /> Adicionar
-        </Button>
+        {trigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Adicionar Novo Pedido - {quinzena}</DialogTitle>
+          <DialogTitle>{registro ? "Editar Pedido" : "Adicionar Novo Pedido"} - {quinzena}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="grid gap-4 py-4">
           <div className="grid grid-cols-2 gap-4">
@@ -323,17 +333,17 @@ function AddPedidoModal({ quinzena, onAdd, sheetId }: { quinzena: string; onAdd:
             </div>
             <div className="space-y-2">
               <Label htmlFor="total">Total</Label>
-              <Input id="total" type="number" value={formData.total} onChange={e => setFormData({...formData, total: e.target.value})} />
+              <Input id="total" type="number" step="any" value={formData.total} onChange={e => setFormData({...formData, total: e.target.value})} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="pct">Comissão %</Label>
-              <Input id="pct" type="number" value={formData.pct} onChange={e => setFormData({...formData, pct: e.target.value})} />
+              <Input id="pct" type="number" step="any" value={formData.pct} onChange={e => setFormData({...formData, pct: e.target.value})} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="vlParc">Valor Parcela</Label>
-              <Input id="vlParc" type="number" value={formData.vlParc} onChange={e => setFormData({...formData, vlParc: e.target.value})} />
+              <Input id="vlParc" type="number" step="any" value={formData.vlParc} onChange={e => setFormData({...formData, vlParc: e.target.value})} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
@@ -346,8 +356,12 @@ function AddPedidoModal({ quinzena, onAdd, sheetId }: { quinzena: string; onAdd:
               <Input id="venc" value={formData.venc} onChange={e => setFormData({...formData, venc: e.target.value})} />
             </div>
           </div>
+          <div className="space-y-2">
+            <Label htmlFor="receber">Valor a Receber</Label>
+            <Input id="receber" type="number" step="any" value={formData.receber} onChange={e => setFormData({...formData, receber: e.target.value})} />
+          </div>
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar na Planilha"}
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
           </Button>
         </form>
       </DialogContent>

@@ -19,8 +19,8 @@ export interface SheetsDataResult {
 }
 
 const DEFAULT_ID = "1O6ImCfLvgxJF7LiSEFLc9qphD7z0ZpUPii947HCSPGg";
-const MIN_REFRESH_MS = 90_000;
-const CACHE_TTL_MS = 60_000;
+const MIN_REFRESH_MS = 60_000;
+const CACHE_TTL_MS = 30_000;
 
 type CacheEntry = {
   data: QuinzenaData[];

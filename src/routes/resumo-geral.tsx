@@ -659,41 +659,48 @@ function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground tracking-tight">CONTROLE DE COMISSÕES 2026</h2>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Acompanhe vendas, parcelas e comissões a receber por quinzena.
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight uppercase">CONTROLE DE COMISSÕES 2026</h2>
+          <div className="flex items-center justify-between">
+            <p className="text-xs md:text-sm text-muted-foreground/70">
+              Acompanhe suas vendas e comissões.
+            </p>
+            <div className="md:hidden">
+              <ContasModal currentUser={currentUser} />
+            </div>
+          </div>
         </div>
-        <div className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest bg-card border border-border rounded-full px-4 py-2 flex items-center gap-2">
-          {isFetching ? (
-            <Loader2 className="h-3 w-3 animate-spin text-primary" />
-          ) : (
-            <RefreshCcw 
-              className={cn("h-3 w-3 cursor-pointer hover:text-primary transition-colors", isFetching && "animate-spin")} 
-              onClick={() => refetch()}
-            />
-          )}
-          <span>Atualizado às {lastUpdated || "—"}</span>
-          <span className="mx-1 opacity-30">|</span>
-          <span>{filtered.length} parcelas</span>
-          <span className="mx-1 opacity-30">|</span>
-          <span>{selectedQuinzena === "ALL" ? "Todas quinzenas" : selectedQuinzena}</span>
-          <span className="mx-1 opacity-30">|</span>
-          <ContasModal currentUser={currentUser} />
+        
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-card border border-border rounded-2xl">
+          <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest flex-1">
+            {isFetching ? (
+              <Loader2 className="h-3 w-3 animate-spin text-primary" />
+            ) : (
+              <RefreshCcw 
+                className={cn("h-3 w-3 cursor-pointer hover:text-primary transition-colors", isFetching && "animate-spin")} 
+                onClick={() => refetch()}
+              />
+            )}
+            <span className="truncate">Sincronizado: {lastUpdated || "—"}</span>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+            <span>{filtered.length} parcelas</span>
+            <span className="mx-1 opacity-30">|</span>
+            <ContasModal currentUser={currentUser} />
+          </div>
         </div>
       </div>
 
       {/* Quinzena tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
         <button
           onClick={() => setQuinzena("ALL")}
           className={cn(
-            "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all",
+            "px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0",
             selectedQuinzena === "ALL"
-              ? "bg-foreground text-background shadow-sm"
-              : "bg-card border border-border text-muted-foreground hover:text-foreground",
+              ? "bg-foreground text-background shadow-lg shadow-foreground/10"
+              : "bg-card border border-border text-muted-foreground",
           )}
         >
           Todas
@@ -707,14 +714,14 @@ function Dashboard() {
               key={q}
               onClick={() => setQuinzena(q)}
               className={cn(
-                "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2",
+                "px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-2",
                 active
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
-                  : "bg-card border border-border text-muted-foreground hover:text-foreground",
+                  ? "bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/20"
+                  : "bg-card border border-border text-muted-foreground",
               )}
             >
               {q}
-              <span className={cn("text-[10px] font-mono opacity-70", total === 0 && "opacity-30")}>
+              <span className={cn("text-[10px] font-mono opacity-80 font-bold", total === 0 && "opacity-30")}>
                 {total > 0 ? fmtMoney(total).replace("R$", "").trim() : "—"}
               </span>
             </button>
@@ -841,88 +848,85 @@ function Dashboard() {
 
       {/* Main table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-border bg-muted/30 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <div className="relative">
+        <div className="p-4 md:p-5 border-b border-border bg-muted/30 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por cliente ou pedido…"
+                placeholder="Buscar cliente ou pedido…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9 text-sm max-w-md"
+                className="pl-9 h-10 md:h-9 text-sm w-full"
               />
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <ComboboxFilter
-              value={localFilter}
-              onSelect={setLocalFilter}
-              placeholder="Todas as cidades"
-              options={[
-                { label: "Todas as cidades", value: "ALL" },
-                ...allLocals.map(l => ({ label: l, value: l }))
-              ]}
-            />
-            <ComboboxFilter
-              value={pctFilter}
-              onSelect={setPctFilter}
-              placeholder="Todas as %"
-              options={[
-                { label: "Todas as %", value: "ALL" },
-                ...allPercentages.map(p => ({ label: `${p}%`, value: String(p) }))
-              ]}
-            />
-            <ComboboxFilter
-              value={dateFilter}
-              onSelect={setDateFilter}
-              placeholder="Todas as datas"
-              options={[
-                { label: "Todas as datas", value: "ALL" },
-                ...allDates.map(d => ({ label: d, value: d }))
-              ]}
-            />
-            <ComboboxFilter
-              value={qtdParcFilter}
-              onSelect={setQtdParcFilter}
-              placeholder="Todas as parcelas"
-              options={[
-                { label: "Todas as parcelas", value: "ALL" },
-                ...allQtdParcs.map(q => ({ label: q, value: q }))
-              ]}
-            />
-            <ComboboxFilter
-              value={vencFilter}
-              onSelect={setVencFilter}
-              placeholder="Todos os vencimentos"
-              options={[
-                { label: "Todos os vencimentos", value: "ALL" },
-                ...allVencs.map(v => ({ label: v, value: v }))
-              ]}
-            />
-            {(search || localFilter !== "ALL" || pctFilter !== "ALL" || dateFilter !== "ALL" || qtdParcFilter !== "ALL" || vencFilter !== "ALL") && (
-              <button
-                onClick={clearFilters}
-                className="h-9 px-3 rounded-md border border-border text-xs font-medium hover:bg-accent flex items-center gap-1.5"
-              >
-                <X className="h-3 w-3" /> Limpar
-              </button>
-            )}
             {selectedQuinzena !== "ALL" && (
               <PedidoModal 
                 quinzena={selectedQuinzena} 
                 onSuccess={refetch} 
                 sheetId={sheetId} 
                 trigger={
-                  <Button size="sm" className="gap-2 bg-foreground text-background hover:bg-foreground/90 h-9">
-                    <Plus className="h-4 w-4" /> Adicionar
+                  <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-10 md:h-9 font-bold uppercase text-[11px] tracking-widest">
+                    <Plus className="h-4 w-4" /> Adicionar Pedido
                   </Button>
                 }
               />
             )}
           </div>
+          
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full">
+              <ComboboxFilter
+                value={localFilter}
+                onSelect={setLocalFilter}
+                placeholder="Cidades"
+                options={[
+                  { label: "Todas cidades", value: "ALL" },
+                  ...allLocals.map(l => ({ label: l, value: l }))
+                ]}
+              />
+              <ComboboxFilter
+                value={pctFilter}
+                onSelect={setPctFilter}
+                placeholder="%"
+                options={[
+                  { label: "Todas %", value: "ALL" },
+                  ...allPercentages.map(p => ({ label: `${p}%`, value: String(p) }))
+                ]}
+              />
+              <ComboboxFilter
+                value={dateFilter}
+                onSelect={setDateFilter}
+                placeholder="Datas"
+                options={[
+                  { label: "Todas datas", value: "ALL" },
+                  ...allDates.map(d => ({ label: d, value: d }))
+                ]}
+              />
+              <ComboboxFilter
+                value={vencFilter}
+                onSelect={setVencFilter}
+                placeholder="Vencimentos"
+                options={[
+                  { label: "Todos venc.", value: "ALL" },
+                  ...allVencs.map(v => ({ label: v, value: v }))
+                ]}
+              />
+            </div>
+            
+            {(search || localFilter !== "ALL" || pctFilter !== "ALL" || dateFilter !== "ALL" || qtdParcFilter !== "ALL" || vencFilter !== "ALL") && (
+              <Button
+                variant="ghost"
+                onClick={clearFilters}
+                className="h-8 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5 mr-1" /> Limpar Filtros
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="md:overflow-x-auto">
+          {/* Desktop Table View */}
+          <table className="hidden md:table w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/20">
                 <th className="px-3 py-2.5 w-10"></th>
@@ -1028,60 +1032,79 @@ function Dashboard() {
               ))}
             </tbody>
           </table>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y divide-border/50">
+            {paginatedData.map((c, i) => (
+              <div key={`${c.pedido}-${i}`} className="p-4 space-y-3 active:bg-muted/30 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-sm text-foreground uppercase tracking-tight">{c.nome}</div>
+                  <PedidoModal 
+                    quinzena={c.quinzena} 
+                    onSuccess={refetch} 
+                    sheetId={sheetId} 
+                    registro={c}
+                    trigger={
+                      <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-primary active:text-primary-foreground">
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-y-2 text-[11px]">
+                  <div><span className="text-muted-foreground uppercase mr-1">Data:</span> {c.data}</div>
+                  <div><span className="text-muted-foreground uppercase mr-1">Pedido:</span> <span className="font-mono">{c.pedido}</span></div>
+                  <div><span className="text-muted-foreground uppercase mr-1">Local:</span> {c.local}</div>
+                  <div><span className="text-muted-foreground uppercase mr-1">Venc:</span> {c.venc}</div>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ring-inset",
+                      c.pct === 5 ? "bg-blue-500/10 text-blue-600 ring-blue-500/20" :
+                      c.pct === 10 ? "bg-purple-500/10 text-purple-600 ring-purple-500/20" :
+                      "bg-pink-500/10 text-pink-600 ring-pink-500/20"
+                    )}>
+                      {c.pct}%
+                    </span>
+                    <ParcCell qtd={c.qtdParc} />
+                  </div>
+                  <div className="text-sm font-black text-green-600 tracking-tight">
+                    {fmtMoney(c.receber)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {filtered.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-sm text-muted-foreground">Nenhum resultado encontrado para os filtros selecionados.</p>
+              <p className="text-sm text-muted-foreground">Nenhum resultado encontrado.</p>
             </div>
           )}
         </div>
         
         {totalPages > 1 && (
-          <div className="p-4 border-t border-border bg-muted/10 flex items-center justify-between">
-            <div className="text-xs text-muted-foreground">
-              Página <span className="font-bold text-foreground">{currentPage}</span> de <span className="font-bold text-foreground">{totalPages}</span>
+          <div className="p-4 border-t border-border bg-muted/10 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest order-2 md:order-1">
+              Página {currentPage} de {totalPages} ({filtered.length} itens)
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full md:w-auto order-1 md:order-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                 disabled={currentPage === 1}
-                className="h-8 text-xs"
+                className="flex-1 md:flex-none h-10 md:h-8 font-bold uppercase text-[10px] tracking-widest"
               >
                 Anterior
               </Button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum = i + 1;
-                  if (totalPages > 5 && currentPage > 3) {
-                    pageNum = currentPage - 3 + i;
-                    if (pageNum + 2 > totalPages) pageNum = totalPages - 4 + i;
-                  }
-                  if (pageNum <= 0) return null;
-                  if (pageNum > totalPages) return null;
-
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={cn(
-                        "h-8 w-8 rounded-md text-xs font-medium transition-colors",
-                        currentPage === pageNum 
-                          ? "bg-primary text-primary-foreground shadow-sm" 
-                          : "hover:bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                 disabled={currentPage === totalPages}
-                className="h-8 text-xs"
+                className="flex-1 md:flex-none h-10 md:h-8 font-bold uppercase text-[10px] tracking-widest"
               >
                 Próxima
               </Button>

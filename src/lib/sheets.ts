@@ -1,4 +1,6 @@
 import { fetchSpreadsheetData, updateSpreadsheetCell as updateSpreadsheetCellFn } from "./sheets.functions";
+import { savePendingUpdate } from "./offline-sync";
+
 
 export const DEFAULT_SHEET_ID = "1O6ImCfLvgxJF7LiSEFLc9qphD7z0ZpUPii947HCSPGg";
 
@@ -48,7 +50,17 @@ export async function fetchSheetValues(sheetId: string, sheetName: string): Prom
 }
 
 export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
-  await updateSpreadsheetCell({ data: { sheetId, range, value } });
+  if (!navigator.onLine) {
+    savePendingUpdate(sheetId, range, value);
+    return;
+  }
+  
+  try {
+    await updateSpreadsheetCell({ data: { sheetId, range, value } });
+  } catch (error) {
+    savePendingUpdate(sheetId, range, value);
+    throw error;
+  }
 }
 export const updateSpreadsheetCell = updateSpreadsheetCellFn;
 

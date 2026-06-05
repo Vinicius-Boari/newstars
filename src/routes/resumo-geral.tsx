@@ -1085,8 +1085,32 @@ function Dashboard() {
         </div>
         
         {totalPages > 1 && (
-          <div className="p-4 border-t border-border bg-muted/10 flex items-center justify-between">
-            <div className="text-xs text-muted-foreground">
+          <div className="p-4 border-t border-border bg-muted/10 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest order-2 md:order-1">
+              Página {currentPage} de {totalPages} ({filtered.length} itens)
+            </div>
+            <div className="flex items-center gap-2 w-full md:w-auto order-1 md:order-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
+                className="flex-1 md:flex-none h-10 md:h-8 font-bold uppercase text-[10px] tracking-widest"
+              >
+                Anterior
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+                className="flex-1 md:flex-none h-10 md:h-8 font-bold uppercase text-[10px] tracking-widest"
+              >
+                Próxima
+              </Button>
+            </div>
+          </div>
+        )}
               Página <span className="font-bold text-foreground">{currentPage}</span> de <span className="font-bold text-foreground">{totalPages}</span>
             </div>
             <div className="flex items-center gap-2">

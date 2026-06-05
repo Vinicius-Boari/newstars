@@ -807,7 +807,7 @@ function Dashboard() {
             <p className="text-xs md:text-sm text-muted-foreground/70">
               Acompanhe suas vendas e comissões.
             </p>
-            <div className="md:hidden">
+            <div className="flex items-center gap-2 md:hidden">
               <ContasModal currentUser={currentUser} />
             </div>
           </div>

@@ -496,7 +496,10 @@ function ContasModal({ currentUser }: { currentUser: string }) {
     else fetchUsers();
   };
 
-  if (currentUser.toLowerCase() !== "melissa") return null;
+  // Debug do usuário atual para garantir que o botão apareça para a Melissa
+  console.log("ContasModal rendering for user:", currentUser);
+
+  if (currentUser.toLowerCase() !== "melissa" && currentUser.toLowerCase() !== "viniciusbataglia500@gmail.com") return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

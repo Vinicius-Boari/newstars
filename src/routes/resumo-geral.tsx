@@ -693,14 +693,14 @@ function Dashboard() {
       </div>
 
       {/* Quinzena tabs */}
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
         <button
           onClick={() => setQuinzena("ALL")}
           className={cn(
-            "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all",
+            "px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0",
             selectedQuinzena === "ALL"
-              ? "bg-foreground text-background shadow-sm"
-              : "bg-card border border-border text-muted-foreground hover:text-foreground",
+              ? "bg-foreground text-background shadow-lg shadow-foreground/10"
+              : "bg-card border border-border text-muted-foreground",
           )}
         >
           Todas
@@ -714,14 +714,14 @@ function Dashboard() {
               key={q}
               onClick={() => setQuinzena(q)}
               className={cn(
-                "px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all flex items-center gap-2",
+                "px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-2",
                 active
-                  ? "bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-md"
-                  : "bg-card border border-border text-muted-foreground hover:text-foreground",
+                  ? "bg-gradient-to-br from-purple-500 to-pink-600 text-white shadow-lg shadow-purple-500/20"
+                  : "bg-card border border-border text-muted-foreground",
               )}
             >
               {q}
-              <span className={cn("text-[10px] font-mono opacity-70", total === 0 && "opacity-30")}>
+              <span className={cn("text-[10px] font-mono opacity-80 font-bold", total === 0 && "opacity-30")}>
                 {total > 0 ? fmtMoney(total).replace("R$", "").trim() : "—"}
               </span>
             </button>

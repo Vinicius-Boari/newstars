@@ -659,29 +659,36 @@ function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground tracking-tight">CONTROLE DE COMISSÕES 2026</h2>
-          <p className="text-sm text-muted-foreground/70 mt-1">
-            Acompanhe vendas, parcelas e comissões a receber por quinzena.
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight uppercase">CONTROLE DE COMISSÕES 2026</h2>
+          <div className="flex items-center justify-between">
+            <p className="text-xs md:text-sm text-muted-foreground/70">
+              Acompanhe suas vendas e comissões.
+            </p>
+            <div className="md:hidden">
+              <ContasModal currentUser={currentUser} />
+            </div>
+          </div>
         </div>
-        <div className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest bg-card border border-border rounded-full px-4 py-2 flex items-center gap-2">
-          {isFetching ? (
-            <Loader2 className="h-3 w-3 animate-spin text-primary" />
-          ) : (
-            <RefreshCcw 
-              className={cn("h-3 w-3 cursor-pointer hover:text-primary transition-colors", isFetching && "animate-spin")} 
-              onClick={() => refetch()}
-            />
-          )}
-          <span>Atualizado às {lastUpdated || "—"}</span>
-          <span className="mx-1 opacity-30">|</span>
-          <span>{filtered.length} parcelas</span>
-          <span className="mx-1 opacity-30">|</span>
-          <span>{selectedQuinzena === "ALL" ? "Todas quinzenas" : selectedQuinzena}</span>
-          <span className="mx-1 opacity-30">|</span>
-          <ContasModal currentUser={currentUser} />
+        
+        <div className="flex flex-wrap items-center gap-2 p-3 bg-card border border-border rounded-2xl">
+          <div className="flex items-center gap-2 text-[10px] md:text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest flex-1">
+            {isFetching ? (
+              <Loader2 className="h-3 w-3 animate-spin text-primary" />
+            ) : (
+              <RefreshCcw 
+                className={cn("h-3 w-3 cursor-pointer hover:text-primary transition-colors", isFetching && "animate-spin")} 
+                onClick={() => refetch()}
+              />
+            )}
+            <span className="truncate">Sincronizado: {lastUpdated || "—"}</span>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">
+            <span>{filtered.length} parcelas</span>
+            <span className="mx-1 opacity-30">|</span>
+            <ContasModal currentUser={currentUser} />
+          </div>
         </div>
       </div>
 

@@ -116,7 +116,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
         vlParc: toNumber(row[idxVlParc]),
         qtdParc: toStr(row[idxQtdParc]),
         venc: toStr(row[idxVenc]),
-        receber: toNumber(row[idxReceber]),
+        receber: toNumber(row[idxReceber]) || (toNumber(row[idxTotal]) * (toNumber(row[idxPct]) / 100)),
         rowIndex: startRow + i + 1,
       };
     })

@@ -456,11 +456,11 @@ function ViewPedidoModal({
 function ContasModal({ currentUser }: { currentUser: string }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [users, setUsers] = React.useState<{ id: string; username: string; password: string }[]>([]);
-  const [newUser, setNewUser] = React.useState({ username: "", password: "" });
+  const [users, setUsers] = React.useState<{ id: string; username: string; role: string }[]>([]);
+  const [newUser, setNewUser] = React.useState({ username: "", role: "viewer" });
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from("admin_users").select("*");
+    const { data } = await supabase.from("admin_users").select("id, username, role");
     if (data) setUsers(data);
   };
 
@@ -471,11 +471,11 @@ function ContasModal({ currentUser }: { currentUser: string }) {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.from("admin_users").insert([newUser]);
+    const { error } = await supabase.from("admin_users").insert([newUser as never]);
     if (error) toast.error("Erro ao adicionar: " + error.message);
     else {
       toast.success("Usuário adicionado!");
-      setNewUser({ username: "", password: "" });
+      setNewUser({ username: "", role: "viewer" });
       fetchUsers();
     }
     setLoading(false);
@@ -507,8 +507,8 @@ function ContasModal({ currentUser }: { currentUser: string }) {
               <Input value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} placeholder="Nome" required />
             </div>
             <div className="col-span-2 space-y-2">
-              <Label>Senha</Label>
-              <Input value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} placeholder="Senha" required />
+              <Label>Papel</Label>
+              <Input value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} placeholder="viewer ou admin" required />
             </div>
             <Button type="submit" size="sm" disabled={loading} className="mb-0.5">
               <Plus className="h-4 w-4" />
@@ -522,7 +522,7 @@ function ContasModal({ currentUser }: { currentUser: string }) {
                 <div key={user.id} className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
                   <div>
                     <div className="text-sm font-bold">{user.username}</div>
-                    <div className="text-[10px] text-muted-foreground font-mono">Senha: {user.password}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono">Papel: {user.role}</div>
                   </div>
                   {user.username !== "melissa" && (
                     <button onClick={() => handleDelete(user.id)} className="text-destructive hover:scale-110 transition-transform">
@@ -546,11 +546,14 @@ function Dashboard() {
   const [currentUser, setCurrentUser] = React.useState<string>("");
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      // Temporarily set to 'melissa' if logged in, for testing/visibility
-      if (user) {
-        setCurrentUser("melissa");
-      }
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("admin_users")
+        .select("username")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (data?.username) setCurrentUser(data.username);
     });
   }, []);
   const { sheetId } = useSettings();

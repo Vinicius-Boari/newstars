@@ -18,7 +18,6 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          password: string
           role: string
           updated_at: string
           username: string
@@ -26,7 +25,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          password: string
           role?: string
           updated_at?: string
           username: string
@@ -34,7 +32,6 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          password?: string
           role?: string
           updated_at?: string
           username?: string
@@ -70,7 +67,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_email_for_username: { Args: { _username: string }; Returns: string }
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never

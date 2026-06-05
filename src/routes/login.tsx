@@ -34,10 +34,16 @@ function LoginComponent() {
     console.log("Iniciando tentativa de login para:", username);
 
     try {
-      // Mapping logic: melissa -> viniciusbataglia500@gmail.com
-      const email = username.toLowerCase() === "melissa" 
-        ? "viniciusbataglia500@gmail.com" 
-        : username;
+      // Resolve username -> email via secure server function (no hardcoded mapping)
+      let email = username;
+      if (!username.includes("@")) {
+        const { data: resolved } = await supabase.rpc("get_email_for_username", {
+          _username: username,
+        });
+        if (resolved) {
+          email = resolved as string;
+        }
+      }
 
       console.log("Tentando entrar com email:", email);
       

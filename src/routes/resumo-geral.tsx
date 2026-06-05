@@ -265,27 +265,45 @@ function Dashboard() {
   const COMMISSIONS = React.useMemo(() => abas.flatMap(a => a.registros), [abas]);
   const QUINZENAS = React.useMemo(() => abas.map(a => a.quinzena), [abas]);
 
-  const allLocals = React.useMemo(() => {
-    const relevantRegistros = selectedQuinzena === "ALL" 
+  const currentMonthRegistros = React.useMemo(() => {
+    return selectedQuinzena === "ALL" 
       ? COMMISSIONS 
       : COMMISSIONS.filter(c => c.quinzena === selectedQuinzena);
-    const s = new Set(relevantRegistros.map(c => c.local).filter(l => l && l !== "-"));
-    return [...s].sort();
   }, [COMMISSIONS, selectedQuinzena]);
 
+  const allLocals = React.useMemo(() => {
+    const s = new Set(currentMonthRegistros.map(c => c.local).filter(l => l && l !== "-"));
+    return [...s].sort();
+  }, [currentMonthRegistros]);
+
   const allPercentages = React.useMemo(() => {
-    const relevantRegistros = selectedQuinzena === "ALL" 
-      ? COMMISSIONS 
-      : COMMISSIONS.filter(c => c.quinzena === selectedQuinzena);
-    const s = new Set(relevantRegistros.map(c => c.pct).filter(p => p !== undefined && p !== null));
+    const s = new Set(currentMonthRegistros.map(c => c.pct).filter(p => p !== undefined && p !== null));
     return [...s].sort((a, b) => a - b);
-  }, [COMMISSIONS, selectedQuinzena]);
+  }, [currentMonthRegistros]);
+
+  const allDates = React.useMemo(() => {
+    const s = new Set(currentMonthRegistros.map(c => c.data).filter(Boolean));
+    return [...s].sort();
+  }, [currentMonthRegistros]);
+
+  const allQtdParcs = React.useMemo(() => {
+    const s = new Set(currentMonthRegistros.map(c => c.qtdParc).filter(Boolean));
+    return [...s].sort();
+  }, [currentMonthRegistros]);
+
+  const allVencs = React.useMemo(() => {
+    const s = new Set(currentMonthRegistros.map(c => c.venc).filter(Boolean));
+    return [...s].sort();
+  }, [currentMonthRegistros]);
 
   const filtered = React.useMemo(() => {
     return COMMISSIONS.filter(c => {
       if (selectedQuinzena !== "ALL" && c.quinzena !== selectedQuinzena) return false;
       if (localFilter !== "ALL" && c.local !== localFilter) return false;
       if (pctFilter !== "ALL" && String(c.pct) !== pctFilter) return false;
+      if (dateFilter !== "ALL" && c.data !== dateFilter) return false;
+      if (qtdParcFilter !== "ALL" && c.qtdParc !== qtdParcFilter) return false;
+      if (vencFilter !== "ALL" && c.venc !== vencFilter) return false;
       if (search) {
         const q = search.toLowerCase();
         if (!c.nome.toLowerCase().includes(q) && !c.pedido.toLowerCase().includes(q)) return false;

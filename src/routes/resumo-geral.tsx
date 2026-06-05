@@ -1111,56 +1111,10 @@ function Dashboard() {
             </div>
           </div>
         )}
-              Página <span className="font-bold text-foreground">{currentPage}</span> de <span className="font-bold text-foreground">{totalPages}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="h-8 text-xs"
-              >
-                Anterior
-              </Button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                  let pageNum = i + 1;
-                  if (totalPages > 5 && currentPage > 3) {
-                    pageNum = currentPage - 3 + i;
-                    if (pageNum + 2 > totalPages) pageNum = totalPages - 4 + i;
-                  }
-                  if (pageNum <= 0) return null;
-                  if (pageNum > totalPages) return null;
-
-                  return (
-                    <button
-                      key={pageNum}
-                      onClick={() => setCurrentPage(pageNum)}
-                      className={cn(
-                        "h-8 w-8 rounded-md text-xs font-medium transition-colors",
-                        currentPage === pageNum 
-                          ? "bg-primary text-primary-foreground shadow-sm" 
-                          : "hover:bg-muted text-muted-foreground"
-                      )}
-                    >
-                      {pageNum}
-                    </button>
-                  );
-                })}
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="h-8 text-xs"
-              >
-                Próxima
-              </Button>
-            </div>
-          </div>
-        )}
+      </div>
+    </div>
+  );
+}
       </div>
     </div>
   );

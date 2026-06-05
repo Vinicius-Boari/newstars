@@ -42,14 +42,17 @@ function LoginComponent() {
         });
         if (resolved) {
           email = resolved as string;
+        } else {
+          // Se não encontrou por username, tenta tratar como email direto
+          email = username;
         }
       }
 
-      console.log("Tentando entrar com email:", email);
+      console.log("Tentando entrar com:", email);
       
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
+        password: password.trim(),
       });
 
       if (error) {

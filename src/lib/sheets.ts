@@ -1,4 +1,4 @@
-import { fetchSpreadsheetData, updateSpreadsheetCell } from "./sheets.functions";
+import { fetchSpreadsheetData, updateSpreadsheetCell as updateSpreadsheetCellFn } from "./sheets.functions";
 
 export const DEFAULT_SHEET_ID = "1O6ImCfLvgxJF7LiSEFLc9qphD7z0ZpUPii947HCSPGg";
 
@@ -50,6 +50,7 @@ export async function fetchSheetValues(sheetId: string, sheetName: string): Prom
 export async function updateSheetValue(sheetId: string, range: string, value: any): Promise<void> {
   await updateSpreadsheetCell({ data: { sheetId, range, value } });
 }
+export const updateSpreadsheetCell = updateSpreadsheetCellFn;
 
 function toNumber(v: any): number {
   if (v == null || v === "") return 0;

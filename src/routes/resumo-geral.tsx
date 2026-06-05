@@ -310,7 +310,7 @@ function Dashboard() {
       }
       return true;
     });
-  }, [selectedQuinzena, localFilter, pctFilter, search, COMMISSIONS]);
+  }, [selectedQuinzena, localFilter, pctFilter, search, dateFilter, qtdParcFilter, vencFilter, COMMISSIONS]);
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginatedData = React.useMemo(() => {

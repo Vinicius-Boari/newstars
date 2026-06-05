@@ -848,83 +848,79 @@ function Dashboard() {
 
       {/* Main table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-        <div className="p-5 border-b border-border bg-muted/30 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <div className="relative">
+        <div className="p-4 md:p-5 border-b border-border bg-muted/30 space-y-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="relative w-full md:max-w-md">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por cliente ou pedido…"
+                placeholder="Buscar cliente ou pedido…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9 text-sm max-w-md"
+                className="pl-9 h-10 md:h-9 text-sm w-full"
               />
             </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <ComboboxFilter
-              value={localFilter}
-              onSelect={setLocalFilter}
-              placeholder="Todas as cidades"
-              options={[
-                { label: "Todas as cidades", value: "ALL" },
-                ...allLocals.map(l => ({ label: l, value: l }))
-              ]}
-            />
-            <ComboboxFilter
-              value={pctFilter}
-              onSelect={setPctFilter}
-              placeholder="Todas as %"
-              options={[
-                { label: "Todas as %", value: "ALL" },
-                ...allPercentages.map(p => ({ label: `${p}%`, value: String(p) }))
-              ]}
-            />
-            <ComboboxFilter
-              value={dateFilter}
-              onSelect={setDateFilter}
-              placeholder="Todas as datas"
-              options={[
-                { label: "Todas as datas", value: "ALL" },
-                ...allDates.map(d => ({ label: d, value: d }))
-              ]}
-            />
-            <ComboboxFilter
-              value={qtdParcFilter}
-              onSelect={setQtdParcFilter}
-              placeholder="Todas as parcelas"
-              options={[
-                { label: "Todas as parcelas", value: "ALL" },
-                ...allQtdParcs.map(q => ({ label: q, value: q }))
-              ]}
-            />
-            <ComboboxFilter
-              value={vencFilter}
-              onSelect={setVencFilter}
-              placeholder="Todos os vencimentos"
-              options={[
-                { label: "Todos os vencimentos", value: "ALL" },
-                ...allVencs.map(v => ({ label: v, value: v }))
-              ]}
-            />
-            {(search || localFilter !== "ALL" || pctFilter !== "ALL" || dateFilter !== "ALL" || qtdParcFilter !== "ALL" || vencFilter !== "ALL") && (
-              <button
-                onClick={clearFilters}
-                className="h-9 px-3 rounded-md border border-border text-xs font-medium hover:bg-accent flex items-center gap-1.5"
-              >
-                <X className="h-3 w-3" /> Limpar
-              </button>
-            )}
             {selectedQuinzena !== "ALL" && (
               <PedidoModal 
                 quinzena={selectedQuinzena} 
                 onSuccess={refetch} 
                 sheetId={sheetId} 
                 trigger={
-                  <Button size="sm" className="gap-2 bg-foreground text-background hover:bg-foreground/90 h-9">
-                    <Plus className="h-4 w-4" /> Adicionar
+                  <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-10 md:h-9 font-bold uppercase text-[11px] tracking-widest">
+                    <Plus className="h-4 w-4" /> Adicionar Pedido
                   </Button>
                 }
               />
+            )}
+          </div>
+          
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full">
+              <ComboboxFilter
+                value={localFilter}
+                onSelect={setLocalFilter}
+                placeholder="Cidades"
+                options={[
+                  { label: "Todas cidades", value: "ALL" },
+                  ...allLocals.map(l => ({ label: l, value: l }))
+                ]}
+              />
+              <ComboboxFilter
+                value={pctFilter}
+                onSelect={setPctFilter}
+                placeholder="%"
+                options={[
+                  { label: "Todas %", value: "ALL" },
+                  ...allPercentages.map(p => ({ label: `${p}%`, value: String(p) }))
+                ]}
+              />
+              <ComboboxFilter
+                value={dateFilter}
+                onSelect={setDateFilter}
+                placeholder="Datas"
+                options={[
+                  { label: "Todas datas", value: "ALL" },
+                  ...allDates.map(d => ({ label: d, value: d }))
+                ]}
+              />
+              <ComboboxFilter
+                value={vencFilter}
+                onSelect={setVencFilter}
+                placeholder="Vencimentos"
+                options={[
+                  { label: "Todos venc.", value: "ALL" },
+                  ...allVencs.map(v => ({ label: v, value: v }))
+                ]}
+              />
+            </div>
+            
+            {(search || localFilter !== "ALL" || pctFilter !== "ALL" || dateFilter !== "ALL" || qtdParcFilter !== "ALL" || vencFilter !== "ALL") && (
+              <Button
+                variant="ghost"
+                onClick={clearFilters}
+                className="h-8 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-3.5 w-3.5 mr-1" /> Limpar Filtros
+              </Button>
             )}
           </div>
         </div>

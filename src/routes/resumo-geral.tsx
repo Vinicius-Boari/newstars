@@ -255,6 +255,7 @@ function Dashboard() {
     }
   };
 
+  const [search, setSearch] = React.useState("");
   const [localFilter, setLocalFilter] = React.useState<string>("ALL");
   const [pctFilter, setPctFilter] = React.useState<string>("ALL");
   const [dateFilter, setDateFilter] = React.useState<string>("ALL");

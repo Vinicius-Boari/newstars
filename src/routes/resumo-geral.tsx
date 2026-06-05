@@ -145,6 +145,8 @@ function Dashboard() {
   const { data: abas = [], isLoading, isError, error, refetch } = useSheetsData();
   const { sheetId, setIsSettingsOpen } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 10;
 
   const handleUpdate = async (quinzena: string, rowIndex: number, colIndex: number, value: any) => {
     const cellId = `${quinzena}-${rowIndex}-${colIndex}`;
@@ -190,6 +192,17 @@ function Dashboard() {
       return true;
     });
   }, [selectedQuinzena, localFilter, pctFilter, search, COMMISSIONS]);
+
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const paginatedData = React.useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return filtered.slice(start, start + itemsPerPage);
+  }, [filtered, currentPage]);
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedQuinzena, localFilter, pctFilter, search]);
 
   const allRegistros = COMMISSIONS;
 
@@ -465,7 +478,7 @@ function Dashboard() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
-              {filtered.map((c, i) => (
+              {paginatedData.map((c, i) => (
                 <tr key={`${c.pedido}-${i}`} className="hover:bg-muted/30 transition-colors group">
                   <td className="px-3 py-3 text-xs whitespace-nowrap">
                     <EditableCell 
@@ -547,7 +560,62 @@ function Dashboard() {
             </div>
           )}
         </div>
+        
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-border bg-muted/10 flex items-center justify-between">
+            <div className="text-xs text-muted-foreground">
+              Página <span className="font-bold text-foreground">{currentPage}</span> de <span className="font-bold text-foreground">{totalPages}</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="h-8 text-xs"
+              >
+                Anterior
+              </Button>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  let pageNum = i + 1;
+                  if (totalPages > 5 && currentPage > 3) {
+                    pageNum = currentPage - 3 + i;
+                    if (pageNum + 2 > totalPages) pageNum = totalPages - 4 + i;
+                  }
+                  if (pageNum <= 0) return null;
+                  if (pageNum > totalPages) return null;
+
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => setCurrentPage(pageNum)}
+                      className={cn(
+                        "h-8 w-8 rounded-md text-xs font-medium transition-colors",
+                        currentPage === pageNum 
+                          ? "bg-primary text-primary-foreground shadow-sm" 
+                          : "hover:bg-muted text-muted-foreground"
+                      )}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="h-8 text-xs"
+              >
+                Próxima
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+    </div>
     </div>
   );
 }

@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2 } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2, Eye } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -363,6 +363,91 @@ function PedidoModal({
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
           </Button>
         </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ViewPedidoModal({ 
+  registro, 
+  trigger 
+}: { 
+  registro: Registro;
+  trigger: React.ReactNode;
+}) {
+  const [open, setOpen] = React.useState(false);
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        {trigger}
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Detalhes do Pedido</DialogTitle>
+        </DialogHeader>
+        <div className="grid gap-4 py-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Data</Label>
+              <div className="text-sm font-medium">{registro.data || "—"}</div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Pedido</Label>
+              <div className="text-sm font-mono">{registro.pedido || "—"}</div>
+            </div>
+          </div>
+          <div className="space-y-1">
+            <Label className="text-[10px] uppercase text-muted-foreground font-bold">Nome do Cliente</Label>
+            <div className="text-sm font-bold uppercase">{registro.nome || "—"}</div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Local/Cidade</Label>
+              <div className="text-sm">{registro.local || "—"}</div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Total</Label>
+              <div className="text-sm tabular-nums">{fmtMoney(registro.total)}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Comissão %</Label>
+              <div className="text-sm">
+                <span className={cn(
+                  "text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ring-inset",
+                  registro.pct === 5 ? "bg-blue-500/10 text-blue-600 ring-blue-500/20" :
+                  registro.pct === 10 ? "bg-purple-500/10 text-purple-600 ring-purple-500/20" :
+                  "bg-pink-500/10 text-pink-600 ring-pink-500/20"
+                )}>
+                  {registro.pct}%
+                </span>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Valor Parcela</Label>
+              <div className="text-sm tabular-nums">{fmtMoney(registro.vlParc)}</div>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Qtd Parcelas</Label>
+              <div className="text-sm"><ParcCell qtd={registro.qtdParc} /></div>
+            </div>
+            <div className="space-y-1">
+              <Label className="text-[10px] uppercase text-muted-foreground font-bold">Vencimento</Label>
+              <div className="text-sm">{registro.venc || "—"}</div>
+            </div>
+          </div>
+          <div className="space-y-1 pt-2 border-t border-border">
+            <Label className="text-[10px] uppercase text-green-600 font-bold">Valor a Receber</Label>
+            <div className="text-lg font-black text-green-600 tabular-nums">{fmtMoney(registro.receber)}</div>
+          </div>
+        </div>
+        <Button variant="outline" className="w-full uppercase font-bold text-[11px] tracking-widest" onClick={() => setOpen(false)}>
+          Fechar
+        </Button>
       </DialogContent>
     </Dialog>
   );
@@ -946,17 +1031,27 @@ function Dashboard() {
               {paginatedData.map((c, i) => (
                 <tr key={`${c.pedido}-${i}`} className="hover:bg-muted/30 transition-colors group">
                   <td className="px-3 py-3">
-                    <PedidoModal 
-                      quinzena={c.quinzena} 
-                      onSuccess={refetch} 
-                      sheetId={sheetId} 
-                      registro={c}
-                      trigger={
-                        <button className="text-muted-foreground hover:text-primary transition-colors">
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </button>
-                      }
-                    />
+                    <div className="flex items-center gap-2">
+                      <ViewPedidoModal 
+                        registro={c}
+                        trigger={
+                          <button className="text-muted-foreground hover:text-foreground transition-colors">
+                            <Eye className="h-3.5 w-3.5" />
+                          </button>
+                        }
+                      />
+                      <PedidoModal 
+                        quinzena={c.quinzena} 
+                        onSuccess={refetch} 
+                        sheetId={sheetId} 
+                        registro={c}
+                        trigger={
+                          <button className="text-muted-foreground hover:text-primary transition-colors">
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </button>
+                        }
+                      />
+                    </div>
                   </td>
                   <td className="px-3 py-3 text-xs whitespace-nowrap">
                     <EditableCell 
@@ -1039,17 +1134,27 @@ function Dashboard() {
               <div key={`${c.pedido}-${i}`} className="p-4 space-y-3 active:bg-muted/30 transition-colors">
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-foreground uppercase tracking-tight">{c.nome}</div>
-                  <PedidoModal 
-                    quinzena={c.quinzena} 
-                    onSuccess={refetch} 
-                    sheetId={sheetId} 
-                    registro={c}
-                    trigger={
-                      <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-primary active:text-primary-foreground">
-                        <Edit2 className="h-3.5 w-3.5" />
-                      </button>
-                    }
-                  />
+                  <div className="flex items-center gap-1">
+                    <ViewPedidoModal 
+                      registro={c}
+                      trigger={
+                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-foreground active:text-background">
+                          <Eye className="h-3.5 w-3.5" />
+                        </button>
+                      }
+                    />
+                    <PedidoModal 
+                      quinzena={c.quinzena} 
+                      onSuccess={refetch} 
+                      sheetId={sheetId} 
+                      registro={c}
+                      trigger={
+                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-primary active:text-primary-foreground">
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                      }
+                    />
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-y-2 text-[11px]">
                   <div><span className="text-muted-foreground uppercase mr-1">Data:</span> {c.data}</div>

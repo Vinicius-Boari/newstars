@@ -103,8 +103,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:description", content: "New Stars displays and allows editing of data from Google Sheets, synchronizing directly via a provided link." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a2da817c-a753-42bc-8e94-182785d1b618/id-preview-d1e60250--fddb9bb2-85a7-4d25-b747-bacdf99def15.lovable.app-1779797486422.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a2da817c-a753-42bc-8e94-182785d1b618/id-preview-d1e60250--fddb9bb2-85a7-4d25-b747-bacdf99def15.lovable.app-1779797486422.png" },
+      { name: "theme-color", content: "#ffffff" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "default" },
     ],
     links: [
+      { rel: "manifest", href: "/manifest.webmanifest" },
+      { rel: "apple-touch-icon", href: "/pwa-192x192.png" },
       {
         rel: "stylesheet",
         href: appCss,

@@ -2,7 +2,7 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import * as React from "react";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  PieChart, Pie, Cell, Legend,
+  PieChart, Pie, Cell, Legend, LabelList,
 } from "recharts";
 import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown } from "lucide-react";
 import { supabase } from "@/lib/supabase";
@@ -518,7 +518,14 @@ function Dashboard() {
                   formatter={(v: number) => fmtMoney(v)}
                   contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
                 />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="#3b82f6" barSize={20} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="#3b82f6" barSize={20}>
+                  <LabelList 
+                    dataKey="value" 
+                    position="right" 
+                    formatter={(v: number) => fmtMoney(v).replace("R$", "").trim()}
+                    style={{ fontSize: 9, fill: "var(--muted-foreground)", fontWeight: "bold" }}
+                  />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -541,7 +548,14 @@ function Dashboard() {
                   formatter={(v: number) => fmtMoney(v)}
                   contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
                 />
-                <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="#a855f7" barSize={20} />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="#a855f7" barSize={20}>
+                  <LabelList 
+                    dataKey="value" 
+                    position="right" 
+                    formatter={(v: number) => fmtMoney(v).replace("R$", "").trim()}
+                    style={{ fontSize: 9, fill: "var(--muted-foreground)", fontWeight: "bold" }}
+                  />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>

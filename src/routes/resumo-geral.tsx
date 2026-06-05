@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -56,6 +56,93 @@ function StatCard({ label, value, hint, icon: Icon, accent }: {
           <Icon className="h-5 w-5" />
         </div>
       </div>
+    </div>
+  );
+}
+
+function ComboboxFilter({ 
+  value, 
+  onSelect, 
+  options, 
+  placeholder, 
+  emptyMessage = "Nenhum resultado encontrado." 
+}: { 
+  value: string; 
+  onSelect: (val: string) => void; 
+  options: { label: string; value: string }[]; 
+  placeholder: string;
+  emptyMessage?: string;
+}) {
+  const [isOpen, setIsOpen] = React.useState(false);
+  const [search, setSearch] = React.useState("");
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const filteredOptions = React.useMemo(() => {
+    return options.filter(opt => 
+      opt.label.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [options, search]);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const selectedOption = options.find(opt => opt.value === value);
+
+  return (
+    <div className="relative" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex h-9 w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-xs font-medium ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-w-[140px]"
+      >
+        <span className="truncate">{selectedOption ? selectedOption.label : placeholder}</span>
+        <ChevronsUpDown className="ml-2 h-3 w-3 shrink-0 opacity-50" />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95 min-w-[180px]">
+          <div className="flex items-center border-b border-border px-2 pb-1 pt-1">
+            <Search className="mr-2 h-3 w-3 shrink-0 opacity-50" />
+            <input
+              className="flex h-7 w-full rounded-md bg-transparent py-2 text-xs outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+              placeholder="Procurar..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="mt-1">
+            {filteredOptions.length === 0 ? (
+              <div className="py-2 px-2 text-xs text-muted-foreground text-center">{emptyMessage}</div>
+            ) : (
+              filteredOptions.map((opt) => (
+                <button
+                  key={opt.value}
+                  className={cn(
+                    "relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-xs outline-none hover:bg-accent hover:text-accent-foreground transition-colors",
+                    value === opt.value && "bg-accent text-accent-foreground"
+                  )}
+                  onClick={() => {
+                    onSelect(opt.value);
+                    setIsOpen(false);
+                    setSearch("");
+                  }}
+                >
+                  <span className="truncate">{opt.label}</span>
+                  {value === opt.value && <Check className="ml-auto h-3 w-3" />}
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -444,24 +531,24 @@ function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <select
+            <ComboboxFilter
               value={localFilter}
-              onChange={(e) => setLocalFilter(e.target.value)}
-              className="h-9 px-3 rounded-md border border-border bg-background text-xs font-medium cursor-pointer"
-            >
-              <option value="ALL">Todas as cidades</option>
-              {allLocals.map(l => <option key={l} value={l}>{l}</option>)}
-            </select>
-            <select
+              onSelect={setLocalFilter}
+              placeholder="Todas as cidades"
+              options={[
+                { label: "Todas as cidades", value: "ALL" },
+                ...allLocals.map(l => ({ label: l, value: l }))
+              ]}
+            />
+            <ComboboxFilter
               value={pctFilter}
-              onChange={(e) => setPctFilter(e.target.value)}
-              className="h-9 px-3 rounded-md border border-border bg-background text-xs font-medium cursor-pointer"
-            >
-              <option value="ALL">Todas as %</option>
-              {allPercentages.map(p => (
-                <option key={p} value={String(p)}>{p}%</option>
-              ))}
-            </select>
+              onSelect={setPctFilter}
+              placeholder="Todas as %"
+              options={[
+                { label: "Todas as %", value: "ALL" },
+                ...allPercentages.map(p => ({ label: `${p}%`, value: String(p) }))
+              ]}
+            />
             {(search || localFilter !== "ALL" || pctFilter !== "ALL") && (
               <button
                 onClick={clearFilters}

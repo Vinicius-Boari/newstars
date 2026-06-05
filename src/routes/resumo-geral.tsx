@@ -255,9 +255,11 @@ function Dashboard() {
     }
   };
 
-  const [search, setSearch] = React.useState("");
   const [localFilter, setLocalFilter] = React.useState<string>("ALL");
   const [pctFilter, setPctFilter] = React.useState<string>("ALL");
+  const [dateFilter, setDateFilter] = React.useState<string>("ALL");
+  const [qtdParcFilter, setQtdParcFilter] = React.useState<string>("ALL");
+  const [vencFilter, setVencFilter] = React.useState<string>("ALL");
 
   const COMMISSIONS = React.useMemo(() => abas.flatMap(a => a.registros), [abas]);
   const QUINZENAS = React.useMemo(() => abas.map(a => a.quinzena), [abas]);

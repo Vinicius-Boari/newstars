@@ -5,6 +5,27 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets/v4";
 const MAX_SHEETS_PER_SYNC = 60;
 
+function getAllowedSheetIds(): string[] {
+  const raw = process.env.ALLOWED_SHEET_IDS ?? "";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
+function assertSheetIdAllowed(sheetId: string) {
+  const allowed = getAllowedSheetIds();
+  // If no allowlist is configured, fail closed to avoid arbitrary spreadsheet access.
+  if (allowed.length === 0) {
+    throw new Error(
+      "Nenhuma planilha autorizada configurada no servidor (ALLOWED_SHEET_IDS).",
+    );
+  }
+  if (!allowed.includes(sheetId)) {
+    throw new Error("Planilha não autorizada.");
+  }
+}
+
 const spreadsheetSchema = z.object({
   sheetId: z
     .string()
@@ -82,6 +103,7 @@ export const fetchSpreadsheetData = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => spreadsheetSchema.parse(input))
   .handler(async ({ data }) => {
+    assertSheetIdAllowed(data.sheetId);
     let sheetNames = data.sheetNames?.filter(Boolean) ?? [];
 
     if (sheetNames.length === 0) {
@@ -114,6 +136,7 @@ export const updateSpreadsheetCell = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => updateSchema.parse(input))
   .handler(async ({ data }) => {
+    assertSheetIdAllowed(data.sheetId);
     await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values:batchUpdate`, {
       method: "POST",
       body: JSON.stringify({

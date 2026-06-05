@@ -349,7 +349,7 @@ function Dashboard() {
     return [...map.entries()]
       .map(([name, value]) => ({ name, value }))
       .sort((a, b) => b.value - a.value)
-      .slice(0, 10);
+      .slice(0, 5);
   }, [filtered]);
 
   const perPct = React.useMemo(() => {
@@ -501,31 +501,54 @@ function Dashboard() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2 rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h3 className="text-sm font-semibold mb-1">A receber por quinzena</h3>
-          <p className="text-[11px] text-muted-foreground/60 mb-3">Timeline sincronizada em tempo real</p>
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h3 className="text-sm font-semibold mb-1">A receber por Cidade</h3>
+          <p className="text-[11px] text-muted-foreground/60 mb-3">Top 5 cidades com maior valor</p>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={perQuinzena} margin={{ left: -10, right: 10, top: 10 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 10, fill: "var(--muted-foreground)" }} />
-                <YAxis tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
-                  tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(1)}k` : String(v)} />
+              <BarChart data={perCidade} layout="vertical" margin={{ left: 30, right: 30, top: 10, bottom: 10 }}>
+                <XAxis type="number" hide />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                  width={80}
+                />
                 <Tooltip
                   formatter={(v: number) => fmtMoney(v)}
                   contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
                 />
-                <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                  {perQuinzena.map((_, i) => (
-                    <Cell key={i} fill={i % 2 === 0 ? "#a855f7" : "#ec4899"} />
-                  ))}
-                </Bar>
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="#3b82f6" barSize={20} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h3 className="text-sm font-semibold mb-3">Distribuição por % comissão</h3>
+          <h3 className="text-sm font-semibold mb-1">Ranking de Clientes</h3>
+          <p className="text-[11px] text-muted-foreground/60 mb-3">Maiores comissões por cliente</p>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={topClientes.slice(0, 5)} layout="vertical" margin={{ left: 30, right: 30, top: 10, bottom: 10 }}>
+                <XAxis type="number" hide />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  tick={{ fontSize: 10, fill: "var(--muted-foreground)" }}
+                  width={80}
+                />
+                <Tooltip
+                  formatter={(v: number) => fmtMoney(v)}
+                  contentStyle={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12 }}
+                />
+                <Bar dataKey="value" radius={[0, 4, 4, 0]} fill="#a855f7" barSize={20} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h3 className="text-sm font-semibold mb-3">Distribuição por %</h3>
           <div className="h-64">
             {perPct.length === 0 ? (
               <div className="h-full flex items-center justify-center text-xs text-muted-foreground">Sem dados</div>

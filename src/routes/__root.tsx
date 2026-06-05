@@ -15,6 +15,10 @@ import { useQuery } from "@tanstack/react-query";
 import appCss from "../styles.css?url";
 import { SettingsProvider } from "@/lib/settings-context";
 import { AppLayout } from "@/components/AppLayout";
+import { useEffect } from "react";
+import { syncPendingUpdates } from "@/lib/offline-sync";
+import { updateSpreadsheetCell } from "@/lib/sheets";
+
 
 function NotFoundComponent() {
   return (
@@ -141,6 +145,23 @@ function RootComponent() {
   const { pathname } = useRouterState({ select: (s) => s.location });
 
   const isLoginPage = pathname === "/login";
+
+  useEffect(() => {
+    const handleOnline = () => {
+      syncPendingUpdates(async (sheetId, range, value) => {
+        await updateSpreadsheetCell({ data: { sheetId, range, value } });
+      });
+    };
+
+    window.addEventListener("online", handleOnline);
+    
+    // Check for pending updates on mount if online
+    if (navigator.onLine) {
+      handleOnline();
+    }
+
+    return () => window.removeEventListener("online", handleOnline);
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>

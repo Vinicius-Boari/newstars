@@ -948,7 +948,7 @@ function Dashboard() {
               />
             </div>
             <PedidoModal 
-              quinzena={selectedQuinzena !== "ALL" ? selectedQuinzena : allQuinzenas[0]} 
+              quinzena={selectedQuinzena !== "ALL" ? selectedQuinzena : abas[0]?.quinzena} 
               onSuccess={refetch} 
               sheetId={sheetId} 
               trigger={

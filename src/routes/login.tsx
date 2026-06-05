@@ -34,22 +34,7 @@ function LoginComponent() {
     console.log("Iniciando tentativa de login para:", username);
 
     try {
-      // 1. Tentar login "legado" buscando na tabela admin_users (usuário e senha simples)
-      const { data: adminUser, error: adminError } = await supabase
-        .from("admin_users")
-        .select("id, username, role")
-        .eq("username", username)
-        .eq("password", password)
-        .maybeSingle();
-
-      if (adminUser) {
-        console.log("Login via admin_users bem-sucedido!");
-        localStorage.setItem("app_user", adminUser.username);
-        // Se o usuário já tiver um ID de Auth (vinculado), o fluxo abaixo continuará
-        // Caso contrário, precisaremos que a sessão seja válida de alguma forma.
-      }
-
-      // 2. Resolver username -> email para login real no Supabase Auth
+      // Resolve username -> email via secure server function (no hardcoded mapping)
       let email = username;
       if (!username.includes("@")) {
         const { data: resolved } = await supabase.rpc("get_email_for_username", {
@@ -68,20 +53,20 @@ function LoginComponent() {
       });
 
       if (error) {
-        console.error("Erro no login auth:", error);
-        // Se falhou no Auth mas temos o adminUser (login manual), podemos considerar sucesso 
-        // mas o beforeLoad vai barrar. Então precisamos que o login sempre passe pelo Auth 
-        // ou ajustar a lógica de proteção de rota.
-        // Como a melissa já tem conta no Auth, o fluxo padrão funciona.
+        console.error("Erro no login:", error);
         toast.error(error.message || "Usuário ou senha incorretos.");
         setIsLoading(false);
         return;
       }
 
       if (data.user) {
-        console.log("Login via Auth bem-sucedido!");
-        toast.success("Bem-vinda! ✨");
+        console.log("Login bem-sucedido!");
+        toast.success("Bem-vinda, Melissa! ✨");
+        
+        // Invalidate router state to ensure beforeLoad re-runs
         await invalidate();
+        
+        // Navigate immediately without timeout to avoid "stuck" feeling
         navigate({ to: "/resumo-geral" });
       }
     } catch (error) {

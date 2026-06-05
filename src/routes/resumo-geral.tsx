@@ -947,18 +947,16 @@ function Dashboard() {
                 className="pl-9 h-11 md:h-9 text-sm w-full"
               />
             </div>
-            {selectedQuinzena !== "ALL" && (
-              <PedidoModal 
-                quinzena={selectedQuinzena} 
-                onSuccess={refetch} 
-                sheetId={sheetId} 
-                trigger={
-                  <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest shadow-lg active:scale-[0.98] transition-transform">
-                    <Plus className="h-5 w-5 md:h-4 md:w-4" /> Adicionar Pedido
-                  </Button>
-                }
-              />
-            )}
+            <PedidoModal 
+              quinzena={selectedQuinzena !== "ALL" ? selectedQuinzena : abas[0]?.quinzena} 
+              onSuccess={refetch} 
+              sheetId={sheetId} 
+              trigger={
+                <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest shadow-lg active:scale-[0.98] transition-transform">
+                  <Plus className="h-5 w-5 md:h-4 md:w-4" /> Adicionar Pedido
+                </Button>
+              }
+            />
           </div>
           
           <div className="flex flex-wrap items-center gap-2">

@@ -934,14 +934,14 @@ function Dashboard() {
       {/* Main table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
         <div className="p-4 md:p-5 border-b border-border bg-muted/30 space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="relative w-full md:max-w-md">
+          <div className="flex flex-col gap-4">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Buscar cliente ou pedido…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-10 md:h-9 text-sm w-full"
+                className="pl-9 h-11 md:h-9 text-sm w-full"
               />
             </div>
             {selectedQuinzena !== "ALL" && (
@@ -950,8 +950,8 @@ function Dashboard() {
                 onSuccess={refetch} 
                 sheetId={sheetId} 
                 trigger={
-                  <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-10 md:h-9 font-bold uppercase text-[11px] tracking-widest">
-                    <Plus className="h-4 w-4" /> Adicionar Pedido
+                  <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest shadow-lg active:scale-[0.98] transition-transform">
+                    <Plus className="h-5 w-5 md:h-4 md:w-4" /> Adicionar Pedido
                   </Button>
                 }
               />

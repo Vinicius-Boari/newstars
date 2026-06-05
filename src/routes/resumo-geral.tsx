@@ -176,9 +176,12 @@ function Dashboard() {
   const QUINZENAS = React.useMemo(() => abas.map(a => a.quinzena), [abas]);
 
   const allLocals = React.useMemo(() => {
-    const s = new Set(COMMISSIONS.map(c => c.local).filter(l => l && l !== "-"));
+    const relevantRegistros = selectedQuinzena === "ALL" 
+      ? COMMISSIONS 
+      : COMMISSIONS.filter(c => c.quinzena === selectedQuinzena);
+    const s = new Set(relevantRegistros.map(c => c.local).filter(l => l && l !== "-"));
     return [...s].sort();
-  }, [COMMISSIONS]);
+  }, [COMMISSIONS, selectedQuinzena]);
 
   const filtered = React.useMemo(() => {
     return COMMISSIONS.filter(c => {

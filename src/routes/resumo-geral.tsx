@@ -377,6 +377,12 @@ function Dashboard() {
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
+  
+  // Set dark mode for this dashboard
+  React.useEffect(() => {
+    document.documentElement.classList.add("dark");
+    return () => document.documentElement.classList.remove("dark");
+  }, []);
 
   const handleUpdate = async (quinzena: string, rowIndex: number, colIndex: number, value: any) => {
     const cellId = `${quinzena}-${rowIndex}-${colIndex}`;

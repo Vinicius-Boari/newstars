@@ -779,7 +779,16 @@ function Dashboard() {
               </button>
             )}
             {selectedQuinzena !== "ALL" && (
-              <AddPedidoModal quinzena={selectedQuinzena} onAdd={refetch} sheetId={sheetId} />
+              <PedidoModal 
+                quinzena={selectedQuinzena} 
+                onSuccess={refetch} 
+                sheetId={sheetId} 
+                trigger={
+                  <Button size="sm" className="gap-2 bg-foreground text-background hover:bg-foreground/90 h-9">
+                    <Plus className="h-4 w-4" /> Adicionar
+                  </Button>
+                }
+              />
             )}
           </div>
         </div>
@@ -804,16 +813,17 @@ function Dashboard() {
               {paginatedData.map((c, i) => (
                 <tr key={`${c.pedido}-${i}`} className="hover:bg-muted/30 transition-colors group">
                   <td className="px-3 py-3">
-                    <button 
-                      onClick={() => {
-                        // This triggers the edit mode of all cells in the row by focusing them.
-                        // In this UI, editing is already available by clicking any cell.
-                        toast.info("Clique em qualquer campo para editar.");
-                      }}
-                      className="text-muted-foreground hover:text-primary transition-colors"
-                    >
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
+                    <PedidoModal 
+                      quinzena={c.quinzena} 
+                      onSuccess={refetch} 
+                      sheetId={sheetId} 
+                      registro={c}
+                      trigger={
+                        <button className="text-muted-foreground hover:text-primary transition-colors">
+                          <Edit2 className="h-3.5 w-3.5" />
+                        </button>
+                      }
+                    />
                   </td>
                   <td className="px-3 py-3 text-xs whitespace-nowrap">
                     <EditableCell 

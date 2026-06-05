@@ -811,7 +811,7 @@ function Dashboard() {
               Acompanhe suas vendas e comissões.
             </p>
             <div className="flex items-center gap-2 md:hidden">
-            <ContasModal currentUser={currentUser} />
+              <ContasModal currentUser={currentUser} />
             </div>
           </div>
         </div>

@@ -461,7 +461,7 @@ function ContasModal({ currentUser }: { currentUser: string }) {
 
   const fetchUsers = async () => {
     const { data } = await supabase.from("admin_users").select("id, username, role, password");
-    if (data) setUsers(data);
+    if (data) setUsers(data as any);
   };
 
   React.useEffect(() => {

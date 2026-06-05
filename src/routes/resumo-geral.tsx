@@ -921,8 +921,9 @@ function Dashboard() {
             )}
           </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
+        <div className="md:overflow-x-auto">
+          {/* Desktop Table View */}
+          <table className="hidden md:table w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/20">
                 <th className="px-3 py-2.5 w-10"></th>
@@ -1028,9 +1029,54 @@ function Dashboard() {
               ))}
             </tbody>
           </table>
+
+          {/* Mobile Card View */}
+          <div className="md:hidden divide-y divide-border/50">
+            {paginatedData.map((c, i) => (
+              <div key={`${c.pedido}-${i}`} className="p-4 space-y-3 active:bg-muted/30 transition-colors">
+                <div className="flex items-center justify-between">
+                  <div className="font-bold text-sm text-foreground uppercase tracking-tight">{c.nome}</div>
+                  <PedidoModal 
+                    quinzena={c.quinzena} 
+                    onSuccess={refetch} 
+                    sheetId={sheetId} 
+                    registro={c}
+                    trigger={
+                      <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-primary active:text-primary-foreground">
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </button>
+                    }
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-y-2 text-[11px]">
+                  <div><span className="text-muted-foreground uppercase mr-1">Data:</span> {c.data}</div>
+                  <div><span className="text-muted-foreground uppercase mr-1">Pedido:</span> <span className="font-mono">{c.pedido}</span></div>
+                  <div><span className="text-muted-foreground uppercase mr-1">Local:</span> {c.local}</div>
+                  <div><span className="text-muted-foreground uppercase mr-1">Venc:</span> {c.venc}</div>
+                </div>
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center gap-2">
+                    <span className={cn(
+                      "text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ring-inset",
+                      c.pct === 5 ? "bg-blue-500/10 text-blue-600 ring-blue-500/20" :
+                      c.pct === 10 ? "bg-purple-500/10 text-purple-600 ring-purple-500/20" :
+                      "bg-pink-500/10 text-pink-600 ring-pink-500/20"
+                    )}>
+                      {c.pct}%
+                    </span>
+                    <ParcCell qtd={c.qtdParc} />
+                  </div>
+                  <div className="text-sm font-black text-green-600 tracking-tight">
+                    {fmtMoney(c.receber)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {filtered.length === 0 && (
             <div className="py-20 text-center">
-              <p className="text-sm text-muted-foreground">Nenhum resultado encontrado para os filtros selecionados.</p>
+              <p className="text-sm text-muted-foreground">Nenhum resultado encontrado.</p>
             </div>
           )}
         </div>

@@ -1163,19 +1163,28 @@ function Dashboard() {
                   <div><span className="text-muted-foreground uppercase mr-1">Venc:</span> {c.venc}</div>
                 </div>
                 <div className="flex items-center justify-between pt-1">
-                  <div className="flex items-center gap-2">
-                    <span className={cn(
-                      "text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ring-inset",
-                      c.pct === 5 ? "bg-blue-500/10 text-blue-600 ring-blue-500/20" :
-                      c.pct === 10 ? "bg-purple-500/10 text-purple-600 ring-purple-500/20" :
-                      "bg-pink-500/10 text-pink-600 ring-pink-500/20"
-                    )}>
-                      {c.pct}%
-                    </span>
-                    <ParcCell qtd={c.qtdParc} />
+                  <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground">Comissão:</span>
+                      <span className={cn(
+                        "text-[10px] font-bold px-1.5 py-0.5 rounded-full ring-1 ring-inset",
+                        c.pct === 5 ? "bg-blue-500/10 text-blue-600 ring-blue-500/20" :
+                        c.pct === 10 ? "bg-purple-500/10 text-purple-600 ring-purple-500/20" :
+                        "bg-pink-500/10 text-pink-600 ring-pink-500/20"
+                      )}>
+                        {c.pct}%
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] uppercase font-bold text-muted-foreground">Parcelas:</span>
+                      <ParcCell qtd={c.qtdParc} />
+                    </div>
                   </div>
-                  <div className="text-sm font-black text-green-600 tracking-tight">
-                    {fmtMoney(c.receber)}
+                  <div className="text-right">
+                    <div className="text-[9px] uppercase font-bold text-green-600/70">A Receber</div>
+                    <div className="text-sm font-black text-green-600 tracking-tight">
+                      {fmtMoney(c.receber)}
+                    </div>
                   </div>
                 </div>
               </div>

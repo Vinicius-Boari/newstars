@@ -37,18 +37,16 @@ function LoginComponent() {
       // 1. Tentar login "legado" buscando na tabela admin_users (usuário e senha simples)
       const { data: adminUser, error: adminError } = await supabase
         .from("admin_users")
-        .select("username, role")
+        .select("id, username, role")
         .eq("username", username)
         .eq("password", password)
         .maybeSingle();
 
       if (adminUser) {
         console.log("Login via admin_users bem-sucedido!");
-        toast.success(`Bem-vinda, ${adminUser.username}! ✨`);
-        
-        // Simular sessão ou apenas navegar (o app usa getSession no beforeLoad)
-        // Para que o beforeLoad não barre o usuário, ele PRECISA ter uma sessão no Supabase Auth.
-        // Se o usuário não existe no Auth, tentamos o login real.
+        localStorage.setItem("app_user", adminUser.username);
+        // Se o usuário já tiver um ID de Auth (vinculado), o fluxo abaixo continuará
+        // Caso contrário, precisaremos que a sessão seja válida de alguma forma.
       }
 
       // 2. Resolver username -> email para login real no Supabase Auth

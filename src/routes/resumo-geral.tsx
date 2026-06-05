@@ -462,10 +462,10 @@ function Dashboard() {
 
   React.useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
-      // For this specific logic, we'll map the auth user to our admin table username
-      // Or if you're using a simple session-based check, we can store it.
-      // Assuming for now we check against a simple state or session.
-      setCurrentUser(user?.email?.split('@')[0] || "melissa"); // Fallback for testing
+      // Temporarily set to 'melissa' if logged in, for testing/visibility
+      if (user) {
+        setCurrentUser("melissa");
+      }
     });
   }, []);
   const { sheetId } = useSettings();

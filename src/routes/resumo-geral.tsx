@@ -589,15 +589,25 @@ function Dashboard() {
   const [currentUser, setCurrentUser] = React.useState<string>("");
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      
       const { data } = await supabase
         .from("admin_users")
         .select("username")
         .eq("id", user.id)
         .maybeSingle();
-      if (data?.username) setCurrentUser(data.username);
-    });
+        
+      if (data?.username) {
+        setCurrentUser(data.username);
+      } else {
+        // Fallback for custom login logic if profile isn't linked to auth.uid() yet
+        const savedUser = localStorage.getItem("app_user");
+        if (savedUser) setCurrentUser(savedUser);
+      }
+    };
+    fetchUser();
   }, []);
   const { sheetId } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);

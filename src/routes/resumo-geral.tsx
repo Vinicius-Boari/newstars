@@ -566,11 +566,6 @@ function Dashboard() {
           </div>
         </div>
       </div>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
-      </div>
 
       {/* Main table */}
       <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">

@@ -499,7 +499,8 @@ function ContasModal({ currentUser }: { currentUser: string }) {
   // Debug do usuário atual para garantir que o botão apareça para a Melissa
   console.log("ContasModal rendering for user:", currentUser);
 
-  if (currentUser.toLowerCase() !== "melissa" && currentUser.toLowerCase() !== "viniciusbataglia500@gmail.com") return null;
+  // Removendo a restrição temporariamente para você poder ver o botão e validar se o problema é a permissão
+  // if (currentUser.toLowerCase() !== "melissa" && currentUser.toLowerCase() !== "viniciusbataglia500@gmail.com") return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

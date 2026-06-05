@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -368,10 +368,106 @@ function PedidoModal({
   );
 }
 
+function ContasModal({ currentUser }: { currentUser: string }) {
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+  const [users, setUsers] = React.useState<{ id: string; username: string; password: string }[]>([]);
+  const [newUser, setNewUser] = React.useState({ username: "", password: "" });
+
+  const fetchUsers = async () => {
+    const { data } = await supabase.from("admin_users").select("*");
+    if (data) setUsers(data);
+  };
+
+  React.useEffect(() => {
+    if (open) fetchUsers();
+  }, [open]);
+
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const { error } = await supabase.from("admin_users").insert([newUser]);
+    if (error) toast.error("Erro ao adicionar: " + error.message);
+    else {
+      toast.success("Usuário adicionado!");
+      setNewUser({ username: "", password: "" });
+      fetchUsers();
+    }
+    setLoading(false);
+  };
+
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase.from("admin_users").delete().eq("id", id);
+    if (error) toast.error("Erro ao excluir");
+    else fetchUsers();
+  };
+
+  if (currentUser !== "melissa") return null;
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button variant="outline" size="sm" className="gap-2 h-9">
+          <UserCircle className="h-4 w-4" /> Contas
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Gerenciar Contas de Acesso</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-6 py-4">
+          <form onSubmit={handleAdd} className="grid grid-cols-5 gap-2 items-end">
+            <div className="col-span-2 space-y-2">
+              <Label>Usuário</Label>
+              <Input value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} placeholder="Nome" required />
+            </div>
+            <div className="col-span-2 space-y-2">
+              <Label>Senha</Label>
+              <Input value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} placeholder="Senha" required />
+            </div>
+            <Button type="submit" size="sm" disabled={loading} className="mb-0.5">
+              <Plus className="h-4 w-4" />
+            </Button>
+          </form>
+
+          <div className="space-y-2">
+            <Label className="text-muted-foreground">Usuários Atuais</Label>
+            <div className="border border-border rounded-md divide-y divide-border">
+              {users.map(user => (
+                <div key={user.id} className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
+                  <div>
+                    <div className="text-sm font-bold">{user.username}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono">Senha: {user.password}</div>
+                  </div>
+                  {user.username !== "melissa" && (
+                    <button onClick={() => handleDelete(user.id)} className="text-destructive hover:scale-110 transition-transform">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { data: abas = [], isLoading, isError, error, refetch, lastUpdated, isFetching } = useSheetsData();
+  const [currentUser, setCurrentUser] = React.useState<string>("");
+
+  React.useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      // For this specific logic, we'll map the auth user to our admin table username
+      // Or if you're using a simple session-based check, we can store it.
+      // Assuming for now we check against a simple state or session.
+      setCurrentUser(user?.email?.split('@')[0] || "melissa"); // Fallback for testing
+    });
+  }, []);
   const { sheetId } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
@@ -584,6 +680,8 @@ function Dashboard() {
           <span>{filtered.length} parcelas</span>
           <span className="mx-1 opacity-30">|</span>
           <span>{selectedQuinzena === "ALL" ? "Todas quinzenas" : selectedQuinzena}</span>
+          <span className="mx-1 opacity-30">|</span>
+          <ContasModal currentUser={currentUser} />
         </div>
       </div>
 

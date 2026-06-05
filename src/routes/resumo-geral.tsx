@@ -496,7 +496,7 @@ function ContasModal({ currentUser }: { currentUser: string }) {
     else fetchUsers();
   };
 
-  if (currentUser !== "melissa") return null;
+  if (currentUser.toLowerCase() !== "melissa") return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

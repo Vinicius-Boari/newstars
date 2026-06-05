@@ -456,12 +456,12 @@ function ViewPedidoModal({
 function ContasModal({ currentUser }: { currentUser: string }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [users, setUsers] = React.useState<{ id: string; username: string; role: string }[]>([]);
-  const [newUser, setNewUser] = React.useState({ username: "", role: "viewer" });
+  const [users, setUsers] = React.useState<{ id: string; username: string; role: string; password?: string }[]>([]);
+  const [newUser, setNewUser] = React.useState({ username: "", password: "", role: "viewer" });
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from("admin_users").select("id, username, role");
-    if (data) setUsers(data);
+    const { data } = await supabase.from("admin_users").select("id, username, role, password");
+    if (data) setUsers(data as any);
   };
 
   React.useEffect(() => {
@@ -471,11 +471,20 @@ function ContasModal({ currentUser }: { currentUser: string }) {
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.from("admin_users").insert([newUser as never]);
+    // Para simplificar e manter a compatibilidade com o login atual, 
+    // estamos inserindo sem vincular a um auth.uid() real no primeiro momento
+    // se for apenas para visualização/dashboard compartilhado.
+    // O login buscará o username/password na tabela admin_users.
+    const { error } = await supabase.from("admin_users").insert([{
+      username: newUser.username,
+      password: newUser.password,
+      role: newUser.role
+    }]);
+
     if (error) toast.error("Erro ao adicionar: " + error.message);
     else {
       toast.success("Usuário adicionado!");
-      setNewUser({ username: "", role: "viewer" });
+      setNewUser({ username: "", password: "", role: "viewer" });
       fetchUsers();
     }
     setLoading(false);
@@ -501,36 +510,70 @@ function ContasModal({ currentUser }: { currentUser: string }) {
           <DialogTitle>Gerenciar Contas de Acesso</DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
-          <form onSubmit={handleAdd} className="grid grid-cols-5 gap-2 items-end">
-            <div className="col-span-2 space-y-2">
-              <Label>Usuário</Label>
-              <Input value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} placeholder="Nome" required />
+          <form onSubmit={handleAdd} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Usuário</Label>
+                <Input 
+                  value={newUser.username} 
+                  onChange={e => setNewUser({...newUser, username: e.target.value})} 
+                  placeholder="Nome de usuário" 
+                  required 
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Senha</Label>
+                <Input 
+                  type="password"
+                  value={newUser.password} 
+                  onChange={e => setNewUser({...newUser, password: e.target.value})} 
+                  placeholder="Senha" 
+                  required 
+                />
+              </div>
             </div>
-            <div className="col-span-2 space-y-2">
-              <Label>Papel</Label>
-              <Input value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} placeholder="viewer ou admin" required />
+            <div className="flex items-end gap-4">
+              <div className="flex-1 space-y-2">
+                <Label>Papel (role)</Label>
+                <select 
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  value={newUser.role}
+                  onChange={e => setNewUser({...newUser, role: e.target.value})}
+                >
+                  <option value="viewer">Visualizador (viewer)</option>
+                  <option value="admin">Administrador (admin)</option>
+                </select>
+              </div>
+              <Button type="submit" disabled={loading} className="gap-2">
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
+                Adicionar
+              </Button>
             </div>
-            <Button type="submit" size="sm" disabled={loading} className="mb-0.5">
-              <Plus className="h-4 w-4" />
-            </Button>
           </form>
 
           <div className="space-y-2">
             <Label className="text-muted-foreground">Usuários Atuais</Label>
-            <div className="border border-border rounded-md divide-y divide-border">
+            <div className="border border-border rounded-md divide-y divide-border max-h-[250px] overflow-y-auto">
               {users.map(user => (
                 <div key={user.id} className="flex items-center justify-between p-3 hover:bg-muted/50 transition-colors">
                   <div>
                     <div className="text-sm font-bold">{user.username}</div>
-                    <div className="text-[10px] text-muted-foreground font-mono">Papel: {user.role}</div>
+                    <div className="text-[10px] text-muted-foreground font-mono">
+                      Papel: <span className="text-primary">{user.role}</span> | Senha: {user.password ? "••••••" : "—"}
+                    </div>
                   </div>
                   {user.username !== "melissa" && (
-                    <button onClick={() => handleDelete(user.id)} className="text-destructive hover:scale-110 transition-transform">
+                    <button onClick={() => handleDelete(user.id)} className="text-destructive hover:scale-110 transition-transform p-2">
                       <Trash2 className="h-4 w-4" />
                     </button>
                   )}
                 </div>
               ))}
+              {users.length === 0 && (
+                <div className="p-4 text-center text-xs text-muted-foreground">
+                  Nenhum usuário cadastrado.
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -12,7 +12,6 @@ import { useSheetsData } from "@/hooks/use-sheets-data";
 import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
-import { Settings } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
@@ -372,8 +371,8 @@ function PedidoModal({
 function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { data: abas = [], isLoading, isError, error, refetch } = useSheetsData();
-  const { sheetId, setIsSettingsOpen } = useSettings();
+  const { data: abas = [], isLoading, isError, error, refetch, lastUpdated, isFetching } = useSheetsData();
+  const { sheetId } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
   const itemsPerPage = 10;
@@ -547,15 +546,15 @@ function Dashboard() {
         </div>
         <h3 className="text-lg font-bold text-foreground">Falha ao carregar dados</h3>
         <p className="text-sm text-muted-foreground max-w-md">
-          {error || "Verifique se a planilha está pública e as credenciais API estão corretas nas configurações."}
+          {error || "Verifique se a planilha está pública e configurada corretamente."}
         </p>
         <Button 
           variant="outline" 
-          onClick={() => setIsSettingsOpen(true)}
+          onClick={() => refetch()}
           className="mt-4 gap-2"
         >
-          <Settings className="h-4 w-4" />
-          Configurar Credenciais
+          <RefreshCcw className={cn("h-4 w-4", isFetching && "animate-spin")} />
+          Tentar novamente
         </Button>
       </div>
     );
@@ -571,8 +570,20 @@ function Dashboard() {
             Acompanhe vendas, parcelas e comissões a receber por quinzena.
           </p>
         </div>
-        <div className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest bg-card border border-border rounded-full px-4 py-2">
-          {filtered.length} parcelas · {selectedQuinzena === "ALL" ? "Todas quinzenas" : selectedQuinzena}
+        <div className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest bg-card border border-border rounded-full px-4 py-2 flex items-center gap-2">
+          {isFetching ? (
+            <Loader2 className="h-3 w-3 animate-spin text-primary" />
+          ) : (
+            <RefreshCcw 
+              className={cn("h-3 w-3 cursor-pointer hover:text-primary transition-colors", isFetching && "animate-spin")} 
+              onClick={() => refetch()}
+            />
+          )}
+          <span>Atualizado às {lastUpdated || "—"}</span>
+          <span className="mx-1 opacity-30">|</span>
+          <span>{filtered.length} parcelas</span>
+          <span className="mx-1 opacity-30">|</span>
+          <span>{selectedQuinzena === "ALL" ? "Todas quinzenas" : selectedQuinzena}</span>
         </div>
       </div>
 

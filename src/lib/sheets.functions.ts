@@ -98,7 +98,7 @@ export const fetchSpreadsheetData = createServerFn({ method: "POST" })
 
     const url = new URL(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values:batchGet`);
     for (const sheetName of sheetNames) {
-      url.searchParams.append("ranges", `${quoteSheetName(sheetName)}!A:J`);
+      url.searchParams.append("ranges", `${quoteSheetName(sheetName)}!A:Z`);
     }
 
     const values = await gatewayFetch<{ valueRanges?: Array<{ values?: any[][] }> }>(url.toString());

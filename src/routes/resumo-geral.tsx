@@ -496,7 +496,7 @@ function ContasModal({ currentUser }: { currentUser: string }) {
     else fetchUsers();
   };
 
-  if (currentUser !== "melissa") return null;
+  if (currentUser.toLowerCase() !== "melissa") return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -589,15 +589,25 @@ function Dashboard() {
   const [currentUser, setCurrentUser] = React.useState<string>("");
 
   React.useEffect(() => {
-    supabase.auth.getUser().then(async ({ data: { user } }) => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
+      
       const { data } = await supabase
         .from("admin_users")
         .select("username")
         .eq("id", user.id)
         .maybeSingle();
-      if (data?.username) setCurrentUser(data.username);
-    });
+        
+      if (data?.username) {
+        setCurrentUser(data.username);
+      } else {
+        // Fallback for custom login logic if profile isn't linked to auth.uid() yet
+        const savedUser = localStorage.getItem("app_user");
+        if (savedUser) setCurrentUser(savedUser);
+      }
+    };
+    fetchUser();
   }, []);
   const { sheetId } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
@@ -797,7 +807,7 @@ function Dashboard() {
             <p className="text-xs md:text-sm text-muted-foreground/70">
               Acompanhe suas vendas e comissões.
             </p>
-            <div className="md:hidden">
+            <div className="flex items-center gap-2 md:hidden">
               <ContasModal currentUser={currentUser} />
             </div>
           </div>

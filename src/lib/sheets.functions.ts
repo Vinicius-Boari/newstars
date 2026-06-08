@@ -24,6 +24,11 @@ const updateSchema = z.object({
   value: z.union([z.string(), z.number(), z.boolean(), z.null()]),
 });
 
+const createSheetSchema = z.object({
+  sheetId: spreadsheetSchema.shape.sheetId,
+  title: z.string().min(1).max(100),
+});
+
 function getConnectorHeaders() {
   const lovableApiKey = process.env.LOVABLE_API_KEY;
   const connectionKey = process.env.GOOGLE_SHEETS_API_KEY_1 ?? process.env.GOOGLE_SHEETS_API_KEY;
@@ -119,6 +124,41 @@ export const updateSpreadsheetCell = createServerFn({ method: "POST" })
       body: JSON.stringify({
         valueInputOption: "USER_ENTERED",
         data: [{ range: data.range, values: [[data.value]] }],
+      }),
+    });
+
+    return { success: true };
+  });
+
+export const createSheet = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => createSheetSchema.parse(input))
+  .handler(async ({ data }) => {
+    // 1. Create the sheet
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}:batchUpdate`, {
+      method: "POST",
+      body: JSON.stringify({
+        requests: [
+          {
+            addSheet: {
+              properties: {
+                title: data.title,
+              },
+            },
+          },
+        ],
+      }),
+    });
+
+    // 2. Add headers to the new sheet
+    const headers = [
+      "DATA", "PEDIDO", "NOME", "LOCAL", "TOTAL", "PCT", "VL PARC", "QTD PARC", "VENC", "RECEBER"
+    ];
+
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.title)}!A1:J1?valueInputOption=USER_ENTERED`, {
+      method: "PUT",
+      body: JSON.stringify({
+        values: [headers],
       }),
     });
 

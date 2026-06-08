@@ -1,5 +1,5 @@
 import * as React from "react";
-import { fetchSpreadsheet, type QuinzenaData } from "@/lib/sheets";
+import { fetchSpreadsheet, createSheet, type QuinzenaData } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { toast } from "sonner";
 
@@ -121,10 +121,18 @@ export function useSheetsData(): SheetsDataResult {
     syncStatus,
     refetch: () => sync(false, true),
     addAba: async (name: string) => {
-      // No v4 API, adding a sheet requires a POST request with authentication.
-      // Since we are likely using an API Key (read-only), we might not be able to write.
-      // For now, let's just log or show a message.
-      toast.info("A edição de abas deve ser feita diretamente no Google Sheets.");
+      try {
+        setIsFetching(true);
+        setSyncStatus("syncing");
+        await createSheet({ data: { sheetId: effectiveSheetId, title: name } });
+        toast.success(`Aba "${name}" criada com sucesso no Google Sheets!`);
+        await sync(false, true); // Refresh data to show new tab
+      } catch (err: any) {
+        console.error("[Add Aba Error]", err);
+        toast.error("Erro ao criar aba: " + err.message);
+      } finally {
+        setIsFetching(false);
+      }
     },
     removeAba: async (name: string) => {
       toast.info("A exclusão de abas deve ser feita diretamente no Google Sheets.");

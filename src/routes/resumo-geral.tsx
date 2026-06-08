@@ -13,8 +13,9 @@ import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDI
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/resumo-geral")({
   beforeLoad: async () => {
@@ -322,13 +323,11 @@ function PedidoModal({
     }
   };
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+
   const handleDelete = async () => {
     if (!registro || !registro.rowIndex) return;
     
-    if (!confirm(`Tem certeza que deseja excluir o pedido de ${registro.nome}?`)) {
-      return;
-    }
-
     setLoading(true);
     try {
       toast.info("Excluindo pedido...");
@@ -340,6 +339,7 @@ function PedidoModal({
         }
       });
       toast.success("Pedido excluído com sucesso!");
+      setDeleteConfirmOpen(false);
       setOpen(false);
       await onSuccess();
     } catch (err: any) {
@@ -348,6 +348,7 @@ function PedidoModal({
       setLoading(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -409,17 +410,50 @@ function PedidoModal({
           </div>
           <div className="flex gap-2">
             {registro && (
-              <Button 
-                type="button" 
-                variant="destructive" 
-                className="flex-1" 
-                onClick={handleDelete}
-                disabled={loading}
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-2" /> Excluir</>}
-              </Button>
+              <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    className="flex-1" 
+                    disabled={loading}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-100">
+                  <DialogHeader className="flex flex-col items-center gap-3 pt-4">
+                    <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                      <AlertCircle className="h-6 w-6 text-red-500" />
+                    </div>
+                    <DialogTitle className="text-xl font-bold uppercase tracking-tight text-center">Confirmar Exclusão</DialogTitle>
+                    <p className="text-sm text-zinc-400 text-center px-4">
+                      Tem certeza que deseja excluir o pedido de <span className="text-zinc-100 font-bold">{registro.nome}</span>? Esta ação não pode ser desfeita.
+                    </p>
+                  </DialogHeader>
+                  <DialogFooter className="flex flex-row gap-3 sm:justify-center pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="flex-1 bg-transparent border-zinc-800 text-zinc-400 hover:text-zinc-100 h-11"
+                      onClick={() => setDeleteConfirmOpen(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="destructive" 
+                      className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold h-11"
+                      onClick={handleDelete}
+                      disabled={loading}
+                    >
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             )}
-            <Button type="submit" className="flex-[2]" disabled={loading}>
+            <Button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold h-11 rounded-xl" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
             </Button>
           </div>
@@ -528,15 +562,10 @@ function TransferModal({
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const handleTransfer = async (targetQuinzena: string) => {
-    if (targetQuinzena === registro.quinzena) {
-      toast.error("O pedido já está nesta quinzena.");
-      return;
-    }
+  const [transferTarget, setTransferTarget] = React.useState<string | null>(null);
 
-    if (!confirm(`Deseja transferir o pedido de ${registro.nome} para a quinzena ${targetQuinzena}?`)) {
-      return;
-    }
+  const handleTransfer = async () => {
+    if (!transferTarget) return;
 
     setLoading(true);
     try {
@@ -557,13 +586,14 @@ function TransferModal({
         data: {
           sheetId,
           fromQuinzena: registro.quinzena,
-          toQuinzena: targetQuinzena,
+          toQuinzena: transferTarget,
           rowIndex: registro.rowIndex,
           registroData
         }
       });
 
       toast.success("Pedido transferido com sucesso!");
+      setTransferTarget(null);
       setOpen(false);
       await onSuccess();
     } catch (err: any) {
@@ -574,34 +604,68 @@ function TransferModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <button className="text-muted-foreground hover:text-blue-500 transition-colors" title="Transferir Quinzena">
-          <ArrowRightLeft className="h-3.5 w-3.5" />
-        </button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-100">
-        <DialogHeader>
-          <DialogTitle className="text-xl font-bold uppercase tracking-tight">Transferir Quinzena</DialogTitle>
-        </DialogHeader>
-        <div className="py-4 space-y-4">
-          <p className="text-xs text-zinc-400 uppercase font-bold tracking-widest">Selecione o destino:</p>
-          <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
-            {quinzenas.filter(q => q !== registro.quinzena).map(q => (
-              <button
-                key={q}
-                disabled={loading}
-                onClick={() => handleTransfer(q)}
-                className="w-full text-left p-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group flex items-center justify-between"
-              >
-                <span className="text-sm font-bold uppercase text-zinc-300 group-hover:text-purple-400 transition-colors">{q}</span>
-                <ArrowRightLeft className="h-4 w-4 text-zinc-600 group-hover:text-purple-500 opacity-0 group-hover:opacity-100 transition-all" />
-              </button>
-            ))}
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <button className="text-muted-foreground hover:text-blue-500 transition-colors" title="Transferir Quinzena">
+            <ArrowRightLeft className="h-3.5 w-3.5" />
+          </button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-100">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-bold uppercase tracking-tight">Transferir Quinzena</DialogTitle>
+          </DialogHeader>
+          <div className="py-4 space-y-4">
+            <p className="text-xs text-zinc-400 uppercase font-bold tracking-widest">Selecione o destino:</p>
+            <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+              {quinzenas.filter(q => q !== registro.quinzena).map(q => (
+                <button
+                  key={q}
+                  disabled={loading}
+                  onClick={() => setTransferTarget(q)}
+                  className="w-full text-left p-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group flex items-center justify-between"
+                >
+                  <span className="text-sm font-bold uppercase text-zinc-300 group-hover:text-purple-400 transition-colors">{q}</span>
+                  <ArrowRightLeft className="h-4 w-4 text-zinc-600 group-hover:text-purple-500 opacity-0 group-hover:opacity-100 transition-all" />
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!transferTarget} onOpenChange={(isOpen) => !isOpen && setTransferTarget(null)}>
+        <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-100">
+          <DialogHeader className="flex flex-col items-center gap-3 pt-4">
+            <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
+              <ArrowRightLeft className="h-6 w-6 text-blue-500" />
+            </div>
+            <DialogTitle className="text-xl font-bold uppercase tracking-tight text-center">Confirmar Transferência</DialogTitle>
+            <p className="text-sm text-zinc-400 text-center px-4">
+              Deseja transferir o pedido de <span className="text-zinc-100 font-bold">{registro.nome}</span> para a quinzena <span className="text-blue-400 font-bold">{transferTarget}</span>?
+            </p>
+          </DialogHeader>
+          <DialogFooter className="flex flex-row gap-3 sm:justify-center pt-4">
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1 bg-transparent border-zinc-800 text-zinc-400 hover:text-zinc-100 h-11"
+              onClick={() => setTransferTarget(null)}
+            >
+              Cancelar
+            </Button>
+            <Button 
+              type="button" 
+              className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold h-11"
+              onClick={handleTransfer}
+              disabled={loading}
+            >
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 

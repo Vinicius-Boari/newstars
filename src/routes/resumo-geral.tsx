@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2, Eye, ArrowRightLeft } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2, Eye, ArrowRightLeft, LogOut } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -905,8 +905,16 @@ function Dashboard() {
             <p className="text-xs md:text-sm text-muted-foreground/70">
               Acompanhe suas vendas e comissões.
             </p>
-            <div className="md:hidden">
+            <div className="flex items-center gap-2 md:hidden">
               <ContasModal isAdmin={isAdmin} />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => supabase.auth.signOut()}
+                className="h-9 w-9 text-muted-foreground"
+              >
+                <LogOut className="h-4 w-4" />
+              </Button>
             </div>
           </div>
         </div>
@@ -927,6 +935,14 @@ function Dashboard() {
             <span>{filtered.length} parcelas</span>
             <span className="mx-1 opacity-30">|</span>
             <ContasModal isAdmin={isAdmin} />
+            <span className="mx-1 opacity-30">|</span>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="flex items-center gap-1.5 hover:text-primary transition-all cursor-pointer"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>Sair</span>
+            </button>
           </div>
         </div>
       </div>

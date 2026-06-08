@@ -172,10 +172,10 @@ export const createSheet = createServerFn({ method: "POST" })
 
     // 2. Add headers to the new sheet
     const headers = [
-      "DATA", "PEDIDO", "NOME", "LOCAL", "TOTAL", "PCT", "VL PARC", "QTD PARC", "VENC", "RECEBER"
+      "DATA", "PEDIDO", "NOME", "LOCAL", "TOTAL", "PCT", "VL PARC", "QTD PARC", "VENC", "RECEBER", "PAGO"
     ];
 
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.title)}!A1:J1?valueInputOption=USER_ENTERED`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.title)}!A1:K1?valueInputOption=USER_ENTERED`, {
       method: "PUT",
       body: JSON.stringify({
         values: [headers],
@@ -202,7 +202,7 @@ export const transferPedido = createServerFn({ method: "POST" })
     });
 
     // Clear from fromQuinzena
-    const range = `${quoteSheetName(data.fromQuinzena)}!A${data.rowIndex}:J${data.rowIndex}`;
+    const range = `${quoteSheetName(data.fromQuinzena)}!A${data.rowIndex}:K${data.rowIndex}`;
     await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${range}:clear`, {
       method: "POST",
     });
@@ -214,7 +214,7 @@ export const appendPedido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => appendPedidoSchema.parse(input))
   .handler(async ({ data }) => {
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.quinzena)}!A:J:append?valueInputOption=USER_ENTERED`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.quinzena)}!A:K:append?valueInputOption=USER_ENTERED`, {
       method: "POST",
       body: JSON.stringify({
         values: [data.values],

@@ -253,7 +253,8 @@ function PedidoModal({
     vlParc: registro?.vlParc?.toString() || "",
     qtdParc: registro?.qtdParc || "",
     venc: registro?.venc || "",
-    receber: registro?.receber?.toString() || ""
+    receber: registro?.receber?.toString() || "",
+    pago: registro?.pago || "NÃO"
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -279,6 +280,7 @@ function PedidoModal({
         { col: COL_INDICES.QTD_PARC, val: formData.qtdParc },
         { col: COL_INDICES.VENC, val: formData.venc },
         { col: COL_INDICES.RECEBER, val: Number(formData.receber) || 0 },
+        { col: COL_INDICES.PAGO, val: formData.pago },
       ];
 
       if (isEditing && rowIndex) {
@@ -302,6 +304,7 @@ function PedidoModal({
           formData.qtdParc,
           formData.venc,
           Number(formData.receber) || 0,
+          formData.pago,
         ];
 
         await appendPedido({
@@ -404,9 +407,23 @@ function PedidoModal({
               <Input id="venc" value={formData.venc} onChange={e => setFormData({...formData, venc: e.target.value})} />
             </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="receber">Valor a Receber</Label>
-            <Input id="receber" type="number" step="any" value={formData.receber} onChange={e => setFormData({...formData, receber: e.target.value})} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="receber">Valor a Receber</Label>
+              <Input id="receber" type="number" step="any" value={formData.receber} onChange={e => setFormData({...formData, receber: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="pago">Pago</Label>
+              <select 
+                id="pago"
+                value={formData.pago}
+                onChange={e => setFormData({...formData, pago: e.target.value})}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="SIM">SIM</option>
+                <option value="NÃO">NÃO</option>
+              </select>
+            </div>
           </div>
           <div className="flex gap-2">
             {registro && (
@@ -579,7 +596,8 @@ function TransferModal({
         registro.vlParc,
         registro.qtdParc,
         registro.venc,
-        registro.receber
+        registro.receber,
+        registro.pago
       ];
 
       await transferPedido({
@@ -809,6 +827,7 @@ function Dashboard() {
   const [dateFilter, setDateFilter] = React.useState<string>("ALL");
   const [qtdParcFilter, setQtdParcFilter] = React.useState<string>("ALL");
   const [vencFilter, setVencFilter] = React.useState<string>("ALL");
+  const [pagoFilter, setPagoFilter] = React.useState<string>("ALL");
 
   const COMMISSIONS = React.useMemo(() => abas.flatMap(a => a.registros), [abas]);
   const QUINZENAS = React.useMemo(() => abas.map(a => a.quinzena), [abas]);
@@ -852,6 +871,7 @@ function Dashboard() {
       if (dateFilter !== "ALL" && c.data !== dateFilter) return false;
       if (qtdParcFilter !== "ALL" && c.qtdParc !== qtdParcFilter) return false;
       if (vencFilter !== "ALL" && c.venc !== vencFilter) return false;
+      if (pagoFilter !== "ALL" && c.pago !== pagoFilter) return false;
       if (search) {
         const q = search.toLowerCase();
         if (!c.nome.toLowerCase().includes(q) && !c.pedido.toLowerCase().includes(q)) return false;
@@ -869,7 +889,7 @@ function Dashboard() {
   // Reset to first page when filters change
   React.useEffect(() => {
     setCurrentPage(1);
-  }, [selectedQuinzena, localFilter, pctFilter, search, dateFilter, qtdParcFilter, vencFilter]);
+  }, [selectedQuinzena, localFilter, pctFilter, search, dateFilter, qtdParcFilter, vencFilter, pagoFilter]);
 
   const allRegistros = COMMISSIONS;
 
@@ -927,6 +947,7 @@ function Dashboard() {
     setDateFilter("ALL");
     setQtdParcFilter("ALL");
     setVencFilter("ALL");
+    setPagoFilter("ALL");
   };
 
   if (isLoading && abas.length === 0) {
@@ -1267,9 +1288,19 @@ function Dashboard() {
                   ...allVencs.map(v => ({ label: v, value: v }))
                 ]}
               />
+              <ComboboxFilter
+                value={pagoFilter}
+                onSelect={setPagoFilter}
+                placeholder="Pago"
+                options={[
+                  { label: "Todos status", value: "ALL" },
+                  { label: "SIM", value: "SIM" },
+                  { label: "NÃO", value: "NÃO" }
+                ]}
+              />
             </div>
             
-            {(search || localFilter !== "ALL" || pctFilter !== "ALL" || dateFilter !== "ALL" || qtdParcFilter !== "ALL" || vencFilter !== "ALL") && (
+            {(search || localFilter !== "ALL" || pctFilter !== "ALL" || dateFilter !== "ALL" || qtdParcFilter !== "ALL" || vencFilter !== "ALL" || pagoFilter !== "ALL") && (
               <Button
                 variant="ghost"
                 onClick={clearFilters}
@@ -1295,6 +1326,7 @@ function Dashboard() {
                 <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-right">Vl Parc</th>
                 <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Qtd Parc</th>
                 <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">Venc</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">Pago</th>
                 <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-green-600 font-bold text-right">Receber</th>
               </tr>
             </thead>
@@ -1391,6 +1423,14 @@ function Dashboard() {
                       onSave={(val) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.VENC, val)}
                       isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.VENC}`}
                     />
+                  </td>
+                  <td className="px-3 py-3 text-center text-xs">
+                    <span className={cn(
+                      "font-bold px-1.5 py-0.5 rounded-full text-[10px]",
+                      c.pago === "SIM" ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+                    )}>
+                      {c.pago}
+                    </span>
                   </td>
                   <td className="px-3 py-3 text-right tabular-nums font-bold text-green-600">
                     <EditableCell 

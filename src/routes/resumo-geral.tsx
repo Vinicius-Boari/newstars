@@ -410,17 +410,50 @@ function PedidoModal({
           </div>
           <div className="flex gap-2">
             {registro && (
-              <Button 
-                type="button" 
-                variant="destructive" 
-                className="flex-1" 
-                onClick={handleDelete}
-                disabled={loading}
-              >
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-2" /> Excluir</>}
-              </Button>
+              <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+                <DialogTrigger asChild>
+                  <Button 
+                    type="button" 
+                    variant="destructive" 
+                    className="flex-1" 
+                    disabled={loading}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" /> Excluir
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-100">
+                  <DialogHeader className="flex flex-col items-center gap-3 pt-4">
+                    <div className="h-12 w-12 rounded-full bg-red-500/10 flex items-center justify-center">
+                      <AlertCircle className="h-6 w-6 text-red-500" />
+                    </div>
+                    <DialogTitle className="text-xl font-bold uppercase tracking-tight text-center">Confirmar Exclusão</DialogTitle>
+                    <p className="text-sm text-zinc-400 text-center px-4">
+                      Tem certeza que deseja excluir o pedido de <span className="text-zinc-100 font-bold">{registro.nome}</span>? Esta ação não pode ser desfeita.
+                    </p>
+                  </DialogHeader>
+                  <DialogFooter className="flex flex-row gap-3 sm:justify-center pt-4">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="flex-1 bg-transparent border-zinc-800 text-zinc-400 hover:text-zinc-100 h-11"
+                      onClick={() => setDeleteConfirmOpen(false)}
+                    >
+                      Cancelar
+                    </Button>
+                    <Button 
+                      type="button" 
+                      variant="destructive" 
+                      className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold h-11"
+                      onClick={handleDelete}
+                      disabled={loading}
+                    >
+                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Confirmar"}
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             )}
-            <Button type="submit" className="flex-[2]" disabled={loading}>
+            <Button type="submit" className="flex-[2] bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold h-11 rounded-xl" disabled={loading}>
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
             </Button>
           </div>

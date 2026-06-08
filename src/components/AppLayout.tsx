@@ -214,13 +214,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <span>Sincronizar</span>
           </button>
 
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-destructive hover:bg-destructive/10 transition-all cursor-pointer"
-          >
-            <LogOut className="h-4 w-4 shrink-0" />
-            <span>Sair</span>
-          </button>
+          {/* Botão de sair removido conforme solicitado para manter o login persistente */}
+
         </div>
       </aside>
 

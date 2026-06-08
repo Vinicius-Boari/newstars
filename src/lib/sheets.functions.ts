@@ -142,7 +142,7 @@ export const updateSpreadsheetCell = createServerFn({ method: "POST" })
     await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values:batchUpdate`, {
       method: "POST",
       body: JSON.stringify({
-        valueInputOption: "USER_ENTERED",
+        valueInputOption: "RAW",
         data: [{ range: data.range, values: [[data.value]] }],
       }),
     });
@@ -175,7 +175,7 @@ export const createSheet = createServerFn({ method: "POST" })
       "DATA", "PEDIDO", "NOME", "LOCAL", "TOTAL", "PCT", "VL PARC", "QTD PARC", "VENC", "RECEBER", "PAGO"
     ];
 
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.title)}!A1:K1?valueInputOption=USER_ENTERED`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.title)}!A1:K1?valueInputOption=RAW`, {
       method: "PUT",
       body: JSON.stringify({
         values: [headers],
@@ -194,7 +194,7 @@ export const transferPedido = createServerFn({ method: "POST" })
     // Actually, to "move" we should append to target and clear source.
     
     // Append to toQuinzena
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.toQuinzena)}!A:A:append?valueInputOption=USER_ENTERED`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.toQuinzena)}!A:A:append?valueInputOption=RAW`, {
       method: "POST",
       body: JSON.stringify({
         values: [data.registroData],
@@ -214,7 +214,7 @@ export const appendPedido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => appendPedidoSchema.parse(input))
   .handler(async ({ data }) => {
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.quinzena)}!A:K:append?valueInputOption=USER_ENTERED`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.quinzena)}!A:K:append?valueInputOption=RAW`, {
       method: "POST",
       body: JSON.stringify({
         values: [data.values],

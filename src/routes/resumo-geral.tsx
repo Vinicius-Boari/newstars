@@ -672,7 +672,7 @@ function ContasModal({ isAdmin }: { isAdmin: boolean }) {
                     <div className="text-sm font-bold">{user.username}</div>
                     <div className="text-[10px] text-muted-foreground font-mono">Papel: {user.role}</div>
                   </div>
-                  {user.username !== "melissa" && (
+                  {!user.protected && (
                     <button onClick={() => handleDelete(user.id)} className="text-destructive hover:scale-110 transition-transform">
                       <Trash2 className="h-4 w-4" />
                     </button>

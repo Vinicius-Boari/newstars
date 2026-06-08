@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Lock } from "lucide-react";
-import { resolveUsernameEmail } from "@/lib/auth.functions";
+import { signInWithUsername } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
@@ -34,36 +34,30 @@ function LoginComponent() {
     setIsLoading(true);
 
     try {
-      // Resolve username -> email via secure server function (admin lookup, no anon RPC)
-      let email = username;
-      if (!username.includes("@")) {
-        try {
-          const resolved = await resolveUsernameEmail({ data: { username } });
-          if (resolved?.email) email = resolved.email;
-        } catch {
-          // fall through with raw input
-        }
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: password.trim(),
+      const result = await signInWithUsername({
+        data: { username: username.trim(), password: password.trim() },
       });
 
-      if (error) {
-        console.error("Erro no login:", error);
-        toast.error(error.message || "Usuário ou senha incorretos.");
+      if (result.error || !result.session) {
+        toast.error(result.error || "Usuário ou senha incorretos.");
         setIsLoading(false);
         return;
       }
 
-      if (data.user) {
+      const { error } = await supabase.auth.setSession({
+        access_token: result.session.access_token,
+        refresh_token: result.session.refresh_token,
+      });
+
+      if (error) {
+        toast.error("Erro ao iniciar sessão.");
+        setIsLoading(false);
+        return;
+      }
+
+      {
         toast.success("Bem-vinda, Melissa! ✨");
-        
-        // Invalidate router state to ensure beforeLoad re-runs
         await invalidate();
-        
-        // Navigate immediately without timeout to avoid "stuck" feeling
         navigate({ to: "/resumo-geral" });
       }
     } catch (error) {

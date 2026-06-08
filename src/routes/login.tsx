@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, Lock } from "lucide-react";
+import { resolveUsernameEmail } from "@/lib/auth.functions";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
@@ -33,17 +34,14 @@ function LoginComponent() {
     setIsLoading(true);
 
     try {
-      // Resolve username -> email via secure server function (no hardcoded mapping)
+      // Resolve username -> email via secure server function (admin lookup, no anon RPC)
       let email = username;
       if (!username.includes("@")) {
-        const { data: resolved } = await supabase.rpc("get_email_for_username", {
-          _username: username,
-        });
-        if (resolved) {
-          email = resolved as string;
-        } else {
-          // Se não encontrou por username, tenta tratar como email direto
-          email = username;
+        try {
+          const resolved = await resolveUsernameEmail({ data: { username } });
+          if (resolved?.email) email = resolved.email;
+        } catch {
+          // fall through with raw input
         }
       }
 

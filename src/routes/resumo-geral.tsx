@@ -833,7 +833,7 @@ function Dashboard() {
             <div className="grid gap-6 py-6">
               <div className="space-y-3">
                 <Label htmlFor="nome-quinzena" className="text-xs font-bold uppercase text-zinc-400 tracking-wider">
-                  Nome da Quinzena (Exatamente como na Aba)
+                  Nome da Quinzena
                 </Label>
                 <Input 
                   id="nome-quinzena" 
@@ -851,9 +851,6 @@ function Dashboard() {
                     }
                   }}
                 />
-                <p className="text-[11px] text-zinc-500 leading-relaxed italic">
-                  O nome deve ser idêntico ao que aparece na aba lá no Google Sheets.
-                </p>
               </div>
               <Button 
                 className="h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold uppercase text-xs tracking-widest rounded-xl transition-all shadow-lg shadow-purple-500/20"

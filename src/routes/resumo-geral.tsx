@@ -4,12 +4,12 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2, Eye } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2, Eye, ArrowRightLeft } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID } from "@/lib/sheets";
+import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID, transferPedido } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -448,6 +448,97 @@ function ViewPedidoModal({
         <Button variant="outline" className="w-full uppercase font-bold text-[11px] tracking-widest" onClick={() => setOpen(false)}>
           Fechar
         </Button>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function TransferModal({ 
+  registro, 
+  quinzenas, 
+  sheetId, 
+  onSuccess 
+}: { 
+  registro: Registro; 
+  quinzenas: string[]; 
+  sheetId: string; 
+  onSuccess: () => Promise<void> 
+}) {
+  const [open, setOpen] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
+
+  const handleTransfer = async (targetQuinzena: string) => {
+    if (targetQuinzena === registro.quinzena) {
+      toast.error("O pedido já está nesta quinzena.");
+      return;
+    }
+
+    if (!confirm(`Deseja transferir o pedido de ${registro.nome} para a quinzena ${targetQuinzena}?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const registroData = [
+        registro.data,
+        registro.pedido,
+        registro.nome,
+        registro.local,
+        registro.total,
+        registro.pct,
+        registro.vlParc,
+        registro.qtdParc,
+        registro.venc,
+        registro.receber
+      ];
+
+      await transferPedido({
+        data: {
+          sheetId,
+          fromQuinzena: registro.quinzena,
+          toQuinzena: targetQuinzena,
+          rowIndex: registro.rowIndex,
+          registroData
+        }
+      });
+
+      toast.success("Pedido transferido com sucesso!");
+      setOpen(false);
+      await onSuccess();
+    } catch (err: any) {
+      toast.error("Erro ao transferir: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <button className="text-muted-foreground hover:text-blue-500 transition-colors" title="Transferir Quinzena">
+          <ArrowRightLeft className="h-3.5 w-3.5" />
+        </button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[400px] bg-zinc-950 border-zinc-800 text-zinc-100">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold uppercase tracking-tight">Transferir Quinzena</DialogTitle>
+        </DialogHeader>
+        <div className="py-4 space-y-4">
+          <p className="text-xs text-zinc-400 uppercase font-bold tracking-widest">Selecione o destino:</p>
+          <div className="grid grid-cols-1 gap-2 max-h-[300px] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-zinc-800">
+            {quinzenas.filter(q => q !== registro.quinzena).map(q => (
+              <button
+                key={q}
+                disabled={loading}
+                onClick={() => handleTransfer(q)}
+                className="w-full text-left p-3 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-purple-500/50 hover:bg-purple-500/5 transition-all group flex items-center justify-between"
+              >
+                <span className="text-sm font-bold uppercase text-zinc-300 group-hover:text-purple-400 transition-colors">{q}</span>
+                <ArrowRightLeft className="h-4 w-4 text-zinc-600 group-hover:text-purple-500 opacity-0 group-hover:opacity-100 transition-all" />
+              </button>
+            ))}
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
@@ -1106,6 +1197,12 @@ function Dashboard() {
                           </button>
                         }
                       />
+                      <TransferModal 
+                        registro={c} 
+                        quinzenas={QUINZENAS} 
+                        sheetId={sheetId} 
+                        onSuccess={refetch} 
+                      />
                     </div>
                   </td>
                   <td className="px-3 py-3 text-xs whitespace-nowrap">
@@ -1208,6 +1305,12 @@ function Dashboard() {
                           <Edit2 className="h-3.5 w-3.5" />
                         </button>
                       }
+                    />
+                    <TransferModal 
+                      registro={c} 
+                      quinzenas={QUINZENAS} 
+                      sheetId={sheetId} 
+                      onSuccess={refetch} 
                     />
                   </div>
                 </div>

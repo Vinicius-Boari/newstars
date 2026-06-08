@@ -1,4 +1,4 @@
-import { fetchSpreadsheetData, updateSpreadsheetCell as updateSpreadsheetCellFn, createSheet as createSheetFn } from "./sheets.functions";
+import { fetchSpreadsheetData, updateSpreadsheetCell as updateSpreadsheetCellFn, createSheet as createSheetFn, transferPedido as transferPedidoFn } from "./sheets.functions";
 import { savePendingUpdate } from "./offline-sync";
 
 
@@ -64,6 +64,7 @@ export async function updateSheetValue(sheetId: string, range: string, value: an
 }
 export const updateSpreadsheetCell = updateSpreadsheetCellFn;
 export const createSheet = createSheetFn;
+export const transferPedido = transferPedidoFn;
 
 function toNumber(v: any): number {
   if (v == null || v === "") return 0;

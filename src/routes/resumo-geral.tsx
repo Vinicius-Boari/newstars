@@ -1484,6 +1484,15 @@ function Dashboard() {
                   <div><span className="text-muted-foreground uppercase mr-1">Pedido:</span> <span className="font-mono">{c.pedido}</span></div>
                   <div><span className="text-muted-foreground uppercase mr-1">Local:</span> {c.local}</div>
                   <div><span className="text-muted-foreground uppercase mr-1">Venc:</span> {c.venc}</div>
+                  <div className="flex items-center gap-1">
+                    <span className="text-muted-foreground uppercase mr-1">Pago:</span>
+                    <span className={cn(
+                      "font-bold px-1.5 py-0.5 rounded-full text-[9px]",
+                      c.pago === "SIM" ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
+                    )}>
+                      {c.pago}
+                    </span>
+                  </div>
                 </div>
                 <div className="flex items-center justify-between pt-1">
                   <div className="flex flex-col gap-1">

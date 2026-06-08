@@ -29,6 +29,12 @@ const createSheetSchema = z.object({
   title: z.string().min(1).max(100),
 });
 
+const appendPedidoSchema = z.object({
+  sheetId: spreadsheetSchema.shape.sheetId,
+  quinzena: z.string(),
+  values: z.array(z.any()),
+});
+
 const transferPedidoSchema = z.object({
   sheetId: spreadsheetSchema.shape.sheetId,
   fromQuinzena: z.string(),
@@ -193,6 +199,20 @@ export const transferPedido = createServerFn({ method: "POST" })
     const range = `${quoteSheetName(data.fromQuinzena)}!A${data.rowIndex}:J${data.rowIndex}`;
     await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${range}:clear`, {
       method: "POST",
+    });
+
+    return { success: true };
+  });
+
+export const appendPedido = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => appendPedidoSchema.parse(input))
+  .handler(async ({ data }) => {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.quinzena)}!A:J:append?valueInputOption=USER_ENTERED`, {
+      method: "POST",
+      body: JSON.stringify({
+        values: [data.values],
+      }),
     });
 
     return { success: true };

@@ -1,4 +1,4 @@
-import { fetchSpreadsheetData, updateSpreadsheetCell as updateSpreadsheetCellFn, createSheet as createSheetFn, transferPedido as transferPedidoFn, appendPedido as appendPedidoFn } from "./sheets.functions";
+import { fetchSpreadsheetData, updateSpreadsheetCell as updateSpreadsheetCellFn, createSheet as createSheetFn, transferPedido as transferPedidoFn, appendPedido as appendPedidoFn, deletePedido as deletePedidoFn } from "./sheets.functions";
 import { savePendingUpdate } from "./offline-sync";
 
 

@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell } from "@/lib/sheets";
+import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -542,7 +542,7 @@ function ContasModal({ currentUser }: { currentUser: string }) {
 function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const { data: abas = [], isLoading, isError, error, refetch, lastUpdated, isFetching } = useSheetsData();
+  const { data: abas = [], isLoading, isError, error, refetch, lastUpdated, isFetching, addAba } = useSheetsData();
   const [currentUser, setCurrentUser] = React.useState<string>("");
 
   React.useEffect(() => {
@@ -815,6 +815,59 @@ function Dashboard() {
             </button>
           );
         })}
+        
+        {/* Botão para adicionar quinzena */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-2 bg-card border border-border text-muted-foreground hover:bg-muted/50"
+            >
+              <Plus className="h-3 w-3" />
+              Add Quinzena
+            </button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Adicionar Nova Quinzena</DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="nome-quinzena">Nome da Quinzena (Aba)</Label>
+                <Input 
+                  id="nome-quinzena" 
+                  placeholder="Ex: JUNHO 2026 - 1" 
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const input = e.currentTarget;
+                      const val = input.value.trim();
+                      if (val) {
+                        addAba(val);
+                        // @ts-ignore - close dialog
+                        e.currentTarget.closest('[role="dialog"]')?.querySelector('[data-radix-collection-item]')?.click();
+                      }
+                    }
+                  }}
+                />
+                <p className="text-[10px] text-muted-foreground italic">
+                  Dica: Crie a aba primeiro no Google Sheets e use o mesmo nome aqui para vincular, ou digite o nome para criar (se tiver permissão).
+                </p>
+              </div>
+              <Button 
+                onClick={(e) => {
+                  const input = document.getElementById("nome-quinzena") as HTMLInputElement;
+                  const val = input?.value.trim();
+                  if (val) {
+                    addAba(val);
+                    // Close logic is handled by Radix automatically if we use asChild or similar, 
+                    // but here we just call addAba which shows a toast.
+                  }
+                }}
+              >
+                Vincular Quinzena
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Stat cards */}

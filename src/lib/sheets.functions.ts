@@ -5,6 +5,12 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/google_sheets/v4";
 const MAX_SHEETS_PER_SYNC = 60;
 
+const sheetNameSchema = z
+  .string()
+  .min(1)
+  .max(100)
+  .regex(/^[^\x00-\x1f/?&#]+$/, "Nome de aba inválido.");
+
 const spreadsheetSchema = z.object({
   sheetId: z
     .string()
@@ -31,20 +37,20 @@ const createSheetSchema = z.object({
 
 const appendPedidoSchema = z.object({
   sheetId: spreadsheetSchema.shape.sheetId,
-  quinzena: z.string(),
+  quinzena: sheetNameSchema,
   values: z.array(z.any()),
 });
 
 const deletePedidoSchema = z.object({
   sheetId: spreadsheetSchema.shape.sheetId,
-  quinzena: z.string(),
+  quinzena: sheetNameSchema,
   rowIndex: z.number(),
 });
 
 const transferPedidoSchema = z.object({
   sheetId: spreadsheetSchema.shape.sheetId,
-  fromQuinzena: z.string(),
-  toQuinzena: z.string(),
+  fromQuinzena: sheetNameSchema,
+  toQuinzena: sheetNameSchema,
   rowIndex: z.number(),
   registroData: z.array(z.any()),
 });
@@ -66,6 +72,10 @@ function getConnectorHeaders() {
 
 function quoteSheetName(name: string) {
   return /^[A-Za-z0-9_]+$/.test(name) ? name : `'${name.replace(/'/g, "''")}'`;
+}
+
+function encodeSheetSegment(name: string) {
+  return encodeURIComponent(quoteSheetName(name));
 }
 
 async function gatewayFetch<T>(url: string, init?: RequestInit): Promise<T> {
@@ -175,7 +185,7 @@ export const createSheet = createServerFn({ method: "POST" })
       "DATA", "PEDIDO", "NOME", "LOCAL", "TOTAL", "PCT", "VL PARC", "QTD PARC", "VENC", "RECEBER", "PAGO"
     ];
 
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.title)}!A1:K1?valueInputOption=RAW`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${encodeSheetSegment(data.title)}!A1:K1?valueInputOption=RAW`, {
       method: "PUT",
       body: JSON.stringify({
         values: [headers],
@@ -194,7 +204,7 @@ export const transferPedido = createServerFn({ method: "POST" })
     // Actually, to "move" we should append to target and clear source.
     
     // Append to toQuinzena
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.toQuinzena)}!A:A:append?valueInputOption=RAW`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${encodeSheetSegment(data.toQuinzena)}!A:A:append?valueInputOption=RAW`, {
       method: "POST",
       body: JSON.stringify({
         values: [data.registroData],
@@ -202,7 +212,7 @@ export const transferPedido = createServerFn({ method: "POST" })
     });
 
     // Clear from fromQuinzena
-    const range = `${quoteSheetName(data.fromQuinzena)}!A${data.rowIndex}:K${data.rowIndex}`;
+    const range = `${encodeSheetSegment(data.fromQuinzena)}!A${data.rowIndex}:K${data.rowIndex}`;
     await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${range}:clear`, {
       method: "POST",
     });
@@ -214,7 +224,7 @@ export const appendPedido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => appendPedidoSchema.parse(input))
   .handler(async ({ data }) => {
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.quinzena)}!A:K:append?valueInputOption=RAW`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${encodeSheetSegment(data.quinzena)}!A:K:append?valueInputOption=RAW`, {
       method: "POST",
       body: JSON.stringify({
         values: [data.values],
@@ -228,7 +238,7 @@ export const deletePedido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => deletePedidoSchema.parse(input))
   .handler(async ({ data }) => {
-    const range = `${quoteSheetName(data.quinzena)}!A${data.rowIndex}:J${data.rowIndex}`;
+    const range = `${encodeSheetSegment(data.quinzena)}!A${data.rowIndex}:J${data.rowIndex}`;
     await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${range}:clear`, {
       method: "POST",
     });

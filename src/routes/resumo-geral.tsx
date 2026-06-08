@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID, transferPedido, appendPedido } from "@/lib/sheets";
+import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID, transferPedido, appendPedido, deletePedido } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";

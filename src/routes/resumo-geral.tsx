@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID, transferPedido, appendPedido } from "@/lib/sheets";
+import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID, transferPedido, appendPedido, deletePedido } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -322,6 +322,33 @@ function PedidoModal({
     }
   };
 
+  const handleDelete = async () => {
+    if (!registro || !registro.rowIndex) return;
+    
+    if (!confirm(`Tem certeza que deseja excluir o pedido de ${registro.nome}?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      toast.info("Excluindo pedido...");
+      await deletePedido({
+        data: {
+          sheetId,
+          quinzena,
+          rowIndex: registro.rowIndex
+        }
+      });
+      toast.success("Pedido excluído com sucesso!");
+      setOpen(false);
+      await onSuccess();
+    } catch (err: any) {
+      toast.error("Erro ao excluir: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
@@ -380,9 +407,22 @@ function PedidoModal({
             <Label htmlFor="receber">Valor a Receber</Label>
             <Input id="receber" type="number" step="any" value={formData.receber} onChange={e => setFormData({...formData, receber: e.target.value})} />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
-          </Button>
+          <div className="flex gap-2">
+            {registro && (
+              <Button 
+                type="button" 
+                variant="destructive" 
+                className="flex-1" 
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-2" /> Excluir</>}
+              </Button>
+            )}
+            <Button type="submit" className="flex-[2]" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

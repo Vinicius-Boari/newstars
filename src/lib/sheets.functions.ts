@@ -35,6 +35,12 @@ const appendPedidoSchema = z.object({
   values: z.array(z.any()),
 });
 
+const deletePedidoSchema = z.object({
+  sheetId: spreadsheetSchema.shape.sheetId,
+  quinzena: z.string(),
+  rowIndex: z.number(),
+});
+
 const transferPedidoSchema = z.object({
   sheetId: spreadsheetSchema.shape.sheetId,
   fromQuinzena: z.string(),
@@ -213,6 +219,18 @@ export const appendPedido = createServerFn({ method: "POST" })
       body: JSON.stringify({
         values: [data.values],
       }),
+    });
+
+    return { success: true };
+  });
+
+export const deletePedido = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => deletePedidoSchema.parse(input))
+  .handler(async ({ data }) => {
+    const range = `${quoteSheetName(data.quinzena)}!A${data.rowIndex}:J${data.rowIndex}`;
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${range}:clear`, {
+      method: "POST",
     });
 
     return { success: true };

@@ -604,12 +604,12 @@ function TransferModal({
 function ContasModal({ isAdmin }: { isAdmin: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [users, setUsers] = React.useState<{ id: string; username: string; role: string }[]>([]);
+  const [users, setUsers] = React.useState<{ id: string; username: string; role: string; protected: boolean }[]>([]);
   const [newUser, setNewUser] = React.useState({ username: "", role: "viewer" });
 
   const fetchUsers = async () => {
-    const { data } = await supabase.from("admin_users").select("id, username, role");
-    if (data) setUsers(data);
+    const { data } = await supabase.from("admin_users").select("id, username, role, protected");
+    if (data) setUsers(data as never);
   };
 
   React.useEffect(() => {
@@ -672,7 +672,7 @@ function ContasModal({ isAdmin }: { isAdmin: boolean }) {
                     <div className="text-sm font-bold">{user.username}</div>
                     <div className="text-[10px] text-muted-foreground font-mono">Papel: {user.role}</div>
                   </div>
-                  {user.username !== "melissa" && (
+                  {!user.protected && (
                     <button onClick={() => handleDelete(user.id)} className="text-destructive hover:scale-110 transition-transform">
                       <Trash2 className="h-4 w-4" />
                     </button>

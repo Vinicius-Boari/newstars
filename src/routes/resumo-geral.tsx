@@ -1051,10 +1051,10 @@ function Dashboard() {
           accent="bg-green-500/15 text-green-600"
         />
         <StatCard
-          label="Clientes únicos"
-          value={String(stats.clientesUnicos)}
-          hint="No filtro atual"
-          icon={Users}
+          label="Total Pago"
+          value={fmtMoney(stats.totalPago)}
+          hint="Somente pedidos pagos"
+          icon={Check}
           accent="bg-purple-500/15 text-purple-600"
         />
         <StatCard

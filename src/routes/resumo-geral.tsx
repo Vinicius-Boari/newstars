@@ -322,6 +322,33 @@ function PedidoModal({
     }
   };
 
+  const handleDelete = async () => {
+    if (!registro || !registro.rowIndex) return;
+    
+    if (!confirm(`Tem certeza que deseja excluir o pedido de ${registro.nome}?`)) {
+      return;
+    }
+
+    setLoading(true);
+    try {
+      toast.info("Excluindo pedido...");
+      await deletePedido({
+        data: {
+          sheetId,
+          quinzena,
+          rowIndex: registro.rowIndex
+        }
+      });
+      toast.success("Pedido excluído com sucesso!");
+      setOpen(false);
+      await onSuccess();
+    } catch (err: any) {
+      toast.error("Erro ao excluir: " + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>

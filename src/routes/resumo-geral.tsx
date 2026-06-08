@@ -1237,9 +1237,9 @@ function Dashboard() {
               <ComboboxFilter
                 value={pagoFilter}
                 onSelect={setPagoFilter}
-                placeholder="Todos Pagos"
+                placeholder="Todos pagamentos"
                 options={[
-                  { label: "Todos Pagos", value: "ALL" },
+                  { label: "Todos pagamentos", value: "ALL" },
                   { label: "SIM", value: "SIM" },
                   { label: "NÃO", value: "NÃO" },
                   { label: "OUTROS", value: "OUTROS" }

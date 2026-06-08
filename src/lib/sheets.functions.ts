@@ -29,6 +29,12 @@ const createSheetSchema = z.object({
   title: z.string().min(1).max(100),
 });
 
+const appendPedidoSchema = z.object({
+  sheetId: spreadsheetSchema.shape.sheetId,
+  quinzena: z.string(),
+  values: z.array(z.any()),
+});
+
 const transferPedidoSchema = z.object({
   sheetId: spreadsheetSchema.shape.sheetId,
   fromQuinzena: z.string(),

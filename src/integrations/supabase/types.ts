@@ -67,7 +67,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_email_for_username: { Args: { _username: string }; Returns: string }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {

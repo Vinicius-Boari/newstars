@@ -15,6 +15,7 @@ export interface Registro {
   vlParc: number;
   qtdParc: string;
   venc: string;
+  pago: string;
   receber: number;
   rowIndex: number;
 }
@@ -36,7 +37,8 @@ export const COL_INDICES = {
   VL_PARC: 6,
   QTD_PARC: 7,
   VENC: 8,
-  RECEBER: 9
+  RECEBER: 9,
+  PAGO: 10
 };
 
 export async function fetchSheetNames(sheetId: string): Promise<string[]> {
@@ -113,6 +115,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
   const idxQtdParc = getIdx(["QTD PARC", "PARCELAS", "QTD"], 7);
   const idxVenc = getIdx(["VENCIMENTO", "VENC"], 8);
   const idxReceber = getIdx(["RECEBER", "A RECEBER"], 9);
+  const idxPago = getIdx(["PAGO", "STATUS"], 10);
 
   const startRow = headerIndex !== -1 ? headerIndex + 1 : 1;
 
@@ -133,6 +136,7 @@ export function parseRows(values: any[][], quinzena: string): Registro[] {
         vlParc: toNumber(row[idxVlParc]),
         qtdParc: toStr(row[idxQtdParc]),
         venc: toStr(row[idxVenc]),
+        pago: toStr(row[idxPago]) || "NÃO",
         receber: toNumber(row[idxReceber]) || (toNumber(row[idxVlParc]) * (toNumber(row[idxPct]) / 100)) || 0,
         rowIndex: startRow + i + 1,
       };

@@ -18,7 +18,7 @@ export async function fetchExcelData(abas: string[]): Promise<{ quinzena: string
   const results = await Promise.all(
     abas.map(async (aba) => {
       try {
-        const range = "A1:J500"; 
+        const range = "A1:K500"; 
         // URL format for Microsoft Graph to access a worksheet range
         const url = `https://graph.microsoft.com/v1.0/me/drive/items/${EXCEL_FILE_ID}/workbook/worksheets('${aba}')/range(address='${range}')`;
         
@@ -58,6 +58,7 @@ export async function fetchExcelData(abas: string[]): Promise<{ quinzena: string
             vlParc: toNumber(row[6]),
             qtdParc: String(row[7] || ""),
             venc: String(row[8] || ""),
+            pago: String(row[10] || "NÃO"),
             receber: toNumber(row[9]),
             rowIndex: i + 3, // Assuming data starts at row 3 (A1-based)
           };

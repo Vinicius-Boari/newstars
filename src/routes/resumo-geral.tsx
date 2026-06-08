@@ -1239,7 +1239,7 @@ function Dashboard() {
                 onSelect={setPagoFilter}
                 placeholder="Todos Pagos"
                 options={[
-                  { label: "Todos status", value: "ALL" },
+                  { label: "Todos Pagos", value: "ALL" },
                   { label: "SIM", value: "SIM" },
                   { label: "NÃO", value: "NÃO" },
                   { label: "OUTROS", value: "OUTROS" }

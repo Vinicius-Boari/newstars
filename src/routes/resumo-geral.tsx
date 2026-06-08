@@ -1064,7 +1064,7 @@ function Dashboard() {
           accent="bg-green-500/15 text-green-600"
         />
         <StatCard
-          label="Total Pago"
+          label="Todos pagamentos"
           value={fmtMoney(stats.totalPago)}
           hint="Somente pedidos pagos"
           icon={Check}

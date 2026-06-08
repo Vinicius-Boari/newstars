@@ -66,6 +66,7 @@ export const updateSpreadsheetCell = updateSpreadsheetCellFn;
 export const createSheet = createSheetFn;
 export const transferPedido = transferPedidoFn;
 export const appendPedido = appendPedidoFn;
+export const deletePedido = deletePedidoFn;
 
 function toNumber(v: any): number {
   if (v == null || v === "") return 0;

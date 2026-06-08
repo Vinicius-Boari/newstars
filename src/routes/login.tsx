@@ -31,7 +31,6 @@ function LoginComponent() {
     if (isLoading) return;
     
     setIsLoading(true);
-    console.log("Iniciando tentativa de login para:", username);
 
     try {
       // Resolve username -> email via secure server function (no hardcoded mapping)
@@ -48,8 +47,6 @@ function LoginComponent() {
         }
       }
 
-      console.log("Tentando entrar com:", email);
-      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password: password.trim(),
@@ -63,7 +60,6 @@ function LoginComponent() {
       }
 
       if (data.user) {
-        console.log("Login bem-sucedido!");
         toast.success("Bem-vinda, Melissa! ✨");
         
         // Invalidate router state to ensure beforeLoad re-runs

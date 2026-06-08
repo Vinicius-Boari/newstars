@@ -9,7 +9,7 @@ import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { useSheetsData } from "@/hooks/use-sheets-data";
-import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID, transferPedido } from "@/lib/sheets";
+import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDICES, updateSpreadsheetCell, DEFAULT_SHEET_ID, transferPedido, appendPedido } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -289,7 +289,28 @@ function PedidoModal({
         }
         toast.success("Pedido atualizado com sucesso!");
       } else {
-        toast.info("Inclusão manual requer indicar a linha. Adicione via planilha ou edite existentes.");
+        toast.info("Adicionando novo pedido...");
+        const registroData = [
+          formData.data,
+          formData.pedido,
+          formData.nome,
+          formData.local,
+          Number(formData.total) || 0,
+          Number(formData.pct) || 0,
+          Number(formData.vlParc) || 0,
+          formData.qtdParc,
+          formData.venc,
+          Number(formData.receber) || 0,
+        ];
+
+        await appendPedido({
+          data: {
+            sheetId,
+            quinzena,
+            values: registroData
+          }
+        });
+        toast.success("Pedido adicionado com sucesso!");
       }
       
       setOpen(false);

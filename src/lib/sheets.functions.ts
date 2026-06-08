@@ -29,6 +29,14 @@ const createSheetSchema = z.object({
   title: z.string().min(1).max(100),
 });
 
+const transferPedidoSchema = z.object({
+  sheetId: spreadsheetSchema.shape.sheetId,
+  fromQuinzena: z.string(),
+  toQuinzena: z.string(),
+  rowIndex: z.number(),
+  registroData: z.array(z.any()),
+});
+
 function getConnectorHeaders() {
   const lovableApiKey = process.env.LOVABLE_API_KEY;
   const connectionKey = process.env.GOOGLE_SHEETS_API_KEY_1 ?? process.env.GOOGLE_SHEETS_API_KEY;
@@ -160,6 +168,31 @@ export const createSheet = createServerFn({ method: "POST" })
       body: JSON.stringify({
         values: [headers],
       }),
+    });
+
+    return { success: true };
+  });
+
+export const transferPedido = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => transferPedidoSchema.parse(input))
+  .handler(async ({ data }) => {
+    // 1. Clear the old row (we don't DELETE because that shifts rows and can break logic, 
+    // but clear is usually safer for Sheets-as-DB unless we want a full row shift)
+    // Actually, to "move" we should append to target and clear source.
+    
+    // Append to toQuinzena
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${quoteSheetName(data.toQuinzena)}!A:A:append?valueInputOption=USER_ENTERED`, {
+      method: "POST",
+      body: JSON.stringify({
+        values: [data.registroData],
+      }),
+    });
+
+    // Clear from fromQuinzena
+    const range = `${quoteSheetName(data.fromQuinzena)}!A${data.rowIndex}:J${data.rowIndex}`;
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${range}:clear`, {
+      method: "POST",
     });
 
     return { success: true };

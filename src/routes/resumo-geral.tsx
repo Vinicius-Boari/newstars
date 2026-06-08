@@ -414,15 +414,29 @@ function PedidoModal({
             </div>
             <div className="space-y-2">
               <Label htmlFor="pago">Pago</Label>
-              <select 
-                id="pago"
-                value={formData.pago}
-                onChange={e => setFormData({...formData, pago: e.target.value})}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <option value="SIM">SIM</option>
-                <option value="NÃO">NÃO</option>
-              </select>
+              <div className="flex gap-2">
+                <select 
+                  id="pago-select"
+                  value={["SIM", "NÃO"].includes(formData.pago) ? formData.pago : "OUTRO"}
+                  onChange={e => {
+                    if (e.target.value !== "OUTRO") {
+                      setFormData({...formData, pago: e.target.value});
+                    }
+                  }}
+                  className="flex h-10 w-1/3 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <option value="SIM">SIM</option>
+                  <option value="NÃO">NÃO</option>
+                  <option value="OUTRO">OUTRO</option>
+                </select>
+                <Input 
+                  id="pago"
+                  placeholder="Status personalizado..."
+                  value={formData.pago} 
+                  onChange={e => setFormData({...formData, pago: e.target.value})}
+                  className="flex-1 h-10"
+                />
+              </div>
             </div>
           </div>
           <div className="flex gap-2">
@@ -1295,7 +1309,10 @@ function Dashboard() {
                 options={[
                   { label: "Todos status", value: "ALL" },
                   { label: "SIM", value: "SIM" },
-                  { label: "NÃO", value: "NÃO" }
+                  { label: "NÃO", value: "NÃO" },
+                  ...Array.from(new Set(COMMISSIONS.map(c => c.pago)))
+                    .filter(p => p && p !== "SIM" && p !== "NÃO")
+                    .map(p => ({ label: p, value: p }))
                 ]}
               />
             </div>

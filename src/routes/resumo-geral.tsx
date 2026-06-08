@@ -820,50 +820,54 @@ function Dashboard() {
         <Dialog>
           <DialogTrigger asChild>
             <button
-              className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-2 bg-card border border-border text-muted-foreground hover:bg-muted/50"
+              className="px-5 py-2.5 rounded-2xl text-[11px] font-black uppercase tracking-widest transition-all shrink-0 flex items-center gap-2 bg-gradient-to-br from-green-500 to-emerald-600 text-white shadow-lg shadow-green-500/20 hover:scale-[1.02] active:scale-[0.98]"
             >
-              <Plus className="h-3 w-3" />
+              <Plus className="h-3.5 w-3.5" />
               Add Quinzena
             </button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[425px] bg-zinc-950 border-zinc-800 text-zinc-100">
             <DialogHeader>
-              <DialogTitle>Adicionar Nova Quinzena</DialogTitle>
+              <DialogTitle className="text-xl font-bold uppercase tracking-tight">Nova Quinzena</DialogTitle>
             </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="nome-quinzena">Nome da Quinzena (Aba)</Label>
+            <div className="grid gap-6 py-6">
+              <div className="space-y-3">
+                <Label htmlFor="nome-quinzena" className="text-xs font-bold uppercase text-zinc-400 tracking-wider">
+                  Nome da Quinzena (Exatamente como na Aba)
+                </Label>
                 <Input 
                   id="nome-quinzena" 
                   placeholder="Ex: JUNHO 2026 - 1" 
+                  className="bg-zinc-900 border-zinc-800 h-12 rounded-xl focus:ring-purple-500/20"
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
                       const input = e.currentTarget;
                       const val = input.value.trim();
                       if (val) {
                         addAba(val);
-                        // @ts-ignore - close dialog
-                        e.currentTarget.closest('[role="dialog"]')?.querySelector('[data-radix-collection-item]')?.click();
+                        const closeBtn = e.currentTarget.closest('[role="dialog"]')?.querySelector('button[aria-label="Close"]');
+                        if (closeBtn instanceof HTMLElement) closeBtn.click();
                       }
                     }
                   }}
                 />
-                <p className="text-[10px] text-muted-foreground italic">
-                  Dica: Crie a aba primeiro no Google Sheets e use o mesmo nome aqui para vincular, ou digite o nome para criar (se tiver permissão).
+                <p className="text-[11px] text-zinc-500 leading-relaxed italic">
+                  O nome deve ser idêntico ao que aparece na aba lá no Google Sheets.
                 </p>
               </div>
               <Button 
+                className="h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold uppercase text-xs tracking-widest rounded-xl transition-all shadow-lg shadow-purple-500/20"
                 onClick={(e) => {
                   const input = document.getElementById("nome-quinzena") as HTMLInputElement;
                   const val = input?.value.trim();
                   if (val) {
                     addAba(val);
-                    // Close logic is handled by Radix automatically if we use asChild or similar, 
-                    // but here we just call addAba which shows a toast.
+                    const closeBtn = input.closest('[role="dialog"]')?.querySelector('button[aria-label="Close"]');
+                    if (closeBtn instanceof HTMLElement) closeBtn.click();
                   }
                 }}
               >
-                Vincular Quinzena
+                Confirmar
               </Button>
             </div>
           </DialogContent>

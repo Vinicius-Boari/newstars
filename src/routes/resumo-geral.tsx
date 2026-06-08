@@ -785,14 +785,27 @@ function Dashboard() {
       if (dateFilter !== "ALL" && c.data !== dateFilter) return false;
       if (qtdParcFilter !== "ALL" && c.qtdParc !== qtdParcFilter) return false;
       if (vencFilter !== "ALL" && c.venc !== vencFilter) return false;
-      if (pagoFilter !== "ALL" && c.pago !== pagoFilter) return false;
+      
+      if (pagoFilter !== "ALL") {
+        const val = String(c.pago || "").toUpperCase();
+        if (pagoFilter === "SIM") {
+          if (val !== "SIM") return false;
+        } else if (pagoFilter === "NÃO") {
+          if (val !== "NÃO" && val !== "NAO") return false;
+        } else if (pagoFilter === "OUTROS") {
+          if (val === "SIM" || val === "NÃO" || val === "NAO") return false;
+        } else {
+          if (c.pago !== pagoFilter) return false;
+        }
+      }
+      
       if (search) {
         const q = search.toLowerCase();
         if (!c.nome.toLowerCase().includes(q) && !c.pedido.toLowerCase().includes(q)) return false;
       }
       return true;
     });
-  }, [selectedQuinzena, localFilter, pctFilter, search, dateFilter, qtdParcFilter, vencFilter, COMMISSIONS]);
+  }, [selectedQuinzena, localFilter, pctFilter, search, dateFilter, qtdParcFilter, vencFilter, pagoFilter, COMMISSIONS]);
 
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginatedData = React.useMemo(() => {
@@ -1227,10 +1240,9 @@ function Dashboard() {
                 placeholder="Pago"
                 options={[
                   { label: "Todos status", value: "ALL" },
-                  ...Array.from(new Set(COMMISSIONS.map(c => c.pago)))
-                    .filter(Boolean)
-                    .sort()
-                    .map(p => ({ label: p, value: p }))
+                  { label: "SIM", value: "SIM" },
+                  { label: "NÃO", value: "NÃO" },
+                  { label: "OUTROS", value: "OUTROS" }
                 ]}
               />
             </div>

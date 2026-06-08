@@ -407,9 +407,22 @@ function PedidoModal({
             <Label htmlFor="receber">Valor a Receber</Label>
             <Input id="receber" type="number" step="any" value={formData.receber} onChange={e => setFormData({...formData, receber: e.target.value})} />
           </div>
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
-          </Button>
+          <div className="flex gap-2">
+            {registro && (
+              <Button 
+                type="button" 
+                variant="destructive" 
+                className="flex-1" 
+                onClick={handleDelete}
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Trash2 className="h-4 w-4 mr-2" /> Excluir</>}
+              </Button>
+            )}
+            <Button type="submit" className="flex-[2]" disabled={loading}>
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Salvar Alterações"}
+            </Button>
+          </div>
         </form>
       </DialogContent>
     </Dialog>

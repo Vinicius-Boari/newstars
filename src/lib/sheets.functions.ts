@@ -223,3 +223,15 @@ export const appendPedido = createServerFn({ method: "POST" })
 
     return { success: true };
   });
+
+export const deletePedido = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => deletePedidoSchema.parse(input))
+  .handler(async ({ data }) => {
+    const range = `${quoteSheetName(data.quinzena)}!A${data.rowIndex}:J${data.rowIndex}`;
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${range}:clear`, {
+      method: "POST",
+    });
+
+    return { success: true };
+  });

@@ -1064,7 +1064,7 @@ function Dashboard() {
           accent="bg-green-500/15 text-green-600"
         />
         <StatCard
-          label="Todos pagamentos"
+          label="Total Pago"
           value={fmtMoney(stats.totalPago)}
           hint="Somente pedidos pagos"
           icon={Check}
@@ -1237,7 +1237,7 @@ function Dashboard() {
               <ComboboxFilter
                 value={pagoFilter}
                 onSelect={setPagoFilter}
-                placeholder="Pago"
+                placeholder="Todos Pagos"
                 options={[
                   { label: "Todos status", value: "ALL" },
                   { label: "SIM", value: "SIM" },

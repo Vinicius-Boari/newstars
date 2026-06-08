@@ -601,7 +601,7 @@ function TransferModal({
   );
 }
 
-function ContasModal({ currentUser }: { currentUser: string }) {
+function ContasModal({ isAdmin }: { isAdmin: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [users, setUsers] = React.useState<{ id: string; username: string; role: string }[]>([]);
@@ -635,7 +635,7 @@ function ContasModal({ currentUser }: { currentUser: string }) {
     else fetchUsers();
   };
 
-  if (currentUser !== "melissa") return null;
+  if (!isAdmin) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -691,17 +691,17 @@ function Dashboard() {
   const { quinzena: selectedQuinzena } = Route.useSearch();
   const navigate = Route.useNavigate();
   const { data: abas = [], isLoading, isError, error, refetch, lastUpdated, isFetching, addAba } = useSheetsData();
-  const [currentUser, setCurrentUser] = React.useState<string>("");
+  const [isAdmin, setIsAdmin] = React.useState<boolean>(false);
 
   React.useEffect(() => {
     supabase.auth.getUser().then(async ({ data: { user } }) => {
       if (!user) return;
       const { data } = await supabase
         .from("admin_users")
-        .select("username")
+        .select("role")
         .eq("id", user.id)
         .maybeSingle();
-      if (data?.username) setCurrentUser(data.username);
+      if (data?.role === "admin") setIsAdmin(true);
     });
   }, []);
   const { sheetId } = useSettings();
@@ -906,7 +906,7 @@ function Dashboard() {
               Acompanhe suas vendas e comissões.
             </p>
             <div className="md:hidden">
-              <ContasModal currentUser={currentUser} />
+              <ContasModal isAdmin={isAdmin} />
             </div>
           </div>
         </div>
@@ -926,7 +926,7 @@ function Dashboard() {
           <div className="hidden md:flex items-center gap-2 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">
             <span>{filtered.length} parcelas</span>
             <span className="mx-1 opacity-30">|</span>
-            <ContasModal currentUser={currentUser} />
+            <ContasModal isAdmin={isAdmin} />
           </div>
         </div>
       </div>

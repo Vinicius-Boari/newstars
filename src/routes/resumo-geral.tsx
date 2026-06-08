@@ -810,9 +810,12 @@ function Dashboard() {
 
   const stats = React.useMemo(() => {
     const totalReceber = filtered.reduce((s, c) => s + c.receber, 0);
-    const clientesUnicos = new Set(filtered.map(c => c.nome)).size;
+    const totalPago = filtered.reduce((s, c) => {
+      const isPago = ["SIM", "sim", "PAGO", "pago"].includes(String(c.pago).trim());
+      return isPago ? s + c.receber : s;
+    }, 0);
     const maiorComissao = filtered.reduce((m, c) => c.receber > m ? c.receber : m, 0);
-    return { totalReceber, clientesUnicos, maiorComissao, qtd: filtered.length };
+    return { totalReceber, totalPago, maiorComissao, qtd: filtered.length };
   }, [filtered]);
 
   const perQuinzena = React.useMemo(() => {
@@ -1048,10 +1051,10 @@ function Dashboard() {
           accent="bg-green-500/15 text-green-600"
         />
         <StatCard
-          label="Clientes únicos"
-          value={String(stats.clientesUnicos)}
-          hint="No filtro atual"
-          icon={Users}
+          label="Total Pago"
+          value={fmtMoney(stats.totalPago)}
+          hint="Somente pedidos pagos"
+          icon={Check}
           accent="bg-purple-500/15 text-purple-600"
         />
         <StatCard

@@ -935,6 +935,14 @@ function Dashboard() {
             <span>{filtered.length} parcelas</span>
             <span className="mx-1 opacity-30">|</span>
             <ContasModal isAdmin={isAdmin} />
+            <span className="mx-1 opacity-30">|</span>
+            <button
+              onClick={() => supabase.auth.signOut()}
+              className="flex items-center gap-1.5 hover:text-primary transition-all cursor-pointer"
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span>Sair</span>
+            </button>
           </div>
         </div>
       </div>

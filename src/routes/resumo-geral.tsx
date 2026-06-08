@@ -1335,11 +1335,14 @@ function Dashboard() {
                 <tr key={`${c.pedido}-${i}`} className="hover:bg-muted/30 transition-colors group">
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
-                      <ViewPedidoModal 
+                      <PedidoModal 
+                        quinzena={c.quinzena} 
+                        onSuccess={refetch} 
+                        sheetId={sheetId} 
                         registro={c}
                         trigger={
-                          <button className="text-muted-foreground hover:text-foreground transition-colors">
-                            <Eye className="h-3.5 w-3.5" />
+                          <button className="text-muted-foreground hover:text-primary transition-colors">
+                            <Edit2 className="h-3.5 w-3.5" />
                           </button>
                         }
                       />
@@ -1452,11 +1455,14 @@ function Dashboard() {
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-foreground uppercase tracking-tight">{c.nome}</div>
                   <div className="flex items-center gap-1">
-                    <ViewPedidoModal 
+                    <PedidoModal 
+                      quinzena={c.quinzena} 
+                      onSuccess={refetch} 
+                      sheetId={sheetId} 
                       registro={c}
                       trigger={
-                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-foreground active:text-background">
-                          <Eye className="h-3.5 w-3.5" />
+                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-primary active:text-primary-foreground">
+                          <Edit2 className="h-3.5 w-3.5" />
                         </button>
                       }
                     />

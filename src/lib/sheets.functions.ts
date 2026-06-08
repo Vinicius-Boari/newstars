@@ -35,6 +35,12 @@ const appendPedidoSchema = z.object({
   values: z.array(z.any()),
 });
 
+const deletePedidoSchema = z.object({
+  sheetId: spreadsheetSchema.shape.sheetId,
+  quinzena: z.string(),
+  rowIndex: z.number(),
+});
+
 const transferPedidoSchema = z.object({
   sheetId: spreadsheetSchema.shape.sheetId,
   fromQuinzena: z.string(),

@@ -1,5 +1,12 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+const sheetNameSchema = z
+  .string()
+  .min(1)
+  .max(100)
+  .regex(/^[^\x00-\x1f/?&#]+$/, "Nome inválido.");
 
 export const getSheets = createServerFn({ method: 'GET' })
   .middleware([requireSupabaseAuth])
@@ -31,6 +38,7 @@ export const getSheets = createServerFn({ method: 'GET' })
 
 export const addSheet = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
+  .inputValidator((input) => sheetNameSchema.parse(input))
   .handler(async ({ data: name, context }) => {
     const { error } = await (context as any).supabase
       .from('sheets')
@@ -42,6 +50,7 @@ export const addSheet = createServerFn({ method: 'POST' })
 
 export const removeSheet = createServerFn({ method: 'POST' })
   .middleware([requireSupabaseAuth])
+  .inputValidator((input) => sheetNameSchema.parse(input))
   .handler(async ({ data: name, context }) => {
     const { error } = await (context as any).supabase
       .from('sheets')

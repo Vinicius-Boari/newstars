@@ -1240,10 +1240,9 @@ function Dashboard() {
                 placeholder="Pago"
                 options={[
                   { label: "Todos status", value: "ALL" },
-                  ...Array.from(new Set(COMMISSIONS.map(c => c.pago)))
-                    .filter(Boolean)
-                    .sort()
-                    .map(p => ({ label: p, value: p }))
+                  { label: "SIM", value: "SIM" },
+                  { label: "NÃO", value: "NÃO" },
+                  { label: "OUTROS", value: "OUTROS" }
                 ]}
               />
             </div>

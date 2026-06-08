@@ -13,8 +13,9 @@ import { fmtMoney, extractCurrentParc, type Registro, updateSheetValue, COL_INDI
 import { useSettings } from "@/lib/settings-context";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { AlertCircle } from "lucide-react";
 
 export const Route = createFileRoute("/resumo-geral")({
   beforeLoad: async () => {

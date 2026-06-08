@@ -562,15 +562,10 @@ function TransferModal({
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
-  const handleTransfer = async (targetQuinzena: string) => {
-    if (targetQuinzena === registro.quinzena) {
-      toast.error("O pedido já está nesta quinzena.");
-      return;
-    }
+  const [transferTarget, setTransferTarget] = React.useState<string | null>(null);
 
-    if (!confirm(`Deseja transferir o pedido de ${registro.nome} para a quinzena ${targetQuinzena}?`)) {
-      return;
-    }
+  const handleTransfer = async () => {
+    if (!transferTarget) return;
 
     setLoading(true);
     try {
@@ -591,13 +586,14 @@ function TransferModal({
         data: {
           sheetId,
           fromQuinzena: registro.quinzena,
-          toQuinzena: targetQuinzena,
+          toQuinzena: transferTarget,
           rowIndex: registro.rowIndex,
           registroData
         }
       });
 
       toast.success("Pedido transferido com sucesso!");
+      setTransferTarget(null);
       setOpen(false);
       await onSuccess();
     } catch (err: any) {
@@ -606,6 +602,7 @@ function TransferModal({
       setLoading(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

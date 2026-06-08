@@ -1382,17 +1382,6 @@ function Dashboard() {
                         </button>
                       }
                     />
-                    <PedidoModal 
-                      quinzena={c.quinzena} 
-                      onSuccess={refetch} 
-                      sheetId={sheetId} 
-                      registro={c}
-                      trigger={
-                        <button className="h-8 w-8 flex items-center justify-center rounded-full bg-muted text-muted-foreground active:bg-primary active:text-primary-foreground">
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </button>
-                      }
-                    />
                     <TransferModal 
                       registro={c} 
                       quinzenas={QUINZENAS} 

@@ -323,13 +323,11 @@ function PedidoModal({
     }
   };
 
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+
   const handleDelete = async () => {
     if (!registro || !registro.rowIndex) return;
     
-    if (!confirm(`Tem certeza que deseja excluir o pedido de ${registro.nome}?`)) {
-      return;
-    }
-
     setLoading(true);
     try {
       toast.info("Excluindo pedido...");
@@ -341,6 +339,7 @@ function PedidoModal({
         }
       });
       toast.success("Pedido excluído com sucesso!");
+      setDeleteConfirmOpen(false);
       setOpen(false);
       await onSuccess();
     } catch (err: any) {
@@ -349,6 +348,7 @@ function PedidoModal({
       setLoading(false);
     }
   };
+
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

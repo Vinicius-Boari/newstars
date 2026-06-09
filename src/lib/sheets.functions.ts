@@ -224,7 +224,7 @@ export const appendPedido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => appendPedidoSchema.parse(input))
   .handler(async ({ data }) => {
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${encodeSheetSegment(data.quinzena)}!A:K:append?valueInputOption=RAW`, {
+    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${encodeSheetSegment(data.quinzena)}:append?valueInputOption=RAW`, {
       method: "POST",
       body: JSON.stringify({
         values: [data.values],

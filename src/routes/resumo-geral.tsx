@@ -257,6 +257,38 @@ function PedidoModal({
     pago: registro?.pago || "NÃO"
   });
 
+  React.useEffect(() => {
+    if (open && !registro) {
+      setFormData({
+        data: new Date().toLocaleDateString("pt-BR"),
+        pedido: "",
+        nome: "",
+        local: "",
+        total: "",
+        pct: "10",
+        vlParc: "",
+        qtdParc: "",
+        venc: "",
+        receber: "",
+        pago: "NÃO"
+      });
+    } else if (open && registro) {
+      setFormData({
+        data: registro.data || "",
+        pedido: registro.pedido || "",
+        nome: registro.nome || "",
+        local: registro.local || "",
+        total: registro.total?.toString() || "",
+        pct: registro.pct?.toString() || "10",
+        vlParc: registro.vlParc?.toString() || "",
+        qtdParc: registro.qtdParc || "",
+        venc: registro.venc || "",
+        receber: registro.receber?.toString() || "",
+        pago: registro.pago || "NÃO"
+      });
+    }
+  }, [open, registro]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nome || !quinzena || quinzena === "ALL") {
@@ -707,7 +739,7 @@ function Dashboard() {
   const { sheetId } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 100;
   
   // Set dark mode for this dashboard
   React.useEffect(() => {
@@ -1185,9 +1217,10 @@ function Dashboard() {
               />
             </div>
             <PedidoModal 
-              quinzena={selectedQuinzena !== "ALL" ? selectedQuinzena : abas[0]?.quinzena} 
+              quinzena={selectedQuinzena !== "ALL" ? selectedQuinzena : (abas[0]?.quinzena || "JUNHO")} 
               onSuccess={refetch} 
               sheetId={sheetId} 
+
               trigger={
                 <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest shadow-lg active:scale-[0.98] transition-transform">
                   <Plus className="h-5 w-5 md:h-4 md:w-4" /> Adicionar Pedido

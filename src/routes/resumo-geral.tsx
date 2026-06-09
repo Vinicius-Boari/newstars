@@ -257,6 +257,38 @@ function PedidoModal({
     pago: registro?.pago || "NÃO"
   });
 
+  React.useEffect(() => {
+    if (open && !registro) {
+      setFormData({
+        data: new Date().toLocaleDateString("pt-BR"),
+        pedido: "",
+        nome: "",
+        local: "",
+        total: "",
+        pct: "10",
+        vlParc: "",
+        qtdParc: "",
+        venc: "",
+        receber: "",
+        pago: "NÃO"
+      });
+    } else if (open && registro) {
+      setFormData({
+        data: registro.data || "",
+        pedido: registro.pedido || "",
+        nome: registro.nome || "",
+        local: registro.local || "",
+        total: registro.total?.toString() || "",
+        pct: registro.pct?.toString() || "10",
+        vlParc: registro.vlParc?.toString() || "",
+        qtdParc: registro.qtdParc || "",
+        venc: registro.venc || "",
+        receber: registro.receber?.toString() || "",
+        pago: registro.pago || "NÃO"
+      });
+    }
+  }, [open, registro]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nome || !quinzena || quinzena === "ALL") {

@@ -707,7 +707,7 @@ function Dashboard() {
   const { sheetId } = useSettings();
   const [updatingId, setUpdatingId] = React.useState<string | null>(null);
   const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 100;
   
   // Set dark mode for this dashboard
   React.useEffect(() => {
@@ -1185,9 +1185,10 @@ function Dashboard() {
               />
             </div>
             <PedidoModal 
-              quinzena={selectedQuinzena !== "ALL" ? selectedQuinzena : abas[0]?.quinzena} 
+              quinzena={selectedQuinzena !== "ALL" ? selectedQuinzena : (abas[0]?.quinzena || "JUNHO")} 
               onSuccess={refetch} 
               sheetId={sheetId} 
+
               trigger={
                 <Button className="w-full md:w-auto gap-2 bg-foreground text-background hover:bg-foreground/90 h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest shadow-lg active:scale-[0.98] transition-transform">
                   <Plus className="h-5 w-5 md:h-4 md:w-4" /> Adicionar Pedido

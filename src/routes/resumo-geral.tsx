@@ -1109,7 +1109,7 @@ function Dashboard() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 print:grid-cols-4 print:gap-2">
         <StatCard
           label="Total a receber"
           value={fmtMoney(stats.totalReceber)}
@@ -1147,7 +1147,6 @@ function Dashboard() {
           icon={Calendar}
           accent="bg-blue-500/15 text-blue-600"
         />
-
       </div>
 
 

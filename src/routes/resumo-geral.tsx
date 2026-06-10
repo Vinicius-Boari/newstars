@@ -1233,8 +1233,8 @@ function Dashboard() {
       </div>
 
       {/* Main table */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
-        <div className="p-4 md:p-5 border-b border-border bg-muted/30 space-y-4">
+      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm print:border-none print:shadow-none">
+        <div className="p-4 md:p-5 border-b border-border bg-muted/30 space-y-4 print:hidden">
           <div className="flex flex-col gap-4">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />

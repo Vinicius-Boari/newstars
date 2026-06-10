@@ -1151,15 +1151,6 @@ function Dashboard() {
       </div>
 
 
-      {stats.totalPendente > 0 && (
-        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl animate-pulse">
-          <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
-          <div className="text-xs font-bold text-red-600 uppercase tracking-tight">
-            Você tem {fmtMoney(stats.totalPendente)} pendentes para receber nesta filtragem!
-          </div>
-        </div>
-      )}
-
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
@@ -1269,7 +1260,7 @@ function Dashboard() {
             <Button 
               variant="outline" 
               onClick={() => window.print()}
-              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest hidden md:flex"
+              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest flex"
             >
               Imprimir / PDF
             </Button>

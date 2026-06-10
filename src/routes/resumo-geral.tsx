@@ -1265,6 +1265,13 @@ function Dashboard() {
                 </Button>
               }
             />
+            <Button 
+              variant="outline" 
+              onClick={() => window.print()}
+              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest hidden md:flex"
+            >
+              Imprimir / PDF
+            </Button>
           </div>
           
           <div className="flex flex-wrap items-center gap-2">

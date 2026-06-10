@@ -1407,13 +1407,21 @@ function Dashboard() {
                       isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.VENC}`}
                     />
                   </td>
-                  <td className="px-3 py-3 text-center text-xs">
-                    <span className={cn(
-                      "font-bold px-1.5 py-0.5 rounded-full text-[10px]",
-                      c.pago === "SIM" ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
-                    )}>
-                      {c.pago}
-                    </span>
+                  <td className=\"px-3 py-3 text-center text-xs\">
+                    <button
+                      disabled={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.PAGO}`}
+                      onClick={() => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.PAGO, c.pago === \"SIM\" ? \"NÃO\" : \"SIM\")}
+                      className={cn(
+                        \"font-bold px-2.5 py-1 rounded-full text-[10px] transition-all active:scale-95 disabled:opacity-50\",
+                        c.pago === \"SIM\" ? \"bg-green-500/20 text-green-600 hover:bg-green-500/30\" : \"bg-red-500/20 text-red-600 hover:bg-red-500/30\"
+                      )}
+                    >
+                      {updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.PAGO}` ? (
+                        <Loader2 className=\"h-3 w-3 animate-spin mx-auto\" />
+                      ) : (
+                        c.pago
+                      )}
+                    </button>
                   </td>
                   <td className="px-3 py-3 text-right tabular-nums font-bold text-green-600">
                     <EditableCell 
@@ -1459,14 +1467,22 @@ function Dashboard() {
                   <div><span className="text-muted-foreground uppercase mr-1">Pedido:</span> <span className="font-mono">{c.pedido}</span></div>
                   <div><span className="text-muted-foreground uppercase mr-1">Local:</span> {c.local}</div>
                   <div><span className="text-muted-foreground uppercase mr-1">Venc:</span> {c.venc}</div>
-                  <div className="flex items-center gap-1">
-                    <span className="text-muted-foreground uppercase mr-1">Pago:</span>
-                    <span className={cn(
-                      "font-bold px-1.5 py-0.5 rounded-full text-[9px]",
-                      c.pago === "SIM" ? "bg-green-500/20 text-green-600" : "bg-red-500/20 text-red-600"
-                    )}>
-                      {c.pago}
-                    </span>
+                  <div className=\"flex items-center gap-1\">
+                    <span className=\"text-muted-foreground uppercase mr-1\">Pago:</span>
+                    <button
+                      disabled={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.PAGO}`}
+                      onClick={() => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.PAGO, c.pago === \"SIM\" ? \"NÃO\" : \"SIM\")}
+                      className={cn(
+                        \"font-bold px-2 py-0.5 rounded-full text-[10px] transition-all active:scale-95 disabled:opacity-50\",
+                        c.pago === \"SIM\" ? \"bg-green-500/20 text-green-600\" : \"bg-red-500/20 text-red-600\"
+                      )}
+                    >
+                      {updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.PAGO}` ? (
+                        <Loader2 className=\"h-2.5 w-2.5 animate-spin\" />
+                      ) : (
+                        c.pago
+                      )}
+                    </button>
                   </div>
                 </div>
                 <div className="flex items-center justify-between pt-1">

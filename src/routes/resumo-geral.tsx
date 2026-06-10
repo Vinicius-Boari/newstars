@@ -1580,7 +1580,7 @@ function Dashboard() {
         </div>
         
         {totalPages > 1 && (
-          <div className="p-4 border-t border-border bg-muted/10 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="p-4 border-t border-border bg-muted/10 flex flex-col md:flex-row items-center justify-between gap-4 print:hidden">
             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest order-2 md:order-1">
               Página {currentPage} de {totalPages} ({filtered.length} itens)
             </div>

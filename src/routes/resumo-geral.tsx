@@ -98,7 +98,7 @@ function ComboboxFilter({
   const selectedOption = options.find(opt => opt.value === value);
 
   return (
-    <div className="relative" ref={containerRef}>
+    <div className="relative print:hidden" ref={containerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}

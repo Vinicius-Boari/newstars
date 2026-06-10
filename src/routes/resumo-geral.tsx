@@ -149,28 +149,49 @@ function ComboboxFilter({
   );
 }
 
-function ParcCell({ qtd }: { qtd: string }) {
+function ParcCell({ qtd, onToggle, isLoading }: { 
+  qtd: string; 
+  onToggle?: (newQtd: string) => void;
+  isLoading?: boolean;
+}) {
   const { atual, partes } = extractCurrentParc(qtd);
   if (!atual) {
     return <span className="font-mono text-xs text-muted-foreground">{qtd}</span>;
   }
+
+  const handleToggle = (partIndex: number) => {
+    if (!onToggle || isLoading) return;
+    const newPartes = partes.map((p, i) => {
+      const clean = p.replace(/[()]/g, "");
+      return i === partIndex ? `(${clean})` : clean;
+    });
+    onToggle(newPartes.join("."));
+  };
+
   return (
-    <span className="font-mono text-xs text-muted-foreground">
+    <div className={cn("flex items-center gap-0.5 font-mono text-xs text-muted-foreground", isLoading && "opacity-50")}>
       {partes.map((p, i) => {
         const clean = p.replace(/[()]/g, "");
         const isAtual = p.includes("(") && p.includes(")");
         return (
           <React.Fragment key={i}>
             {i > 0 && <span className="opacity-40">.</span>}
-            <span className={cn(
-              isAtual && "bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold px-1.5 py-0.5 rounded ring-1 ring-purple-500/30",
-            )}>
+            <button
+              type="button"
+              disabled={isLoading || !onToggle}
+              onClick={() => handleToggle(i)}
+              className={cn(
+                "transition-all px-1 rounded",
+                isAtual ? "bg-purple-500/15 text-purple-600 dark:text-purple-400 font-bold ring-1 ring-purple-500/30" : "hover:bg-muted-foreground/10"
+              )}
+            >
               {clean}
-            </span>
+            </button>
           </React.Fragment>
         );
       })}
-    </span>
+      {isLoading && <Loader2 className="h-3 w-3 animate-spin ml-1" />}
+    </div>
   );
 }
 
@@ -1399,7 +1420,13 @@ function Dashboard() {
                       isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.VL_PARC}`}
                     />
                   </td>
-                  <td className="px-3 py-3"><ParcCell qtd={c.qtdParc} /></td>
+                  <td className="px-3 py-3">
+                    <ParcCell 
+                      qtd={c.qtdParc} 
+                      onToggle={(newVal) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.QTD_PARC, newVal)}
+                      isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.QTD_PARC}`}
+                    />
+                  </td>
                   <td className="px-3 py-3 text-center text-xs text-muted-foreground">
                     <EditableCell 
                       value={c.venc} 
@@ -1500,7 +1527,11 @@ function Dashboard() {
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[9px] uppercase font-bold text-muted-foreground">Parcelas:</span>
-                      <ParcCell qtd={c.qtdParc} />
+                      <ParcCell 
+                        qtd={c.qtdParc} 
+                        onToggle={(newVal) => handleUpdate(c.quinzena, c.rowIndex, COL_INDICES.QTD_PARC, newVal)}
+                        isLoading={updatingId === `${c.quinzena}-${c.rowIndex}-${COL_INDICES.QTD_PARC}`}
+                      />
                     </div>
                   </div>
                   <div className="text-right">

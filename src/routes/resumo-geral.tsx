@@ -1260,7 +1260,7 @@ function Dashboard() {
             <Button 
               variant="outline" 
               onClick={() => window.print()}
-              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest flex"
+              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest hidden md:flex"
             >
               Imprimir / PDF
             </Button>

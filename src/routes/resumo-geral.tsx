@@ -1125,6 +1125,13 @@ function Dashboard() {
           accent="bg-purple-500/15 text-purple-600"
         />
         <StatCard
+          label="Total Pendente"
+          value={fmtMoney(stats.totalPendente)}
+          hint={`${filtered.filter(c => !["SIM", "sim"].includes(String(c.pago).trim())).length} parcelas abertas`}
+          icon={AlertCircle}
+          accent="bg-red-500/15 text-red-600"
+        />
+        <StatCard
           label="Maior comissão"
           value={fmtMoney(stats.maiorComissao)}
           hint="Parcela individual"

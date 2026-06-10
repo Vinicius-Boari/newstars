@@ -1485,7 +1485,7 @@ function Dashboard() {
           </table>
 
           {/* Mobile Card View */}
-          <div className="md:hidden divide-y divide-border/50">
+          <div className="md:hidden print:hidden divide-y divide-border/50">
             {paginatedData.map((c, i) => (
               <div 
                 key={`${c.pedido}-${i}`} 

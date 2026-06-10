@@ -1355,7 +1355,7 @@ function Dashboard() {
                     c.pago === "SIM" ? "bg-green-500/[0.02] hover:bg-green-500/[0.05]" : "bg-red-500/[0.02] hover:bg-red-500/[0.05]"
                   )}
                 >
-                  <td className="px-3 py-3">
+                  <td className="px-3 py-3 print:hidden">
                     <div className="flex items-center gap-2">
                       <PedidoModal 
                         quinzena={c.quinzena} 

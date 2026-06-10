@@ -1151,7 +1151,7 @@ function Dashboard() {
 
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 print:hidden">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <h3 className="text-sm font-semibold mb-1">A receber por Cidade</h3>
           <p className="text-[11px] text-muted-foreground/60 mb-3">Top 5 cidades com maior valor</p>

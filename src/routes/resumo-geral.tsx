@@ -4,7 +4,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend, LabelList,
 } from "recharts";
-import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2, Eye, ArrowRightLeft, LogOut, Printer } from "lucide-react";
+import { Calendar, Wallet, Users, TrendingUp, Search, Filter, X, Loader2, Edit2, Check, X as CloseIcon, ChevronsUpDown, Plus, RefreshCcw, UserCircle, Trash2, Eye, ArrowRightLeft, LogOut } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
@@ -98,7 +98,7 @@ function ComboboxFilter({
   const selectedOption = options.find(opt => opt.value === value);
 
   return (
-    <div className="relative print:hidden" ref={containerRef}>
+    <div className="relative" ref={containerRef}>
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
@@ -1109,7 +1109,7 @@ function Dashboard() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 print:grid-cols-4 print:gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           label="Total a receber"
           value={fmtMoney(stats.totalReceber)}
@@ -1147,11 +1147,12 @@ function Dashboard() {
           icon={Calendar}
           accent="bg-blue-500/15 text-blue-600"
         />
+
       </div>
 
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 print:hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
           <h3 className="text-sm font-semibold mb-1">A receber por Cidade</h3>
           <p className="text-[11px] text-muted-foreground/60 mb-3">Top 5 cidades com maior valor</p>
@@ -1233,8 +1234,8 @@ function Dashboard() {
       </div>
 
       {/* Main table */}
-      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm print:border-none print:shadow-none">
-        <div className="p-4 md:p-5 border-b border-border bg-muted/30 space-y-4 print:hidden">
+      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+        <div className="p-4 md:p-5 border-b border-border bg-muted/30 space-y-4">
           <div className="flex flex-col gap-4">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -1261,7 +1262,7 @@ function Dashboard() {
               onClick={() => window.print()}
               className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest flex"
             >
-              <Printer className="h-4 w-4" /> Imprimir / PDF
+              Imprimir / PDF
             </Button>
           </div>
           
@@ -1327,23 +1328,23 @@ function Dashboard() {
             )}
           </div>
         </div>
-        <div className="md:overflow-x-auto print:overflow-visible">
+        <div className="md:overflow-x-auto">
           {/* Desktop Table View */}
-          <table className="hidden md:table print:table w-full text-left text-sm print:text-[10px]">
+          <table className="hidden md:table w-full text-left text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/20">
-                <th className="px-3 py-2.5 w-10 print:hidden"></th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Data</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Pedido</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Nome</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Local</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-right">Total</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-center">%</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-right">Vl Parc</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Qtd Parc</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-center">Venc</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-center">Pago</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-green-600 font-bold text-right">Receber</th>
+                <th className="px-3 py-2.5 w-10"></th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Data</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Pedido</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Nome</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Local</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-right">Total</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">%</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-right">Vl Parc</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Qtd Parc</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">Venc</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">Pago</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-green-600 font-bold text-right">Receber</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -1355,7 +1356,7 @@ function Dashboard() {
                     c.pago === "SIM" ? "bg-green-500/[0.02] hover:bg-green-500/[0.05]" : "bg-red-500/[0.02] hover:bg-red-500/[0.05]"
                   )}
                 >
-                  <td className="px-3 py-3 print:hidden">
+                  <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
                       <PedidoModal 
                         quinzena={c.quinzena} 
@@ -1485,7 +1486,7 @@ function Dashboard() {
           </table>
 
           {/* Mobile Card View */}
-          <div className="md:hidden print:hidden divide-y divide-border/50">
+          <div className="md:hidden divide-y divide-border/50">
             {paginatedData.map((c, i) => (
               <div 
                 key={`${c.pedido}-${i}`} 
@@ -1580,7 +1581,7 @@ function Dashboard() {
         </div>
         
         {totalPages > 1 && (
-          <div className="p-4 border-t border-border bg-muted/10 flex flex-col md:flex-row items-center justify-between gap-4 print:hidden">
+          <div className="p-4 border-t border-border bg-muted/10 flex flex-col md:flex-row items-center justify-between gap-4">
             <div className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest order-2 md:order-1">
               Página {currentPage} de {totalPages} ({filtered.length} itens)
             </div>

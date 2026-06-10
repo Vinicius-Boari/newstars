@@ -1261,7 +1261,7 @@ function Dashboard() {
               onClick={() => window.print()}
               className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest flex"
             >
-              Imprimir / PDF
+              <Printer className="h-4 w-4" /> Imprimir / PDF
             </Button>
           </div>
           

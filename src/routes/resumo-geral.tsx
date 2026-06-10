@@ -880,8 +880,9 @@ function Dashboard() {
       const isPago = ["SIM", "sim", "PAGO", "pago"].includes(String(c.pago).trim());
       return isPago ? s + c.receber : s;
     }, 0);
+    const totalPendente = totalReceber - totalPago;
     const maiorComissao = filtered.reduce((m, c) => c.receber > m ? c.receber : m, 0);
-    return { totalReceber, totalPago, maiorComissao, qtd: filtered.length };
+    return { totalReceber, totalPago, totalPendente, maiorComissao, qtd: filtered.length };
   }, [filtered]);
 
   const perQuinzena = React.useMemo(() => {

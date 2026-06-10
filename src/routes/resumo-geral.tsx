@@ -1151,6 +1151,15 @@ function Dashboard() {
       </div>
 
 
+      {stats.totalPendente > 0 && (
+        <div className="flex items-center gap-3 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl animate-pulse">
+          <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
+          <div className="text-xs font-bold text-red-600 uppercase tracking-tight">
+            Você tem {fmtMoney(stats.totalPendente)} pendentes para receber nesta filtragem!
+          </div>
+        </div>
+      )}
+
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="rounded-xl border border-border bg-card p-5 shadow-sm">
@@ -1260,7 +1269,7 @@ function Dashboard() {
             <Button 
               variant="outline" 
               onClick={() => window.print()}
-              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest flex"
+              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest hidden md:flex"
             >
               Imprimir / PDF
             </Button>
@@ -1358,17 +1367,6 @@ function Dashboard() {
                 >
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
-                      <PedidoModal 
-                        quinzena={c.quinzena} 
-                        onSuccess={refetch} 
-                        sheetId={sheetId} 
-                        registro={c}
-                        trigger={
-                          <button className="text-muted-foreground hover:text-primary transition-colors">
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </button>
-                        }
-                      />
                       <PedidoModal 
                         quinzena={c.quinzena} 
                         onSuccess={refetch} 

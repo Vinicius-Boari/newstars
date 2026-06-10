@@ -1332,18 +1332,18 @@ function Dashboard() {
           <table className="hidden md:table print:table w-full text-left text-sm print:text-[10px]">
             <thead>
               <tr className="border-b border-border bg-muted/20">
-                <th className="px-3 py-2.5 w-10"></th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Data</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Pedido</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Nome</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Local</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-right">Total</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">%</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-right">Vl Parc</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground">Qtd Parc</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">Venc</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-muted-foreground text-center">Pago</th>
-                <th className="px-3 py-2.5 font-semibold text-[11px] uppercase tracking-wider text-green-600 font-bold text-right">Receber</th>
+                <th className="px-3 py-2.5 w-10 print:hidden"></th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Data</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Pedido</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Nome</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Local</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-right">Total</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-center">%</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-right">Vl Parc</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground">Qtd Parc</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-center">Venc</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-muted-foreground text-center">Pago</th>
+                <th className="px-3 py-2.5 font-semibold text-[11px] print:text-[9px] uppercase tracking-wider text-green-600 font-bold text-right">Receber</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">

@@ -880,8 +880,9 @@ function Dashboard() {
       const isPago = ["SIM", "sim", "PAGO", "pago"].includes(String(c.pago).trim());
       return isPago ? s + c.receber : s;
     }, 0);
+    const totalPendente = totalReceber - totalPago;
     const maiorComissao = filtered.reduce((m, c) => c.receber > m ? c.receber : m, 0);
-    return { totalReceber, totalPago, maiorComissao, qtd: filtered.length };
+    return { totalReceber, totalPago, totalPendente, maiorComissao, qtd: filtered.length };
   }, [filtered]);
 
   const perQuinzena = React.useMemo(() => {
@@ -1124,6 +1125,13 @@ function Dashboard() {
           accent="bg-purple-500/15 text-purple-600"
         />
         <StatCard
+          label="Total Pendente"
+          value={fmtMoney(stats.totalPendente)}
+          hint={`${filtered.filter(c => !["SIM", "sim"].includes(String(c.pago).trim())).length} parcelas abertas`}
+          icon={AlertCircle}
+          accent="bg-red-500/15 text-red-600"
+        />
+        <StatCard
           label="Maior comissão"
           value={fmtMoney(stats.maiorComissao)}
           hint="Parcela individual"
@@ -1141,6 +1149,15 @@ function Dashboard() {
         />
 
       </div>
+
+      {stats.totalPendente > 0 && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+          <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
+          <div className="text-xs font-bold text-red-600 uppercase tracking-tight">
+            Você tem {fmtMoney(stats.totalPendente)} pendentes para receber nesta filtragem!
+          </div>
+        </div>
+      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -1248,6 +1265,13 @@ function Dashboard() {
                 </Button>
               }
             />
+            <Button 
+              variant="outline" 
+              onClick={() => window.print()}
+              className="w-full md:w-auto gap-2 border-border h-11 md:h-9 font-bold uppercase text-[11px] tracking-widest hidden md:flex"
+            >
+              Imprimir / PDF
+            </Button>
           </div>
           
           <div className="flex flex-wrap items-center gap-2">
@@ -1333,7 +1357,13 @@ function Dashboard() {
             </thead>
             <tbody className="divide-y divide-border/50">
               {paginatedData.map((c, i) => (
-                <tr key={`${c.pedido}-${i}`} className="hover:bg-muted/30 transition-colors group">
+                <tr 
+                  key={`${c.pedido}-${i}`} 
+                  className={cn(
+                    "transition-colors group",
+                    c.pago === "SIM" ? "bg-green-500/[0.02] hover:bg-green-500/[0.05]" : "bg-red-500/[0.02] hover:bg-red-500/[0.05]"
+                  )}
+                >
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
                       <PedidoModal 
@@ -1466,7 +1496,13 @@ function Dashboard() {
           {/* Mobile Card View */}
           <div className="md:hidden divide-y divide-border/50">
             {paginatedData.map((c, i) => (
-              <div key={`${c.pedido}-${i}`} className="p-4 space-y-3 active:bg-muted/30 transition-colors">
+              <div 
+                key={`${c.pedido}-${i}`} 
+                className={cn(
+                  "p-4 space-y-3 transition-colors",
+                  c.pago === "SIM" ? "bg-green-500/[0.02] active:bg-green-500/[0.05]" : "bg-red-500/[0.02] active:bg-red-500/[0.05]"
+                )}
+              >
                 <div className="flex items-center justify-between">
                   <div className="font-bold text-sm text-foreground uppercase tracking-tight">{c.nome}</div>
                   <div className="flex items-center gap-1">

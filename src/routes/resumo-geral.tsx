@@ -1327,9 +1327,9 @@ function Dashboard() {
             )}
           </div>
         </div>
-        <div className="md:overflow-x-auto">
+        <div className="md:overflow-x-auto print:overflow-visible">
           {/* Desktop Table View */}
-          <table className="hidden md:table w-full text-left text-sm">
+          <table className="hidden md:table print:table w-full text-left text-sm print:text-[10px]">
             <thead>
               <tr className="border-b border-border bg-muted/20">
                 <th className="px-3 py-2.5 w-10"></th>

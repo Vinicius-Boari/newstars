@@ -1150,14 +1150,6 @@ function Dashboard() {
 
       </div>
 
-      {stats.totalPendente > 0 && (
-        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-3 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
-          <AlertCircle className="h-5 w-5 text-red-500 shrink-0" />
-          <div className="text-xs font-bold text-red-600 uppercase tracking-tight">
-            Você tem {fmtMoney(stats.totalPendente)} pendentes para receber nesta filtragem!
-          </div>
-        </div>
-      )}
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

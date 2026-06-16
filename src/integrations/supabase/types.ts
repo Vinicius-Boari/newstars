@@ -41,6 +41,39 @@ export type Database = {
         }
         Relationships: []
       }
+      mercados: {
+        Row: {
+          created_at: string
+          data: string
+          id: string
+          observacao: string
+          responsavel: string
+          supermercado: string
+          telefone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data: string
+          id?: string
+          observacao?: string
+          responsavel: string
+          supermercado: string
+          telefone: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: string
+          id?: string
+          observacao?: string
+          responsavel?: string
+          supermercado?: string
+          telefone?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       sheets: {
         Row: {
           created_at: string

@@ -228,11 +228,13 @@ function MercadoPage() {
   const openNew = () => {
     setEditing(null);
     setForm(emptyForm());
+    setPendingFiles([]);
     setDialogOpen(true);
   };
 
   const openEdit = (m: Mercado) => {
     setEditing(m);
+    setPendingFiles([]);
     setForm({
       data: m.data,
       supermercado: m.supermercado,

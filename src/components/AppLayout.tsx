@@ -21,6 +21,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import {
+  isBiometricAvailable,
+  hasBiometricEnrolled,
+  registerBiometric,
+  saveBiometricSession,
+  clearBiometric,
+} from "@/lib/biometric";
+import { Fingerprint } from "lucide-react";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
@@ -37,6 +46,53 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const [tempSheetId, setTempSheetId] = React.useState(sheetId);
   const [tempRefresh, setTempRefresh] = React.useState(refreshMs / 1000);
+
+  const [bioSupported, setBioSupported] = React.useState(false);
+  const [bioEnabled, setBioEnabled] = React.useState(false);
+  const [bioBusy, setBioBusy] = React.useState(false);
+
+  React.useEffect(() => {
+    (async () => {
+      setBioSupported(await isBiometricAvailable());
+      setBioEnabled(hasBiometricEnrolled());
+    })();
+  }, [isSettingsOpen]);
+
+  const handleToggleBiometric = async (checked: boolean) => {
+    if (bioBusy) return;
+    setBioBusy(true);
+    try {
+      if (!checked) {
+        clearBiometric();
+        setBioEnabled(false);
+        toast.success("Biometria desativada.");
+        return;
+      }
+      const { data } = await supabase.auth.getSession();
+      const session = data.session;
+      if (!session) {
+        toast.error("Sessão expirada. Entre novamente para ativar.");
+        return;
+      }
+      const username =
+        (session.user?.email?.split("@")[0]) || session.user?.id || "user";
+      const ok = await registerBiometric(username);
+      if (!ok) {
+        toast.error("Não foi possível ativar a biometria.");
+        return;
+      }
+      saveBiometricSession({
+        access_token: session.access_token,
+        refresh_token: session.refresh_token,
+      });
+      setBioEnabled(true);
+      toast.success("Biometria ativada neste dispositivo!");
+    } catch {
+      toast.error("Falha ao ativar a biometria.");
+    } finally {
+      setBioBusy(false);
+    }
+  };
 
   const [installPrompt, setInstallPrompt] = React.useState<any>(null);
   const [isInstalled, setIsInstalled] = React.useState(false);
@@ -283,6 +339,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     onChange={(e) => setTempRefresh(Number(e.target.value))}
                     min={10}
                   />
+                </div>
+
+                <div className="pt-2">
+                  <div className="bg-muted/50 p-3 rounded-lg border border-border flex items-start justify-between gap-3">
+                    <div className="flex gap-3">
+                      <Fingerprint className="h-5 w-5 text-purple-400 shrink-0 mt-0.5" />
+                      <div>
+                        <h4 className="text-xs font-bold">
+                          Login por biometria
+                        </h4>
+                        <p className="text-[10px] text-muted-foreground mt-0.5">
+                          {bioSupported
+                            ? "Use impressão digital ou reconhecimento facial deste aparelho para entrar."
+                            : "Este aparelho/navegador não suporta biometria."}
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={bioEnabled}
+                      disabled={!bioSupported || bioBusy}
+                      onCheckedChange={handleToggleBiometric}
+                    />
+                  </div>
                 </div>
               </div>
               <DialogFooter>

@@ -224,14 +224,21 @@ export const appendPedido = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input) => appendPedidoSchema.parse(input))
   .handler(async ({ data }) => {
-    await gatewayFetch(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${encodeSheetSegment(data.quinzena)}:append?valueInputOption=RAW`, {
+    const appendRange = `${quoteSheetName(data.quinzena)}!A:K`;
+    const result = await gatewayFetch<{ updates?: { updatedRows?: number; updatedCells?: number; updatedRange?: string } }>(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${appendRange}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS&includeValuesInResponse=true`, {
       method: "POST",
       body: JSON.stringify({
         values: [data.values],
       }),
     });
 
-    return { success: true };
+    const updatedRows = result.updates?.updatedRows ?? 0;
+    const updatedCells = result.updates?.updatedCells ?? 0;
+    if (updatedRows < 1 || updatedCells < data.values.length) {
+      throw new Error("O Google Sheets respondeu sem confirmar a inclusão do pedido. Confira a aba selecionada e tente novamente.");
+    }
+
+    return { success: true, updatedRange: result.updates?.updatedRange };
   });
 
 export const deletePedido = createServerFn({ method: "POST" })

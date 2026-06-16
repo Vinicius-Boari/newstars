@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
-  LayoutDashboard, Calendar, Menu, X, LogOut, RefreshCw, CheckCircle2, AlertCircle, Settings as SettingsIcon
+  LayoutDashboard, Calendar, Menu, X, LogOut, RefreshCw, CheckCircle2, AlertCircle, Settings as SettingsIcon, Store
 } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -151,6 +151,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </Link>
             );
           })}
+
+          <div className="pt-4 pb-2 px-3 text-[10px] font-bold text-sidebar-foreground/30 uppercase tracking-widest">
+            Expansão
+          </div>
+          <Link
+            to="/mercado"
+            onClick={() => setOpen(false)}
+            activeProps={{ className: "bg-sidebar-accent text-primary font-semibold" }}
+            inactiveProps={{ className: "text-sidebar-foreground/60 hover:text-foreground hover:bg-sidebar-accent/50" }}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200"
+          >
+            <Store className="h-4 w-4" />
+            Mercado
+          </Link>
         </nav>
 
         <div className="p-4 space-y-3 border-t border-sidebar-border shrink-0">

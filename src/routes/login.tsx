@@ -6,8 +6,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Lock } from "lucide-react";
+import { Loader2, Lock, Fingerprint } from "lucide-react";
 import { signInWithUsername } from "@/lib/auth.functions";
+import {
+  isBiometricAvailable,
+  hasBiometricEnrolled,
+  registerBiometric,
+  verifyBiometric,
+  saveBiometricSession,
+  getBiometricSession,
+  clearBiometric,
+} from "@/lib/biometric";
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
@@ -24,8 +33,60 @@ function LoginComponent() {
   const [username, setUsername] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [bioReady, setBioReady] = React.useState(false);
+  const [bioEnrolled, setBioEnrolled] = React.useState(false);
   const navigate = useNavigate();
   const { invalidate } = useRouter();
+
+  React.useEffect(() => {
+    (async () => {
+      setBioReady(await isBiometricAvailable());
+      setBioEnrolled(hasBiometricEnrolled());
+    })();
+  }, []);
+
+  const finishSession = async (session: { access_token: string; refresh_token: string }) => {
+    const { error } = await supabase.auth.setSession(session);
+    if (error) {
+      toast.error("Erro ao iniciar sessão.");
+      return false;
+    }
+    await invalidate();
+    navigate({ to: "/resumo-geral" });
+    return true;
+  };
+
+  const handleBiometricLogin = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+    try {
+      const ok = await verifyBiometric();
+      if (!ok) {
+        toast.error("Biometria não reconhecida.");
+        setIsLoading(false);
+        return;
+      }
+      const session = getBiometricSession();
+      if (!session) {
+        toast.error("Sessão biométrica expirou. Entre com senha novamente.");
+        clearBiometric();
+        setBioEnrolled(false);
+        setIsLoading(false);
+        return;
+      }
+      const ok2 = await finishSession(session);
+      if (!ok2) {
+        clearBiometric();
+        setBioEnrolled(false);
+        setIsLoading(false);
+      } else {
+        toast.success("Bem-vinda de volta! ✨");
+      }
+    } catch {
+      toast.error("Falha na biometria.");
+      setIsLoading(false);
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,22 +105,35 @@ function LoginComponent() {
         return;
       }
 
-      const { error } = await supabase.auth.setSession({
+      const session = {
         access_token: result.session.access_token,
         refresh_token: result.session.refresh_token,
-      });
+      };
 
-      if (error) {
-        toast.error("Erro ao iniciar sessão.");
-        setIsLoading(false);
-        return;
+      // Oferecer cadastro de biometria, se disponível e ainda não cadastrada
+      if (bioReady && !hasBiometricEnrolled()) {
+        const wantsBio = window.confirm(
+          "Deseja ativar login por impressão digital / reconhecimento facial neste dispositivo?",
+        );
+        if (wantsBio) {
+          try {
+            const enrolled = await registerBiometric(username.trim());
+            if (enrolled) {
+              saveBiometricSession(session);
+              toast.success("Biometria ativada neste dispositivo!");
+            }
+          } catch {
+            toast.error("Não foi possível ativar a biometria.");
+          }
+        }
+      } else if (hasBiometricEnrolled()) {
+        // mantém os tokens atualizados para uso futuro via biometria
+        saveBiometricSession(session);
       }
 
-      {
-        toast.success("Bem-vinda, Melissa! ✨");
-        await invalidate();
-        navigate({ to: "/resumo-geral" });
-      }
+      const ok = await finishSession(session);
+      if (ok) toast.success("Bem-vinda, Melissa! ✨");
+      else setIsLoading(false);
     } catch (error) {
       console.error("Erro inesperado no login:", error);
       toast.error("Ocorreu um erro inesperado ao tentar entrar.");
@@ -140,6 +214,19 @@ function LoginComponent() {
                 "Entrar"
               )}
             </Button>
+
+            {bioReady && bioEnrolled && (
+              <Button
+                type="button"
+                onClick={handleBiometricLogin}
+                disabled={isLoading}
+                variant="outline"
+                className="w-full h-12 border-purple-500/30 bg-zinc-900/40 text-zinc-100 hover:bg-purple-500/10 hover:text-white rounded-xl transition-all duration-300 flex items-center justify-center gap-2"
+              >
+                <Fingerprint className="h-5 w-5 text-purple-400" />
+                Entrar com biometria
+              </Button>
+            )}
 
             <div className="space-y-4 pt-4 text-center">
               <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs">

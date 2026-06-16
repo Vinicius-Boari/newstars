@@ -96,7 +96,7 @@ function LoginComponent() {
         setBioEnrolled(false);
         setIsLoading(false);
       } else {
-        toast.success("Bem-vinda de volta! ✨");
+        toast.success("Bem-vindo(a) de volta! ✨");
       }
     } catch {
       toast.error("Falha na biometria.");

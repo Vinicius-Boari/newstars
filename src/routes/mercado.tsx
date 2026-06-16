@@ -134,6 +134,10 @@ function MercadoPage() {
     mutationFn: async (payload: { id?: string; values: FormState }) => {
       const values = {
         ...payload.values,
+        data: payload.values.data || null,
+        supermercado: payload.values.supermercado.trim() || null,
+        responsavel: payload.values.responsavel.trim() || null,
+        telefone: payload.values.telefone.trim() || null,
         proxima_visita: payload.values.proxima_visita || null,
       };
       if (payload.id) {
@@ -218,19 +222,7 @@ function MercadoPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.data || !form.supermercado.trim() || !form.responsavel.trim() || !form.telefone.trim()) {
-      toast.error("Preencha os campos obrigatórios.");
-      return;
-    }
-    saveMutation.mutate({
-      id: editing?.id,
-      values: {
-        ...form,
-        supermercado: form.supermercado.trim(),
-        responsavel: form.responsavel.trim(),
-        telefone: form.telefone.trim(),
-      },
-    });
+    saveMutation.mutate({ id: editing?.id, values: form });
   };
 
   return (

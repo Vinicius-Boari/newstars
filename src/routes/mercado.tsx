@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import * as React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Store, Plus, Search, Edit2, Trash2, Calendar as CalendarIcon, ArrowUpDown, Loader2, X, MessageCircle, Phone, Clock } from "lucide-react";
+import { Store, Plus, Search, Edit2, Trash2, Calendar as CalendarIcon, ArrowUpDown, Loader2, X, MessageCircle, Phone, Clock, Camera, Image as ImageIcon, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -477,6 +477,12 @@ function MercadoPage() {
                 placeholder="Anote detalhes da visita, próximos passos, contatos..."
               />
             </div>
+            {editing && <MercadoAnexos mercadoId={editing.id} />}
+            {!editing && (
+              <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-[11px] text-muted-foreground">
+                Salve o mercado para anexar fotos (galeria/câmera).
+              </div>
+            )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar

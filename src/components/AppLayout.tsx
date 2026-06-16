@@ -217,6 +217,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-4 space-y-3 border-t border-sidebar-border shrink-0">
+          <button
+            onClick={handleInstall}
+            disabled={isInstalled}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer",
+              isInstalled
+                ? "text-sidebar-foreground/40 cursor-default"
+                : "bg-gradient-to-r from-purple-500/15 to-pink-500/15 text-foreground hover:from-purple-500/25 hover:to-pink-500/25 border border-purple-500/20",
+            )}
+          >
+            {isInstalled ? (
+              <>
+                <Check className="h-4 w-4 shrink-0 text-green-500" />
+                <span>App instalado</span>
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 shrink-0" />
+                <span>Instalar app</span>
+              </>
+            )}
+          </button>
+
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
               <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-foreground hover:bg-sidebar-accent/50 transition-all cursor-pointer">

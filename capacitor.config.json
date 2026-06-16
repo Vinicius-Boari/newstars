@@ -1,0 +1,8 @@
+{
+  "appId": "app.newstars.comissoes",
+  "appName": "NewStars",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": true
+  }
+}

@@ -136,7 +136,7 @@ function LoginComponent() {
       }
 
       const ok = await finishSession(session);
-      if (ok) toast.success("Bem-vinda, Melissa! ✨");
+      if (ok) toast.success(`Bem-vindo(a), ${username.trim()}! ✨`);
       else setIsLoading(false);
     } catch (error) {
       console.error("Erro inesperado no login:", error);

@@ -117,6 +117,7 @@ function MercadoPage() {
   const [editing, setEditing] = React.useState<Mercado | null>(null);
   const [form, setForm] = React.useState<FormState>(emptyForm());
   const [confirmDelete, setConfirmDelete] = React.useState<Mercado | null>(null);
+  const [pendingFiles, setPendingFiles] = React.useState<File[]>([]);
 
   const { data: mercados = [], isLoading } = useQuery({
     queryKey: ["mercados"],
@@ -154,9 +155,21 @@ function MercadoPage() {
       if (payload.id) {
         const { error } = await supabase.from("mercados").update(values).eq("id", payload.id);
         if (error) throw error;
+        return payload.id;
       } else {
-        const { error } = await supabase.from("mercados").insert(values);
+        const { data, error } = await supabase.from("mercados").insert(values).select("id").single();
         if (error) throw error;
+        const newId = data.id as string;
+        if (pendingFiles.length > 0) {
+          for (const file of pendingFiles) {
+            const ext = file.name.split(".").pop() || "jpg";
+            const path = `${newId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+            await supabase.storage
+              .from("mercado-anexos")
+              .upload(path, file, { contentType: file.type || "image/jpeg" });
+          }
+        }
+        return newId;
       }
     },
     onSuccess: () => {
@@ -165,6 +178,7 @@ function MercadoPage() {
       setDialogOpen(false);
       setEditing(null);
       setForm(emptyForm());
+      setPendingFiles([]);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -477,11 +491,10 @@ function MercadoPage() {
                 placeholder="Anote detalhes da visita, próximos passos, contatos..."
               />
             </div>
-            {editing && <MercadoAnexos mercadoId={editing.id} />}
-            {!editing && (
-              <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-[11px] text-muted-foreground">
-                Salve o mercado para anexar fotos (galeria/câmera).
-              </div>
+            {editing ? (
+              <MercadoAnexos mercadoId={editing.id} />
+            ) : (
+              <PendingAnexos files={pendingFiles} onChange={setPendingFiles} />
             )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>

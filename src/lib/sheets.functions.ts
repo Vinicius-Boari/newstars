@@ -83,14 +83,24 @@ function rowHasValue(row: unknown[] | undefined) {
 }
 
 async function gatewayFetch<T>(url: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(url, {
-    ...init,
-    headers: {
-      ...getConnectorHeaders(),
-      ...init?.headers,
-    },
-  });
-  const text = await response.text();
+  const maxAttempts = 4;
+  let response!: Response;
+  let text = "";
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    response = await fetch(url, {
+      ...init,
+      headers: {
+        ...getConnectorHeaders(),
+        ...init?.headers,
+      },
+    });
+    text = await response.text();
+    if (response.ok) break;
+    const retriable = response.status === 429 || response.status >= 500 || text.includes("Quota exceeded") || text.includes("upstream");
+    if (!retriable || attempt === maxAttempts) break;
+    const delay = Math.min(8000, 500 * 2 ** (attempt - 1)) + Math.floor(Math.random() * 300);
+    await new Promise((r) => setTimeout(r, delay));
+  }
   let payload: any = null;
   if (text) {
     try {

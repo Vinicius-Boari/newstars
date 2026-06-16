@@ -379,6 +379,7 @@ function MercadoPage() {
                     <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <span>{m.telefone}</span>
+                        {m.telefone?.trim() && (
                         <a
                           href={waLink(m.telefone)}
                           target="_blank"
@@ -388,6 +389,7 @@ function MercadoPage() {
                         >
                           <MessageCircle className="h-3.5 w-3.5" />
                         </a>
+                        )}
                       </div>
                     </td>
                     <td className={cn("px-4 py-3 whitespace-nowrap text-xs", v?.cls)}>
@@ -605,28 +607,34 @@ function MercadoCard({
         <div>
           <div className="text-[10px] uppercase text-muted-foreground">Telefone</div>
           <div className="flex items-center gap-1">
-            <a href={`tel:${m.telefone.replace(/\D/g, "")}`} className="text-primary truncate">
-              {m.telefone}
-            </a>
+            {m.telefone?.trim() ? (
+              <a href={`tel:${m.telefone.replace(/\D/g, "")}`} className="text-primary truncate">
+                {m.telefone}
+              </a>
+            ) : (
+              <span className="text-muted-foreground">—</span>
+            )}
           </div>
         </div>
       </div>
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        <a
-          href={`tel:${m.telefone.replace(/\D/g, "")}`}
-          className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md border border-border bg-muted/30 text-xs font-medium hover:bg-muted/60"
-        >
-          <Phone className="h-3.5 w-3.5" /> Ligar
-        </a>
-        <a
-          href={waLink(m.telefone)}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-medium hover:bg-emerald-500/25"
-        >
-          <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
-        </a>
-      </div>
+      {m.telefone?.trim() && (
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          <a
+            href={`tel:${m.telefone.replace(/\D/g, "")}`}
+            className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md border border-border bg-muted/30 text-xs font-medium hover:bg-muted/60"
+          >
+            <Phone className="h-3.5 w-3.5" /> Ligar
+          </a>
+          <a
+            href={waLink(m.telefone)}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-medium hover:bg-emerald-500/25"
+          >
+            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+          </a>
+        </div>
+      )}
       {m.observacao && (
         <div className="mt-2 pt-2 border-t border-border">
           <div className="text-[10px] uppercase text-muted-foreground mb-1">Observação</div>

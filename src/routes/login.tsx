@@ -110,23 +110,9 @@ function LoginComponent() {
         refresh_token: result.session.refresh_token,
       };
 
-      // Oferecer cadastro de biometria, se disponível e ainda não cadastrada
-      if (bioReady && !hasBiometricEnrolled()) {
-        const wantsBio = window.confirm(
-          "Deseja ativar login por impressão digital / reconhecimento facial neste dispositivo?",
-        );
-        if (wantsBio) {
-          try {
-            const enrolled = await registerBiometric(username.trim());
-            if (enrolled) {
-              saveBiometricSession(session);
-              toast.success("Biometria ativada neste dispositivo!");
-            }
-          } catch {
-            toast.error("Não foi possível ativar a biometria.");
-          }
-        }
-      } else if (hasBiometricEnrolled()) {
+      // Mantém os tokens atualizados para uso futuro via biometria,
+      // caso já esteja ativada nas Configurações.
+      if (hasBiometricEnrolled()) {
         // mantém os tokens atualizados para uso futuro via biometria
         saveBiometricSession(session);
       }

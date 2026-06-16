@@ -31,11 +31,11 @@ type Status = "prospect" | "negociacao" | "ativo" | "inativo";
 
 type Mercado = {
   id: string;
-  data: string | null;
-  supermercado: string | null;
-  responsavel: string | null;
-  telefone: string | null;
-  observacao: string | null;
+  data: string;
+  supermercado: string;
+  responsavel: string;
+  telefone: string;
+  observacao: string;
   status: Status;
   proxima_visita: string | null;
   created_at: string;

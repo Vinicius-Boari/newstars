@@ -660,7 +660,8 @@ function ContasModal({ isAdmin }: { isAdmin: boolean }) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
   const [users, setUsers] = React.useState<{ id: string; username: string; role: string; protected: boolean }[]>([]);
-  const [newUser, setNewUser] = React.useState({ username: "", role: "viewer" });
+  const [newUser, setNewUser] = React.useState({ username: "", role: "viewer", password: "" });
+  const createUserFn = useServerFn(createAdminUser);
 
   const fetchUsers = async () => {
     const { data } = await supabase.from("admin_users").select("id, username, role, protected");
@@ -673,12 +674,16 @@ function ContasModal({ isAdmin }: { isAdmin: boolean }) {
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (newUser.password.length < 6) {
+      toast.error("Senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
     setLoading(true);
-    const { error } = await supabase.from("admin_users").insert([newUser as never]);
-    if (error) toast.error("Erro ao adicionar: " + error.message);
+    const res = await createUserFn({ data: newUser });
+    if (res.error) toast.error("Erro ao adicionar: " + res.error);
     else {
       toast.success("Usuário adicionado!");
-      setNewUser({ username: "", role: "viewer" });
+      setNewUser({ username: "", role: "viewer", password: "" });
       fetchUsers();
     }
     setLoading(false);
@@ -704,17 +709,21 @@ function ContasModal({ isAdmin }: { isAdmin: boolean }) {
           <DialogTitle>Gerenciar Contas de Acesso</DialogTitle>
         </DialogHeader>
         <div className="space-y-6 py-4">
-          <form onSubmit={handleAdd} className="grid grid-cols-5 gap-2 items-end">
+          <form onSubmit={handleAdd} className="grid grid-cols-7 gap-2 items-end">
             <div className="col-span-2 space-y-2">
               <Label>Usuário</Label>
               <Input value={newUser.username} onChange={e => setNewUser({...newUser, username: e.target.value})} placeholder="Nome" required />
+            </div>
+            <div className="col-span-2 space-y-2">
+              <Label>Senha</Label>
+              <Input type="password" value={newUser.password} onChange={e => setNewUser({...newUser, password: e.target.value})} placeholder="Mín. 6" required />
             </div>
             <div className="col-span-2 space-y-2">
               <Label>Papel</Label>
               <Input value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} placeholder="viewer ou admin" required />
             </div>
             <Button type="submit" size="sm" disabled={loading} className="mb-0.5">
-              <Plus className="h-4 w-4" />
+              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}
             </Button>
           </form>
 

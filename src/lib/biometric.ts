@@ -5,6 +5,7 @@
 const CRED_KEY = "newstars:bio:credentialId";
 const SESSION_KEY = "newstars:bio:session";
 const RP_NAME = "NewStars";
+let activeVerification: Promise<boolean> | null = null;
 
 function b64uToBuf(b64u: string): ArrayBuffer {
   const b64 = b64u.replace(/-/g, "+").replace(/_/g, "/");
@@ -90,6 +91,16 @@ export async function registerBiometric(username: string): Promise<boolean> {
 }
 
 export async function verifyBiometric(): Promise<boolean> {
+  if (activeVerification) return activeVerification;
+
+  activeVerification = runBiometricVerification().finally(() => {
+    activeVerification = null;
+  });
+
+  return activeVerification;
+}
+
+async function runBiometricVerification(): Promise<boolean> {
   const credIdB64 = localStorage.getItem(CRED_KEY);
   if (!credIdB64) return false;
   const challenge = crypto.getRandomValues(new Uint8Array(32));

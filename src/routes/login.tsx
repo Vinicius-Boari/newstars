@@ -11,12 +11,15 @@ import { signInWithUsername } from "@/lib/auth.functions";
 import {
   isBiometricAvailable,
   hasBiometricEnrolled,
-  registerBiometric,
   verifyBiometric,
   saveBiometricSession,
   getBiometricSession,
   clearBiometric,
 } from "@/lib/biometric";
+
+let biometricLoginInFlight = false;
+let lastBiometricLoginAt = 0;
+const BIOMETRIC_LOGIN_COOLDOWN_MS = 10000;
 
 export const Route = createFileRoute("/login")({
   beforeLoad: async () => {
@@ -67,7 +70,10 @@ function LoginComponent() {
   };
 
   const handleBiometricLogin = async () => {
-    if (isLoading) return;
+    const now = Date.now();
+    if (isLoading || biometricLoginInFlight || now - lastBiometricLoginAt < BIOMETRIC_LOGIN_COOLDOWN_MS) return;
+    biometricLoginInFlight = true;
+    lastBiometricLoginAt = now;
     setIsLoading(true);
     try {
       const ok = await verifyBiometric();
@@ -95,6 +101,8 @@ function LoginComponent() {
     } catch {
       toast.error("Falha na biometria.");
       setIsLoading(false);
+    } finally {
+      biometricLoginInFlight = false;
     }
   };
 

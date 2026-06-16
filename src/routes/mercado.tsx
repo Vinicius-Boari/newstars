@@ -514,14 +514,33 @@ function MercadoPage() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-semibold">
         {label}
       </div>
-      <div className="text-2xl font-bold mt-1 tabular-nums">{value}</div>
+      <div className={cn("text-2xl font-bold mt-1 tabular-nums", accent)}>{value}</div>
     </div>
+  );
+}
+
+function FilterChip({
+  active, onClick, children,
+}: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-colors cursor-pointer",
+        active
+          ? "bg-primary text-primary-foreground border-primary"
+          : "bg-muted/30 text-muted-foreground border-border hover:bg-muted/60",
+      )}
+    >
+      {children}
+    </button>
   );
 }
 

@@ -47,7 +47,9 @@ export type Database = {
           data: string
           id: string
           observacao: string
+          proxima_visita: string | null
           responsavel: string
+          status: Database["public"]["Enums"]["mercado_status"]
           supermercado: string
           telefone: string
           updated_at: string
@@ -57,7 +59,9 @@ export type Database = {
           data: string
           id?: string
           observacao?: string
+          proxima_visita?: string | null
           responsavel: string
+          status?: Database["public"]["Enums"]["mercado_status"]
           supermercado: string
           telefone: string
           updated_at?: string
@@ -67,7 +71,9 @@ export type Database = {
           data?: string
           id?: string
           observacao?: string
+          proxima_visita?: string | null
           responsavel?: string
+          status?: Database["public"]["Enums"]["mercado_status"]
           supermercado?: string
           telefone?: string
           updated_at?: string
@@ -106,7 +112,7 @@ export type Database = {
       is_admin: { Args: { _user_id: string }; Returns: boolean }
     }
     Enums: {
-      [_ in never]: never
+      mercado_status: "prospect" | "negociacao" | "ativo" | "inativo"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -233,6 +239,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      mercado_status: ["prospect", "negociacao", "ativo", "inativo"],
+    },
   },
 } as const

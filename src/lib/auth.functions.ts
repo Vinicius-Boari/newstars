@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 const inputSchema = z.object({
   username: z.string().min(1).max(100),
@@ -47,4 +48,45 @@ export const signInWithUsername = createServerFn({ method: "POST" })
         refresh_token: signIn.session.refresh_token,
       },
     };
+  });
+
+const createUserSchema = z.object({
+  username: z.string().trim().min(1).max(100),
+  password: z.string().min(6).max(200),
+  role: z.string().min(1).max(50),
+});
+
+export const createAdminUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input) => createUserSchema.parse(input))
+  .handler(async ({ data, context }) => {
+    const { data: isAdmin } = await context.supabase.rpc("is_admin", {
+      _user_id: context.userId,
+    });
+    if (!isAdmin) return { error: "Acesso negado." };
+
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const username = data.username.trim();
+    const email = `${username.toLowerCase().replace(/[^a-z0-9]/g, "")}@app.local`;
+
+    const { data: created, error: createErr } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: data.password,
+      email_confirm: true,
+      user_metadata: { username },
+    });
+    if (createErr || !created.user) {
+      return { error: createErr?.message ?? "Falha ao criar usuário." };
+    }
+
+    const { error: insErr } = await supabaseAdmin.from("admin_users").insert({
+      id: created.user.id,
+      username,
+      role: data.role,
+    });
+    if (insErr) {
+      await supabaseAdmin.auth.admin.deleteUser(created.user.id);
+      return { error: insErr.message };
+    }
+    return { error: null };
   });

@@ -30,6 +30,7 @@ import {
   clearBiometric,
 } from "@/lib/biometric";
 import { Fingerprint } from "lucide-react";
+import { PullToRefreshIndicator } from "@/components/PullToRefresh";
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = React.useState(false);
@@ -172,6 +173,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-background flex relative">
+      <PullToRefreshIndicator onRefresh={() => refetch()} disabled={isFetching} />
       <aside
         className={cn(
           "fixed lg:static inset-y-0 left-0 z-40 w-64 bg-sidebar text-sidebar-foreground transform transition-transform lg:translate-x-0 flex flex-col",

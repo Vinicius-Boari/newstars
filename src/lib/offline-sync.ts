@@ -1,6 +1,7 @@
 import { toast } from "sonner";
 
 const PENDING_UPDATES_KEY = "sheets_pending_updates";
+const DATA_CACHE_KEY = "sheets_data_cache";
 
 interface PendingUpdate {
   id: string;
@@ -59,4 +60,51 @@ export async function syncPendingUpdates(updateFn: (sheetId: string, range: stri
   } else {
     toast.dismiss("sync-toast");
   }
+}
+
+// =========================
+// Cache local dos dados (modo offline)
+// =========================
+
+interface CachedSheetData<T> {
+  sheetId: string;
+  data: T;
+  timestamp: number;
+}
+
+export function saveCachedData<T>(sheetId: string, data: T) {
+  try {
+    const payload: CachedSheetData<T> = { sheetId, data, timestamp: Date.now() };
+    localStorage.setItem(DATA_CACHE_KEY, JSON.stringify(payload));
+  } catch (err) {
+    console.warn("[offline-sync] Falha ao salvar cache local:", err);
+  }
+}
+
+export function getCachedData<T>(sheetId: string): { data: T; timestamp: number } | null {
+  try {
+    const raw = localStorage.getItem(DATA_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CachedSheetData<T>;
+    if (parsed.sheetId !== sheetId) return null;
+    return { data: parsed.data, timestamp: parsed.timestamp };
+  } catch {
+    return null;
+  }
+}
+
+export function clearCachedData() {
+  localStorage.removeItem(DATA_CACHE_KEY);
+}
+
+// Dispara um callback sempre que a conexão voltar.
+// Retorna função para remover o listener.
+export function onReconnect(handler: () => void): () => void {
+  if (typeof window === "undefined") return () => {};
+  const wrapped = () => {
+    toast.success("Conexão restabelecida. Sincronizando...", { duration: 2500 });
+    handler();
+  };
+  window.addEventListener("online", wrapped);
+  return () => window.removeEventListener("online", wrapped);
 }

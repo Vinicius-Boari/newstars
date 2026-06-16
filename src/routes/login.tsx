@@ -37,6 +37,7 @@ function LoginComponent() {
   const [bioEnrolled, setBioEnrolled] = React.useState(false);
   const navigate = useNavigate();
   const { invalidate } = useRouter();
+  const autoTriedRef = React.useRef(false);
 
   React.useEffect(() => {
     (async () => {
@@ -44,9 +45,10 @@ function LoginComponent() {
       const enrolled = hasBiometricEnrolled();
       setBioReady(ready);
       setBioEnrolled(enrolled);
-      // Se a biometria já está cadastrada, dispara o prompt automaticamente
-      // ao abrir o app — sem precisar clicar no botão.
-      if (ready && enrolled) {
+      // Dispara o prompt apenas uma vez por montagem (evita repetir
+      // em React StrictMode / re-render após login).
+      if (ready && enrolled && !autoTriedRef.current) {
+        autoTriedRef.current = true;
         handleBiometricLogin();
       }
     })();

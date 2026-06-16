@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { AlertCircle } from "lucide-react";
 import { createAdminUser } from "@/lib/auth.functions";
 import { useServerFn } from "@tanstack/react-start";
@@ -720,7 +721,13 @@ function ContasModal({ isAdmin }: { isAdmin: boolean }) {
             </div>
             <div className="col-span-2 space-y-2">
               <Label>Papel</Label>
-              <Input value={newUser.role} onChange={e => setNewUser({...newUser, role: e.target.value})} placeholder="viewer ou admin" required />
+              <Select value={newUser.role} onValueChange={v => setNewUser({...newUser, role: v})}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="viewer">Viewer</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <Button type="submit" size="sm" disabled={loading} className="mb-0.5">
               {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />}

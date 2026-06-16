@@ -2,7 +2,7 @@ import * as React from "react";
 import { Link, useRouterState, useNavigate } from "@tanstack/react-router";
 import {
   LayoutDashboard, Calendar, Menu, X, LogOut, RefreshCw, CheckCircle2, AlertCircle, Settings as SettingsIcon, Store
-} from "lucide-react";
+, Download, Check } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -37,6 +37,50 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const [tempSheetId, setTempSheetId] = React.useState(sheetId);
   const [tempRefresh, setTempRefresh] = React.useState(refreshMs / 1000);
+
+  const [installPrompt, setInstallPrompt] = React.useState<any>(null);
+  const [isInstalled, setIsInstalled] = React.useState(false);
+
+  React.useEffect(() => {
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      // iOS Safari
+      (window.navigator as any).standalone === true;
+    if (standalone) setIsInstalled(true);
+
+    const onPrompt = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    const onInstalled = () => {
+      setIsInstalled(true);
+      setInstallPrompt(null);
+      toast.success("App instalado!");
+    };
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
+
+  const handleInstall = async () => {
+    if (installPrompt) {
+      installPrompt.prompt();
+      const { outcome } = await installPrompt.userChoice;
+      if (outcome !== "accepted") toast.info("Instalação cancelada.");
+      setInstallPrompt(null);
+    } else {
+      const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+      toast.info(
+        isIOS
+          ? "No iPhone: toque em Compartilhar e depois em 'Adicionar à Tela de Início'."
+          : "Abra o menu do navegador e toque em 'Instalar app' ou 'Adicionar à tela inicial'.",
+        { duration: 6000 },
+      );
+    }
+  };
 
   const handleSaveSettings = () => {
     setSheetId(tempSheetId);
@@ -173,6 +217,29 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         <div className="p-4 space-y-3 border-t border-sidebar-border shrink-0">
+          <button
+            onClick={handleInstall}
+            disabled={isInstalled}
+            className={cn(
+              "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer",
+              isInstalled
+                ? "text-sidebar-foreground/40 cursor-default"
+                : "bg-gradient-to-r from-purple-500/15 to-pink-500/15 text-foreground hover:from-purple-500/25 hover:to-pink-500/25 border border-purple-500/20",
+            )}
+          >
+            {isInstalled ? (
+              <>
+                <Check className="h-4 w-4 shrink-0 text-green-500" />
+                <span>App instalado</span>
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 shrink-0" />
+                <span>Instalar app</span>
+              </>
+            )}
+          </button>
+
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
               <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/50 hover:text-foreground hover:bg-sidebar-accent/50 transition-all cursor-pointer">

@@ -1,0 +1,5 @@
+ALTER TABLE public.mercados
+  ALTER COLUMN data DROP NOT NULL,
+  ALTER COLUMN supermercado DROP NOT NULL,
+  ALTER COLUMN responsavel DROP NOT NULL,
+  ALTER COLUMN telefone DROP NOT NULL;

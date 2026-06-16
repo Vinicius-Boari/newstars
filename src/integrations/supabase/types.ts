@@ -44,38 +44,38 @@ export type Database = {
       mercados: {
         Row: {
           created_at: string
-          data: string
+          data: string | null
           id: string
           observacao: string
           proxima_visita: string | null
-          responsavel: string
+          responsavel: string | null
           status: Database["public"]["Enums"]["mercado_status"]
-          supermercado: string
-          telefone: string
+          supermercado: string | null
+          telefone: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
-          data: string
+          data?: string | null
           id?: string
           observacao?: string
           proxima_visita?: string | null
-          responsavel: string
+          responsavel?: string | null
           status?: Database["public"]["Enums"]["mercado_status"]
-          supermercado: string
-          telefone: string
+          supermercado?: string | null
+          telefone?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
-          data?: string
+          data?: string | null
           id?: string
           observacao?: string
           proxima_visita?: string | null
-          responsavel?: string
+          responsavel?: string | null
           status?: Database["public"]["Enums"]["mercado_status"]
-          supermercado?: string
-          telefone?: string
+          supermercado?: string | null
+          telefone?: string | null
           updated_at?: string
         }
         Relationships: []

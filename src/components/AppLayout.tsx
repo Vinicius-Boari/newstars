@@ -27,6 +27,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const navigate = useNavigate();
   const searchStr = useRouterState({ select: (s) => s.location.searchStr });
 
+  React.useEffect(() => {
+    document.documentElement.classList.add("dark");
+    return () => document.documentElement.classList.remove("dark");
+  }, []);
+
   const { data: abas = [], refetch, isFetching, lastUpdated, syncStatus } = useSheetsData();
   const { sheetId, setSheetId, refreshMs, setRefreshMs, isSettingsOpen, setIsSettingsOpen } = useSettings();
 

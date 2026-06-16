@@ -10,12 +10,18 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ResumoGeralRouteImport } from './routes/resumo-geral'
+import { Route as MercadoRouteImport } from './routes/mercado'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 
 const ResumoGeralRoute = ResumoGeralRouteImport.update({
   id: '/resumo-geral',
   path: '/resumo-geral',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MercadoRoute = MercadoRouteImport.update({
+  id: '/mercado',
+  path: '/mercado',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -32,30 +38,34 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/mercado': typeof MercadoRoute
   '/resumo-geral': typeof ResumoGeralRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/mercado': typeof MercadoRoute
   '/resumo-geral': typeof ResumoGeralRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/mercado': typeof MercadoRoute
   '/resumo-geral': typeof ResumoGeralRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/resumo-geral'
+  fullPaths: '/' | '/login' | '/mercado' | '/resumo-geral'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/resumo-geral'
-  id: '__root__' | '/' | '/login' | '/resumo-geral'
+  to: '/' | '/login' | '/mercado' | '/resumo-geral'
+  id: '__root__' | '/' | '/login' | '/mercado' | '/resumo-geral'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  MercadoRoute: typeof MercadoRoute
   ResumoGeralRoute: typeof ResumoGeralRoute
 }
 
@@ -66,6 +76,13 @@ declare module '@tanstack/react-router' {
       path: '/resumo-geral'
       fullPath: '/resumo-geral'
       preLoaderRoute: typeof ResumoGeralRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mercado': {
+      id: '/mercado'
+      path: '/mercado'
+      fullPath: '/mercado'
+      preLoaderRoute: typeof MercadoRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  MercadoRoute: MercadoRoute,
   ResumoGeralRoute: ResumoGeralRoute,
 }
 export const routeTree = rootRouteImport

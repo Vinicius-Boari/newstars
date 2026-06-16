@@ -126,7 +126,18 @@ function MercadoPage() {
         .select("*")
         .order("data", { ascending: false });
       if (error) throw error;
-      return data as Mercado[];
+      return (data ?? []).map((r): Mercado => ({
+        id: r.id,
+        data: r.data ?? "",
+        supermercado: r.supermercado ?? "",
+        responsavel: r.responsavel ?? "",
+        telefone: r.telefone ?? "",
+        observacao: r.observacao ?? "",
+        status: (r.status ?? "prospect") as Status,
+        proxima_visita: r.proxima_visita ?? null,
+        created_at: r.created_at,
+        updated_at: r.updated_at,
+      }));
     },
   });
 

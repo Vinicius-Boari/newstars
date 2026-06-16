@@ -2,6 +2,7 @@ import * as React from "react";
 import { fetchSpreadsheet, createSheet, type QuinzenaData } from "@/lib/sheets";
 import { useSettings } from "@/lib/settings-context";
 import { toast } from "sonner";
+import { saveCachedData, getCachedData, onReconnect } from "@/lib/offline-sync";
 
 export type SyncStatus = "idle" | "syncing" | "success" | "error";
 
@@ -67,6 +68,20 @@ export function useSheetsData(): SheetsDataResult {
 
   const effectiveSheetId = sheetId || DEFAULT_ID;
 
+  // Hidrata a partir do cache local — exibe algo imediatamente, mesmo offline.
+  React.useEffect(() => {
+    const cached = getCachedData<QuinzenaData[]>(effectiveSheetId);
+    if (cached) {
+      setData(cached.data);
+      setLastUpdated(new Date(cached.timestamp).toLocaleTimeString());
+      setIsInitialLoading(false);
+      if (typeof navigator !== "undefined" && !navigator.onLine) {
+        toast.info("Você está offline. Mostrando dados em cache.", { duration: 3000 });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [effectiveSheetId]);
+
   const sync = React.useCallback(async (isBackground = false, force = false) => {
     if (!effectiveSheetId) {
       setError("ID da planilha não configurado.");
@@ -92,6 +107,7 @@ export function useSheetsData(): SheetsDataResult {
         }
       }
 
+      saveCachedData(effectiveSheetId, newData);
       setLastUpdated(new Date().toLocaleTimeString());
       setSyncStatus("success");
       setError(null);
@@ -115,6 +131,11 @@ export function useSheetsData(): SheetsDataResult {
 
     return () => clearInterval(intervalId);
   }, [sync, refreshMs]);
+
+  // Sincroniza assim que a conexão voltar.
+  React.useEffect(() => {
+    return onReconnect(() => sync(true, true));
+  }, [sync]);
 
   return {
     data,

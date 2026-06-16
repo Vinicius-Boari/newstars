@@ -72,8 +72,14 @@ export async function registerBiometric(username: string): Promise<boolean> {
       authenticatorSelection: {
         authenticatorAttachment: "platform",
         userVerification: "required",
-        residentKey: "preferred",
+        residentKey: "discouraged",
+        requireResidentKey: false,
       },
+      // Sinaliza ao navegador para usar APENAS biometria do próprio
+      // aparelho (sem mostrar opções de "salvar passkey", "outro
+      // dispositivo" ou "chave de segurança").
+      // @ts-ignore - 'hints' é um campo recente da spec WebAuthn
+      hints: ["client-device"],
       timeout: 60000,
       attestation: "none",
     },
@@ -97,6 +103,8 @@ export async function verifyBiometric(): Promise<boolean> {
         allowCredentials: [
           { id: b64uToBuf(credIdB64), type: "public-key", transports: ["internal"] },
         ],
+        // @ts-ignore
+        hints: ["client-device"],
       },
     });
     return !!assertion;

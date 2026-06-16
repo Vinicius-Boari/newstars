@@ -37,8 +37,13 @@ async function loadSpreadsheetWithCache(sheetId: string, force = false) {
     return cached.data;
   }
 
-  const running = inFlightSyncs.get(sheetId);
-  if (running) return running;
+  // Quando force=true (após criar/editar/excluir pedido), NUNCA reaproveite
+  // uma requisição em vôo — ela pode ter começado antes da escrita e
+  // retornaria dados desatualizados, fazendo o novo pedido "sumir".
+  if (!force) {
+    const running = inFlightSyncs.get(sheetId);
+    if (running) return running;
+  }
 
   const request = fetchSpreadsheet(sheetId)
     .then((result) => {

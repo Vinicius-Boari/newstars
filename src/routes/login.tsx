@@ -40,9 +40,17 @@ function LoginComponent() {
 
   React.useEffect(() => {
     (async () => {
-      setBioReady(await isBiometricAvailable());
-      setBioEnrolled(hasBiometricEnrolled());
+      const ready = await isBiometricAvailable();
+      const enrolled = hasBiometricEnrolled();
+      setBioReady(ready);
+      setBioEnrolled(enrolled);
+      // Se a biometria já está cadastrada, dispara o prompt automaticamente
+      // ao abrir o app — sem precisar clicar no botão.
+      if (ready && enrolled) {
+        handleBiometricLogin();
+      }
     })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const finishSession = async (session: { access_token: string; refresh_token: string }) => {

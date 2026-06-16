@@ -1,7 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import * as React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Store, Plus, Search, Edit2, Trash2, Calendar as CalendarIcon, ArrowUpDown, Loader2, X, MessageCircle, Phone, Clock } from "lucide-react";
+import { Store, Plus, Search, Edit2, Trash2, Calendar as CalendarIcon, ArrowUpDown, Loader2, X, MessageCircle, Phone, Clock, Camera, Image as ImageIcon, Upload } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -477,6 +477,12 @@ function MercadoPage() {
                 placeholder="Anote detalhes da visita, próximos passos, contatos..."
               />
             </div>
+            {editing && <MercadoAnexos mercadoId={editing.id} />}
+            {!editing && (
+              <div className="rounded-lg border border-dashed border-border bg-muted/20 p-3 text-[11px] text-muted-foreground">
+                Salve o mercado para anexar fotos (galeria/câmera).
+              </div>
+            )}
             <DialogFooter className="gap-2 sm:gap-0">
               <Button type="button" variant="outline" onClick={() => setDialogOpen(false)}>
                 Cancelar
@@ -624,6 +630,156 @@ function MercadoCard({
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+type Anexo = { name: string; url: string };
+
+function MercadoAnexos({ mercadoId }: { mercadoId: string }) {
+  const qc = useQueryClient();
+  const [uploading, setUploading] = React.useState(false);
+  const [preview, setPreview] = React.useState<string | null>(null);
+  const cameraRef = React.useRef<HTMLInputElement>(null);
+  const galleryRef = React.useRef<HTMLInputElement>(null);
+
+  const { data: anexos = [], isLoading } = useQuery({
+    queryKey: ["mercado-anexos", mercadoId],
+    queryFn: async (): Promise<Anexo[]> => {
+      const { data, error } = await supabase.storage
+        .from("mercado-anexos")
+        .list(mercadoId, { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+      if (error) throw error;
+      const files = (data ?? []).filter((f) => f.name && f.name !== ".emptyFolderPlaceholder");
+      if (files.length === 0) return [];
+      const paths = files.map((f) => `${mercadoId}/${f.name}`);
+      const { data: signed, error: sErr } = await supabase.storage
+        .from("mercado-anexos")
+        .createSignedUrls(paths, 60 * 60);
+      if (sErr) throw sErr;
+      return files.map((f, i) => ({ name: f.name, url: signed?.[i]?.signedUrl ?? "" }));
+    },
+  });
+
+  const upload = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    setUploading(true);
+    try {
+      for (const file of Array.from(files)) {
+        const ext = file.name.split(".").pop() || "jpg";
+        const path = `${mercadoId}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+        const { error } = await supabase.storage
+          .from("mercado-anexos")
+          .upload(path, file, { contentType: file.type || "image/jpeg" });
+        if (error) throw error;
+      }
+      toast.success("Foto(s) enviada(s)!");
+      qc.invalidateQueries({ queryKey: ["mercado-anexos", mercadoId] });
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setUploading(false);
+      if (cameraRef.current) cameraRef.current.value = "";
+      if (galleryRef.current) galleryRef.current.value = "";
+    }
+  };
+
+  const removeAnexo = async (name: string) => {
+    if (!confirm("Excluir esta foto?")) return;
+    const { error } = await supabase.storage
+      .from("mercado-anexos")
+      .remove([`${mercadoId}/${name}`]);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    toast.success("Foto removida.");
+    qc.invalidateQueries({ queryKey: ["mercado-anexos", mercadoId] });
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label>Fotos / Anexos</Label>
+      <div className="grid grid-cols-2 gap-2">
+        <input
+          ref={cameraRef}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="hidden"
+          onChange={(e) => upload(e.target.files)}
+        />
+        <input
+          ref={galleryRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className="hidden"
+          onChange={(e) => upload(e.target.files)}
+        />
+        <Button
+          type="button"
+          variant="outline"
+          disabled={uploading}
+          onClick={() => cameraRef.current?.click()}
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Camera className="h-4 w-4" />}
+          Tirar foto
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          disabled={uploading}
+          onClick={() => galleryRef.current?.click()}
+        >
+          {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+          Galeria
+        </Button>
+      </div>
+
+      {isLoading ? (
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+        </div>
+      ) : anexos.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-border bg-muted/20 p-4 text-center text-[11px] text-muted-foreground flex flex-col items-center gap-1">
+          <ImageIcon className="h-5 w-5 opacity-50" />
+          Nenhuma foto anexada.
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-2">
+          {anexos.map((a) => (
+            <div key={a.name} className="relative group aspect-square rounded-lg overflow-hidden border border-border bg-muted/30">
+              <button
+                type="button"
+                onClick={() => setPreview(a.url)}
+                className="absolute inset-0 cursor-zoom-in"
+              >
+                <img src={a.url} alt={a.name} className="w-full h-full object-cover" loading="lazy" />
+              </button>
+              <button
+                type="button"
+                onClick={() => removeAnexo(a.name)}
+                className="absolute top-1 right-1 h-6 w-6 inline-flex items-center justify-center rounded-md bg-destructive/90 text-destructive-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+                title="Excluir"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent className="sm:max-w-[800px] p-2 bg-black/95 border-0">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Visualizar foto</DialogTitle>
+          </DialogHeader>
+          {preview && (
+            <img src={preview} alt="Anexo" className="w-full h-auto max-h-[85vh] object-contain" />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

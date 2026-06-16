@@ -78,6 +78,10 @@ function encodeSheetSegment(name: string) {
   return encodeURIComponent(quoteSheetName(name));
 }
 
+function rowHasValue(row: unknown[] | undefined) {
+  return Boolean(row?.some((cell) => cell != null && String(cell).trim() !== ""));
+}
+
 async function gatewayFetch<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     ...init,
@@ -225,20 +229,31 @@ export const appendPedido = createServerFn({ method: "POST" })
   .inputValidator((input) => appendPedidoSchema.parse(input))
   .handler(async ({ data }) => {
     const appendRange = `${quoteSheetName(data.quinzena)}!A:K`;
-    const result = await gatewayFetch<{ updates?: { updatedRows?: number; updatedCells?: number; updatedRange?: string } }>(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${appendRange}:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS&includeValuesInResponse=true`, {
-      method: "POST",
+    const current = await gatewayFetch<{ values?: unknown[][] }>(
+      `${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${appendRange}`,
+    );
+    const rows = current.values ?? [];
+    let lastNonEmptyRow = rows.length;
+    while (lastNonEmptyRow > 0 && !rowHasValue(rows[lastNonEmptyRow - 1])) {
+      lastNonEmptyRow -= 1;
+    }
+
+    const targetRow = Math.max(lastNonEmptyRow + 1, 2);
+    const targetRange = `${quoteSheetName(data.quinzena)}!A${targetRow}:K${targetRow}`;
+    const result = await gatewayFetch<{ updatedRows?: number; updatedCells?: number; updatedRange?: string }>(`${GATEWAY_URL}/spreadsheets/${data.sheetId}/values/${targetRange}?valueInputOption=RAW`, {
+      method: "PUT",
       body: JSON.stringify({
         values: [data.values],
       }),
     });
 
-    const updatedRows = result.updates?.updatedRows ?? 0;
-    const updatedCells = result.updates?.updatedCells ?? 0;
+    const updatedRows = result.updatedRows ?? 0;
+    const updatedCells = result.updatedCells ?? 0;
     if (updatedRows < 1 || updatedCells < data.values.length) {
       throw new Error("O Google Sheets respondeu sem confirmar a inclusão do pedido. Confira a aba selecionada e tente novamente.");
     }
 
-    return { success: true, updatedRange: result.updates?.updatedRange };
+    return { success: true, updatedRange: result.updatedRange ?? targetRange };
   });
 
 export const deletePedido = createServerFn({ method: "POST" })

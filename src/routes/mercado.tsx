@@ -548,12 +548,16 @@ function MercadoCard({
   m, onEdit, onDelete,
 }: { m: Mercado; onEdit: () => void; onDelete: () => void }) {
   const [expanded, setExpanded] = React.useState(false);
+  const v = visitInfo(m.proxima_visita);
   return (
     <div className="rounded-xl border border-border bg-card p-3">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1">
-          <div className="font-semibold truncate">{m.supermercado}</div>
-          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className="font-semibold truncate">{m.supermercado}</div>
+            <StatusBadge status={m.status} />
+          </div>
+          <div className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
             <CalendarIcon className="h-3 w-3" />
             {fmtDateBR(m.data)}
           </div>
@@ -567,6 +571,12 @@ function MercadoCard({
           </Button>
         </div>
       </div>
+      {v && (
+        <div className={cn("mt-2 flex items-center gap-1 text-[11px] font-medium", v.cls)}>
+          <Clock className="h-3 w-3" />
+          Próx. visita: {v.label}
+        </div>
+      )}
       <div className="mt-2 grid grid-cols-2 gap-2 text-xs">
         <div>
           <div className="text-[10px] uppercase text-muted-foreground">Responsável</div>
@@ -574,10 +584,28 @@ function MercadoCard({
         </div>
         <div>
           <div className="text-[10px] uppercase text-muted-foreground">Telefone</div>
-          <a href={`tel:${m.telefone.replace(/\D/g, "")}`} className="text-primary truncate block">
-            {m.telefone}
-          </a>
+          <div className="flex items-center gap-1">
+            <a href={`tel:${m.telefone.replace(/\D/g, "")}`} className="text-primary truncate">
+              {m.telefone}
+            </a>
+          </div>
         </div>
+      </div>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <a
+          href={`tel:${m.telefone.replace(/\D/g, "")}`}
+          className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md border border-border bg-muted/30 text-xs font-medium hover:bg-muted/60"
+        >
+          <Phone className="h-3.5 w-3.5" /> Ligar
+        </a>
+        <a
+          href={waLink(m.telefone)}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center justify-center gap-1.5 h-8 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 text-xs font-medium hover:bg-emerald-500/25"
+        >
+          <MessageCircle className="h-3.5 w-3.5" /> WhatsApp
+        </a>
       </div>
       {m.observacao && (
         <div className="mt-2 pt-2 border-t border-border">
